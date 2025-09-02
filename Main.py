@@ -83,6 +83,18 @@ class MainWindow(QMainWindow):
         self.stability_reactivity_input = QTextEdit()
             #Section11
         self.toxicological_input = QTextEdit()
+            #Section12
+        self.ecological_input = QTextEdit()
+            #Section13
+        self.disposal_input = QTextEdit()
+            #Section14
+        self.transport_input = QTextEdit()
+            #Section15
+        self.regulatory_input = QTextEdit()
+            #Section16
+        self.shelf_life_input = QTextEdit()
+            #Section17
+        self.other_input = QTextEdit()
 
 
         self.msds_tab = QWidget()           #MSDS Main Tab
@@ -203,6 +215,12 @@ class MainWindow(QMainWindow):
         msds_data_entry.form_section9(self)
         msds_data_entry.form_section10(self)
         msds_data_entry.form_section11(self)
+        msds_data_entry.form_section12(self)
+        msds_data_entry.form_section13(self)
+        msds_data_entry.form_section14(self)
+        msds_data_entry.form_section15(self)
+        msds_data_entry.form_section16(self)
+        msds_data_entry.form_section17(self)
 
 
     def load_msds_table(self):

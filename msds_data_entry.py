@@ -250,3 +250,44 @@ def form_section11(self):
 
     self.section11_layout.addWidget(section11_header)
     self.section11_layout.addWidget(self.toxicological_input)
+
+
+def form_section12(self):
+    section12_header = QLabel("12) Ecological Information")
+
+    self.section12_layout.addWidget(section12_header)
+    self.section12_layout.addWidget(self.ecological_input)
+
+def form_section13(self):
+    section13_header = QLabel("13) Disposal")
+
+    self.section13_layout.addWidget(section13_header)
+    self.section13_layout.addWidget(self.disposal_input)
+
+def form_section14(self):
+    section14_header = QLabel("14) Transport Information")
+
+    self.section14_layout.addWidget(section14_header)
+    self.section14_layout.addWidget(self.transport_input)
+
+def form_section15(self):
+    section15_header = QLabel("15) Regulatory Information")
+
+    self.section15_layout.addWidget(section15_header)
+    self.section15_layout.addWidget(self.regulatory_input)
+
+
+def form_section16(self):
+    section16_header = QLabel("16) Shelf-Life")
+
+    self.section16_layout.addWidget(section16_header)
+    self.section16_layout.addWidget(self.shelf_life_input)
+
+
+def form_section17(self):
+    section17_header = QLabel("17) Other Information")
+
+    self.section17_layout.addWidget(section17_header)
+    self.section17_layout.addWidget(self.other_input)
+
+
