@@ -92,7 +92,7 @@ def coa_data_entry_form(self):
     self.summary_analysis_table.setVerticalHeaderLabels(["Color", "Light fastness (1-B)", "Heat Stability (1-5)"])
 
 
-def add_row_to_table():
+def add_row_to_table(self):
     row_name, ok = QInputDialog.getText(self, "Add Row", "Enter row header name:")
 
     if ok and row_name.strip():  # If user pressed OK and input is not empty
