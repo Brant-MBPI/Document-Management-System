@@ -1,95 +1,75 @@
-from PyQt6.QtWidgets import QLabel, QHBoxLayout, QSizePolicy, QHeaderView, QPushButton, QInputDialog, QTableWidgetItem
+from PyQt6.QtWidgets import QLabel, QHBoxLayout, QSizePolicy, QHeaderView, QPushButton, QInputDialog, QTableWidgetItem, \
+    QFormLayout, QTableWidget
 
 
 def coa_data_entry_form(self):
+    form_layout = QFormLayout()
+    form_layout.setHorizontalSpacing(20)
+    form_layout.setVerticalSpacing(12)
+    form_layout.setContentsMargins(20, 20, 20, 20)
+
     header = QLabel("Certificate of Analysis")
-    row_customer = QHBoxLayout()
-    row_color_code = QHBoxLayout()
-    row_quantity_deliver = QHBoxLayout()
-    row_delivery_date = QHBoxLayout()
-    row_lot_number = QHBoxLayout()
-    row_production_date = QHBoxLayout()
-    row_delivery_receipt = QHBoxLayout()
-    row_certified_by = QHBoxLayout()
-    row_storage = QHBoxLayout()
-    row_shelf_life = QHBoxLayout()
-    row_suitability = QHBoxLayout()
+    header.setStyleSheet("font-size: 18px; font-weight: bold; ")
 
-    customer_label = QLabel("Customer: ")
-    color_code_label = QLabel("Color Code: ")
-    quantity_delivered_label = QLabel("Quantity Delivered: ")
-    delivery_date_label = QLabel("Delivery Date: ")
-    lot_number_label = QLabel("Lot Number: ")
-    production_date_label = QLabel("Production Date: ")
-    delivery_receipt_label = QLabel("Delivery Receipt Number: ")
-    po_label = QLabel("P.O Number: ")
-
-    summary_header = QLabel("Summarv of Analvsis")
-    certified_by_label = QLabel("Certified by: ")
-    creation_date_label = QLabel("Date: ")
-    storage_label = QLabel("Storage: ")
-    shelf_life_label = QLabel("Shelf Life: ")
-    suitability_label = QLabel("Suitability: ")
-    self.btn_add_row = QPushButton("Add Row")
-    self.btn_add_row.clicked.connect(add_row_to_table)
-
-    table_container = QHBoxLayout()
-    self.summary_analysis_table.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-    self.summary_analysis_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
-    table_container.addStretch(1)
-    table_container.addWidget(self.summary_analysis_table, 2)
-    table_container.addStretch(1)
-
-    row_customer.addWidget(customer_label)
-    row_customer.addWidget(self.coa_customer_input)
-    row_color_code.addWidget(color_code_label)
-    row_color_code.addWidget(self.color_code_input)
-    row_quantity_deliver.addWidget(quantity_delivered_label)
-    row_quantity_deliver.addWidget(self.quantity_delivered_input)
-    row_delivery_date.addWidget(delivery_date_label)
-    row_delivery_date.addWidget(self.delivery_date_input)
-    row_lot_number.addWidget(lot_number_label)
-    row_lot_number.addWidget(self.lot_number_input)
-    row_production_date.addWidget(production_date_label)
-    row_production_date.addWidget(self.production_date_input)
-    row_delivery_receipt.addWidget(delivery_receipt_label)
-    row_delivery_receipt.addWidget(self.delivery_receipt_input)
-    row_delivery_receipt.addWidget(po_label)
-    row_delivery_receipt.addWidget(self.po_number_input)
-    row_certified_by.addWidget(certified_by_label)
-    row_certified_by.addWidget(self.certified_by_input)
-    row_certified_by.addWidget(creation_date_label)
-    row_certified_by.addWidget(self.creation_date_input)
-    row_storage.addWidget(storage_label)
-    row_storage.addWidget(self.coa_storage_input)
-    row_shelf_life.addWidget(shelf_life_label)
-    row_shelf_life.addWidget(self.coa_shelf_life_input)
-    row_suitability.addWidget(suitability_label)
-    row_suitability.addWidget(self.suitability_input)
-
-    self.coa_form_layout.addWidget(header)
-    self.coa_form_layout.addLayout(row_customer)
-    self.coa_form_layout.addLayout(row_color_code)
-    self.coa_form_layout.addLayout(row_quantity_deliver)
-    self.coa_form_layout.addLayout(row_delivery_date)
-    self.coa_form_layout.addLayout(row_lot_number)
-    self.coa_form_layout.addLayout(row_production_date)
-    self.coa_form_layout.addLayout(row_delivery_receipt)
-    self.coa_form_layout.addWidget(summary_header)
-    self.coa_form_layout.addLayout(table_container)
-    self.coa_form_layout.addWidget(self.btn_add_row)
-    self.coa_form_layout.addLayout(row_certified_by)
-    self.coa_form_layout.addLayout(row_storage)
-    self.coa_form_layout.addLayout(row_shelf_life)
-    self.coa_form_layout.addLayout(row_suitability)
-    self.coa_btn_layout.addStretch()
-    self.coa_btn_layout.addWidget(self.btn_coa_submit)
-    self.coa_form_layout.addLayout(self.coa_btn_layout)
-
+    # === Table ===
     self.summary_analysis_table.setColumnCount(2)
     self.summary_analysis_table.setRowCount(3)
     self.summary_analysis_table.setHorizontalHeaderLabels(["Standard", "Delivery"])
-    self.summary_analysis_table.setVerticalHeaderLabels(["Color", "Light fastness (1-B)", "Heat Stability (1-5)"])
+    self.summary_analysis_table.setVerticalHeaderLabels([
+        "Color", "Light fastness (1-B)", "Heat Stability (1-5)"
+    ])
+    self.summary_analysis_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+    self.summary_analysis_table.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+
+    # === Add Row Button ===
+    btn_add_row = QPushButton("Add Row")
+    btn_add_table_row = QHBoxLayout()
+    btn_add_table_row.addStretch()
+    btn_add_table_row.addWidget(btn_add_row)
+    btn_add_table_row.addStretch()
+
+    # === Add widgets to form layout ===
+    form_layout.addRow(header)
+
+    form_layout.addRow("Customer:", self.coa_customer_input)
+    form_layout.addRow("Color Code:", self.color_code_input)
+    form_layout.addRow("Quantity Delivered:", self.quantity_delivered_input)
+    form_layout.addRow("Delivery Date:", self.delivery_date_input)
+    form_layout.addRow("Lot Number:", self.lot_number_input)
+    form_layout.addRow("Production Date:", self.production_date_input)
+
+    # Row with multiple widgets
+    receipt_row = QHBoxLayout()
+    receipt_row.addWidget(self.delivery_receipt_input)
+    receipt_row.addWidget(QLabel("P.O Number:"))
+    receipt_row.addWidget(self.po_number_input)
+    form_layout.addRow("Delivery Receipt:", receipt_row)
+
+    # Table with header
+    summary_header = QLabel("Summary of Analysis")
+    summary_header.setStyleSheet("font-weight: bold; margin-top: 12px;")
+    form_layout.addRow(summary_header)
+    form_layout.addRow(self.summary_analysis_table)
+    form_layout.addRow(btn_add_table_row)
+
+    certified_row = QHBoxLayout()
+    certified_row.addWidget(self.certified_by_input)
+    certified_row.addWidget(QLabel("Date:"))
+    certified_row.addWidget(self.creation_date_input)
+    form_layout.addRow("Certified by:", certified_row)
+
+    form_layout.addRow("Storage:", self.coa_storage_input)
+    form_layout.addRow("Shelf Life:", self.coa_shelf_life_input)
+    form_layout.addRow("Suitability:", self.suitability_input)
+
+    # Centered submit button
+    submit_button_row = QHBoxLayout()
+    submit_button_row.addStretch()
+    submit_button_row.addWidget(self.btn_coa_submit)
+    submit_button_row.addStretch()
+    form_layout.addRow(submit_button_row)
+
+    self.coa_form_layout.addLayout(form_layout)
 
 
 def add_row_to_table(self):

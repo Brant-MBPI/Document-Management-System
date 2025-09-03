@@ -124,7 +124,7 @@ class MainWindow(QMainWindow):
         self.coa_storage_input = QLineEdit()
         self.coa_shelf_life_input = QLineEdit()
         self.suitability_input = QLineEdit()
-        self.btn_coa_submit = QPushButton   ("Submit")
+        self.btn_coa_submit = QPushButton("Submit")
 
         self.po_number_input.setValidator((QIntValidator(0, 2147483647)))
 
