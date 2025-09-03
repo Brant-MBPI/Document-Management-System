@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QLabel, QHBoxLayout
+from PyQt6.QtWidgets import QLabel, QHBoxLayout, QSizePolicy, QHeaderView, QPushButton, QInputDialog, QTableWidgetItem
 
 
 def coa_data_entry_form(self):
@@ -30,6 +30,15 @@ def coa_data_entry_form(self):
     storage_label = QLabel("Storage: ")
     shelf_life_label = QLabel("Shelf Life: ")
     suitability_label = QLabel("Suitability: ")
+    self.btn_add_row = QPushButton("Add Row")
+    self.btn_add_row.clicked.connect(add_row_to_table)
+
+    table_container = QHBoxLayout()
+    self.summary_analysis_table.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+    self.summary_analysis_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+    table_container.addStretch(1)
+    table_container.addWidget(self.summary_analysis_table, 2)
+    table_container.addStretch(1)
 
     row_customer.addWidget(customer_label)
     row_customer.addWidget(self.coa_customer_input)
@@ -67,7 +76,8 @@ def coa_data_entry_form(self):
     self.coa_form_layout.addLayout(row_production_date)
     self.coa_form_layout.addLayout(row_delivery_receipt)
     self.coa_form_layout.addWidget(summary_header)
-    self.coa_form_layout.addWidget(self.summary_analysis_table)
+    self.coa_form_layout.addLayout(table_container)
+    self.coa_form_layout.addWidget(self.btn_add_row)
     self.coa_form_layout.addLayout(row_certified_by)
     self.coa_form_layout.addLayout(row_storage)
     self.coa_form_layout.addLayout(row_shelf_life)
@@ -81,3 +91,17 @@ def coa_data_entry_form(self):
     self.summary_analysis_table.setHorizontalHeaderLabels(["Standard", "Delivery"])
     self.summary_analysis_table.setVerticalHeaderLabels(["Color", "Light fastness (1-B)", "Heat Stability (1-5)"])
 
+
+def add_row_to_table():
+    row_name, ok = QInputDialog.getText(self, "Add Row", "Enter row header name:")
+
+    if ok and row_name.strip():  # If user pressed OK and input is not empty
+        current_row_count = self.summary_analysis_table.rowCount()
+        self.summary_analysis_table.insertRow(current_row_count)
+
+        self.summary_analysis_table.setVerticalHeaderItem(
+            current_row_count, QTableWidgetItem(row_name.strip())
+        )
+
+        for col in range(self.summary_analysis_table.columnCount()):
+            self.summary_analysis_table.setItem(current_row_count, col, QTableWidgetItem(""))

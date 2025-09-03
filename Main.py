@@ -1,13 +1,13 @@
 
 import sys
 
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QDate
 from PyQt6.QtGui import QPixmap, QIcon, QIntValidator
 
 import coa_data_entry
 from db import db_con
 from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QLabel, QWidget, QTabWidget, \
-    QTableWidget, QLineEdit, QHeaderView, QTableWidgetItem, QScrollArea, QTextEdit, QPushButton
+    QTableWidget, QLineEdit, QHeaderView, QTableWidgetItem, QScrollArea, QTextEdit, QPushButton, QDateEdit
 import msds_data_entry
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -108,17 +108,23 @@ class MainWindow(QMainWindow):
         self.coa_customer_input = QLineEdit()
         self.color_code_input = QLineEdit()
         self.quantity_delivered_input = QLineEdit()
-        self.delivery_date_input = QLineEdit()
+        self.delivery_date_input = QDateEdit()
+        self.delivery_date_input.setCalendarPopup(True)
+        self.delivery_date_input.setDate(QDate.currentDate())
         self.lot_number_input = QLineEdit()
-        self.production_date_input = QLineEdit()
+        self.production_date_input = QDateEdit()
+        self.production_date_input.setCalendarPopup(True)
+        self.production_date_input.setDate(QDate(QDate.currentDate().year(), QDate.currentDate().month(), 1))
         self.delivery_receipt_input = QLineEdit()
         self.po_number_input = QLineEdit()
         self.certified_by_input = QLineEdit()
-        self.creation_date_input = QLineEdit()
+        self.creation_date_input = QDateEdit()
+        self.creation_date_input.setCalendarPopup(True)
+        self.creation_date_input.setDate(QDate.currentDate())
         self.coa_storage_input = QLineEdit()
         self.coa_shelf_life_input = QLineEdit()
         self.suitability_input = QLineEdit()
-        self.btn_coa_submit = QPushButton("Submit")
+        self.btn_coa_submit = QPushButton   ("Submit")
 
         self.po_number_input.setValidator((QIntValidator(0, 2147483647)))
 

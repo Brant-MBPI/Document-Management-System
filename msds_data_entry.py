@@ -253,11 +253,13 @@ def form_section12(self):
     self.section12_layout.addWidget(section12_header)
     self.section12_layout.addWidget(self.ecological_input)
 
+
 def form_section13(self):
     section13_header = QLabel("13) Disposal")
 
     self.section13_layout.addWidget(section13_header)
     self.section13_layout.addWidget(self.disposal_input)
+
 
 def form_section14(self):
     section14_header = QLabel("14) Transport Information")
