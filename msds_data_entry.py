@@ -1,9 +1,4 @@
-import sys
 
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QPixmap, QIcon
-
-from db import db_con
 from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QLabel, QWidget, QTabWidget, \
     QTableWidget, QLineEdit, QHeaderView, QTableWidgetItem
 
@@ -147,7 +142,7 @@ def form_section7(self):
     handling_layout.addWidget(handling_label)
     handling_layout.addWidget(self.handling_input)
     storage_layout.addWidget(storage_label)
-    storage_layout.addWidget(self.storage_input)
+    storage_layout.addWidget(self.msds_storage_input)
 
     self.section7_layout.addLayout(handling_layout)
     self.section7_layout.addLayout(storage_layout)
@@ -281,7 +276,7 @@ def form_section16(self):
     section16_header = QLabel("16) Shelf-Life")
 
     self.section16_layout.addWidget(section16_header)
-    self.section16_layout.addWidget(self.shelf_life_input)
+    self.section16_layout.addWidget(self.msds_shelf_life_input)
 
 
 def form_section17(self):
@@ -291,3 +286,6 @@ def form_section17(self):
     self.section17_layout.addWidget(self.other_input)
 
 
+def from_btn(self):
+    self.msds_btn_layout.addStretch()
+    self.msds_btn_layout.addWidget(self.btn_msds_submit)
