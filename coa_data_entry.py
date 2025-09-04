@@ -31,7 +31,7 @@ def coa_data_entry_form(self):
     btn_add_table_row.addWidget(btn_add_row)
     btn_add_table_row.addStretch()
 
-    btn_add_row.clicked.connect(self.add_row_to_table)
+    btn_add_row.clicked.connect(self.add_row_to_coa_summary_table)
 
     # === Add widgets to form layout ===
     form_layout.addRow(header)

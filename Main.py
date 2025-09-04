@@ -182,7 +182,6 @@ class MainWindow(QMainWindow):
         self.coa_records_layout.addWidget(self.coa_records_table)
 
 
-
         self.coa_data_entry_layout = QVBoxLayout(self.coa_data_entry_tab)  # inside COA sub-tab Data Entry
         self.coa_data_entry_layout.addLayout(self.coa_form_layout)
 
@@ -282,7 +281,7 @@ class MainWindow(QMainWindow):
         except Exception as e:
             self.show_warning("Database Error", str(e))
 
-    def add_row_to_table(self):
+    def add_row_to_coa_summary_table(self):
         row_count = self.summary_analysis_table.rowCount()
 
         # Ask user for header text
