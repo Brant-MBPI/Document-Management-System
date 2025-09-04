@@ -1,7 +1,7 @@
 
 import sys
 
-from PyQt6.QtCore import Qt, QDate, QRegularExpression, QTimer
+from PyQt6.QtCore import Qt, QDate, QRegularExpression, QTimer, QEvent, QObject
 from PyQt6.QtGui import QIcon, QIntValidator, QRegularExpressionValidator
 
 from db import db_con
@@ -28,6 +28,7 @@ class MainWindow(QMainWindow):
             #Section 1
         self.trade_label_input = QLineEdit()
         self.manufactured_label_input = QTextEdit()
+        self.manufactured_label_input.setTabChangesFocus(True)
         self.tel_label_input = QLineEdit()
         tel_regex = QRegularExpression(r'^(\d{7,12}|\(\d{1,4}\)\s?\d{6,10})$')
         tel_validator = QRegularExpressionValidator(tel_regex)
@@ -45,6 +46,7 @@ class MainWindow(QMainWindow):
 
             #Section2
         self.composition_input = QTextEdit()
+        self.composition_input.setTabChangesFocus(True)
             #Section3
         self.hazard_preliminaries_input = QLineEdit()
         self.hazard_entry_route_input = QLineEdit()
@@ -59,8 +61,10 @@ class MainWindow(QMainWindow):
         self.first_aid_ingestion_input = QLineEdit()
             #Section5
         self.fire_fighting_media_input = QTextEdit()
+        self.fire_fighting_media_input.setTabChangesFocus(True)
             #Section6
         self.accidental_release_input = QTextEdit()
+        self.accidental_release_input.setTabChangesFocus(True)
             #Section7
         self.handling_input = QLineEdit()
         self.msds_storage_input = QLineEdit()
@@ -84,20 +88,28 @@ class MainWindow(QMainWindow):
         self.solubility_input = QLineEdit()
             #Section10
         self.stability_reactivity_input = QTextEdit()
+        self.stability_reactivity_input.setTabChangesFocus(True)
             #Section11
         self.toxicological_input = QTextEdit()
+        self.toxicological_input.setTabChangesFocus(True)
             #Section12
         self.ecological_input = QTextEdit()
+        self.ecological_input.setTabChangesFocus(True)
             #Section13
         self.disposal_input = QTextEdit()
+        self.disposal_input.setTabChangesFocus(True)
             #Section14
         self.transport_input = QTextEdit()
+        self.transport_input.setTabChangesFocus(True)
             #Section15
         self.regulatory_input = QTextEdit()
+        self.regulatory_input.setTabChangesFocus(True)
             #Section16
         self.msds_shelf_life_input = QTextEdit()
+        self.msds_shelf_life_input.setTabChangesFocus(True)
             #Section17
         self.other_input = QTextEdit()
+        self.other_input.setTabChangesFocus(True)
             #Submit Button
         self.btn_msds_submit = QPushButton("Submit")
         self.btn_msds_submit.setProperty("class", "msds_submit_btn")
@@ -227,10 +239,11 @@ class MainWindow(QMainWindow):
             QPushButton[class="msds_submit_btn"] {
                 background-color: #4CAF50;
                 color: white;
-                padding: 10px 20px;
+                padding: 14px 30px;
+                margin: 0 70px 20px 0;
                 border: none;
-                border-radius: 4px;
-                font-size: 16px;
+                border-radius: 8px;
+                font-size: 18px;
             }
             QPushButton[class="msds_submit_btn"]:hover {
                 background-color: #45a049;
@@ -246,7 +259,7 @@ class MainWindow(QMainWindow):
         coa_data_entry.coa_data_entry_form(self)
 
         msds_data_entry.create_form(self)
-        msds_data_entry.from_btn(self)
+
 
     def msds_btn_submit_clicked(self):
         # Collect all required fields
@@ -298,7 +311,7 @@ class MainWindow(QMainWindow):
         # Check for empty values
         for field, value in required_fields.items():
             if not value.strip():  # empty string
-                self.show_warning("Missing Input", f"Please fill in: {field}")
+                self.show_warning("Missing Input", f"Please fill in:    {field}")
                 return  # stop submission
         # If all fields are filled, proceed to save
         QMessageBox.information(self, "Success", "MSDS submitted successfully!")
@@ -336,7 +349,7 @@ class MainWindow(QMainWindow):
         # Check if any required field is empty
         for field, value in required_fields.items():
             if not value:  # empty string
-                self.show_warning("Missing Input", f"Please fill in: {field}")
+                self.show_warning("Missing Input", f"Please fill in:   {field}")
                 return  # stop processing
 
         # Check summary of analysis if no empty row
@@ -541,6 +554,7 @@ class MainWindow(QMainWindow):
 
         # Optionally return the timer in case you want to manipulate it later
         return timer
+
     def check_email(self):
         text = self.email_label_input.text()
         validator = self.email_label_input.validator()

@@ -161,10 +161,12 @@ def create_form(self):
     form_layout.addRow(QLabel("Details:"), self.msds_shelf_life_input)
     form_layout.addRow(section17_header)
     form_layout.addRow(QLabel("Details:"), self.other_input)
+    form_layout.addRow(form_btn(self))
 
     self.msds_form_layout.addWidget(header)
     self.msds_form_layout.addWidget(form_widget)
 
-def from_btn(self):
+
+def form_btn(self):
     self.msds_btn_layout.addStretch()
     self.msds_btn_layout.addWidget(self.btn_msds_submit)
