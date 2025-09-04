@@ -1,5 +1,6 @@
+from PyQt6.QtGui import QIntValidator
 from PyQt6.QtWidgets import QLabel, QHBoxLayout, QSizePolicy, QHeaderView, QPushButton, QInputDialog, QTableWidgetItem, \
-    QFormLayout, QTableWidget
+    QFormLayout, QTableWidget, QLineEdit, QAbstractItemView
 
 
 def coa_data_entry_form(self):
@@ -20,7 +21,9 @@ def coa_data_entry_form(self):
     ])
     self.summary_analysis_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
     self.summary_analysis_table.resizeRowsToContents()
+    self.summary_analysis_table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
     adjust_table_height(self)
+
     # === Add Row Button ===
     btn_add_row = QPushButton("Add Row")
     btn_add_table_row = QHBoxLayout()

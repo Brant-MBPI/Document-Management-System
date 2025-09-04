@@ -123,8 +123,8 @@ def create_tables():
 
 
 def save_certificate_of_analysis(data, summary_of_analysis):
-    conn = get_connection()
     try:
+        conn = get_connection()
         cur = conn.cursor()
 
         # Insert into certificates_of_analysis
@@ -148,8 +148,8 @@ def save_certificate_of_analysis(data, summary_of_analysis):
 
         # Insert analysis results
         for parameter, values in summary_of_analysis.items():
-            standard_value = values.get("Standard")
-            delivery_value = values.get("Delivery")
+            standard_value = values[0]
+            delivery_value = values[1]
 
             cur.execute("""
                 INSERT INTO coa_analysis_results (
@@ -160,8 +160,6 @@ def save_certificate_of_analysis(data, summary_of_analysis):
         conn.commit()
         cur.close()
         conn.close()
-
-        return coa_id
 
     except Exception as e:
         if conn:

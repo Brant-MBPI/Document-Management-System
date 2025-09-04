@@ -113,6 +113,7 @@ class MainWindow(QMainWindow):
         self.btn_coa_submit = QPushButton("Submit")
 
         self.po_number_input.setValidator((QIntValidator(0, 2147483647)))
+        self.quantity_delivered_input.setValidator((QIntValidator(0, 2147483647)))
 
         self.msds_tab = QWidget()           #MSDS Main Tab
         self.msds_layout = QVBoxLayout(self.msds_tab)
@@ -232,7 +233,7 @@ class MainWindow(QMainWindow):
         storage = self.coa_storage_input.text()
         shelf_life = self.coa_shelf_life_input.text()
         suitability = self.suitability_input.text()
-
+        print(summary_of_analysis)
         required_fields = {
             "Customer Name": customer_name,
             "Color Code": color_code,
@@ -276,8 +277,8 @@ class MainWindow(QMainWindow):
 
         # Save
         try:
-            coa_id = db_con.save_certificate_of_analysis(coa_data, summary_of_analysis)
-            QMessageBox.information(self, "Success", f"Certificate saved successfully! (ID: {coa_id})")
+            db_con.save_certificate_of_analysis(coa_data, summary_of_analysis)
+            QMessageBox.information(self, "Success", f"Certificate saved successfully!")
         except Exception as e:
             self.show_warning("Database Error", str(e))
 
