@@ -108,6 +108,7 @@ def create_tables():
             delivery_value VARCHAR(100)
         );
     """)
+
     cur.execute("""
         CREATE TABLE IF NOT EXISTS tbl_user (
             id SERIAL PRIMARY KEY,

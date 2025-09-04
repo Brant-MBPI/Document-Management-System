@@ -19,8 +19,11 @@ def coa_data_entry_form(self):
         "Color", "Light fastness (1-B)", "Heat Stability (1-5)"
     ])
     self.summary_analysis_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
-    self.summary_analysis_table.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-
+    self.summary_analysis_table.resizeRowsToContents()
+    # Adjust height based on row count
+    row_height = sum([self.summary_analysis_table.rowHeight(i) for i in range(self.summary_analysis_table.rowCount())])
+    header_height = self.summary_analysis_table.horizontalHeader().height()
+    self.summary_analysis_table.setFixedHeight(row_height + header_height + 2)
     # === Add Row Button ===
     btn_add_row = QPushButton("Add Row")
     btn_add_table_row = QHBoxLayout()
@@ -62,6 +65,7 @@ def coa_data_entry_form(self):
     form_layout.addRow("Shelf Life:", self.coa_shelf_life_input)
     form_layout.addRow("Suitability:", self.suitability_input)
 
+    self.btn_coa_submit.clicked.connect(self.coa_btn_submit_clicked)
     # Centered submit button
     submit_button_row = QHBoxLayout()
     submit_button_row.addStretch()
