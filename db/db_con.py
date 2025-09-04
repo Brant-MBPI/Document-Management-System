@@ -120,3 +120,50 @@ def create_tables():
     conn.commit()
     cur.close()
     conn.close()
+
+
+def save_certificate_of_analysis(data, summary_of_analysis):
+    conn = get_connection()
+    try:
+        cur = conn.cursor()
+
+        # Insert into certificates_of_analysis
+        cur.execute("""
+            INSERT INTO certificates_of_analysis (
+                customer_name, color_code, lot_number, po_number, 
+                delivery_receipt_number, quantity_delivered, delivery_date, 
+                production_date, certification_date, certified_by, 
+                storage_instructions, shelf_life_coa, suitability
+            )
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            RETURNING id;
+        """, (
+            data["customer_name"], data["color_code"], data["lot_number"], data["po_number"],
+            data["delivery_receipt"], data["quantity_delivered"], data["delivery_date"],
+            data["production_date"], data["creation_date"], data["certified_by"],
+            data["storage"], data["shelf_life"], data["suitability"]
+        ))
+
+        coa_id = cur.fetchone()[0]
+
+        # Insert analysis results
+        for parameter, values in summary_of_analysis.items():
+            standard_value = values.get("Standard")
+            delivery_value = values.get("Delivery")
+
+            cur.execute("""
+                INSERT INTO coa_analysis_results (
+                    coa_id, parameter_name, standard_value, delivery_value
+                ) VALUES (%s, %s, %s, %s)
+            """, (coa_id, parameter, standard_value, delivery_value))
+
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        return coa_id
+
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        raise e

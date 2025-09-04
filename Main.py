@@ -5,9 +5,11 @@ from PyQt6.QtCore import Qt, QDate
 from PyQt6.QtGui import QPixmap, QIcon, QIntValidator
 
 import coa_data_entry
+import db.db_con
 from db import db_con
 from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QLabel, QWidget, QTabWidget, \
-    QTableWidget, QLineEdit, QHeaderView, QTableWidgetItem, QScrollArea, QTextEdit, QPushButton, QDateEdit
+    QTableWidget, QLineEdit, QHeaderView, QTableWidgetItem, QScrollArea, QTextEdit, QPushButton, QDateEdit, \
+    QInputDialog, QMessageBox
 import msds_data_entry
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -216,8 +218,109 @@ class MainWindow(QMainWindow):
 
     def coa_btn_submit_clicked(self):
         print("COA Submit Clicked")
+        customer_name = self.coa_customer_input.text()
+        color_code = self.color_code_input.text()
+        quantity_delivered = self.quantity_delivered_input.text()
+        delivery_date = self.delivery_date_input.date().toString("yyyy-MM-dd")
+        lot_number = self.lot_number_input.text()
+        production_date = self.production_date_input.date().toString("yyyy-MM-dd")
+        delivery_receipt = self.delivery_receipt_input.text()
+        po_number = self.po_number_input.text()
+        summary_of_analysis = self.get_coa_summary_analysis_table_data()
+        certified_by = self.certified_by_input.text()
+        creation_date = self.creation_date_input.date().toString("yyyy-MM-dd")
+        storage = self.coa_storage_input.text()
+        shelf_life = self.coa_shelf_life_input.text()
+        suitability = self.suitability_input.text()
 
+        required_fields = {
+            "Customer Name": customer_name,
+            "Color Code": color_code,
+            "Quantity Delivered": quantity_delivered,
+            "Lot Number": lot_number,
+            "Delivery Receipt": delivery_receipt,
+            "PO Number": po_number,
+            "Certified By": certified_by,
+            "Storage": storage,
+            "Shelf Life": shelf_life,
+            "Suitability": suitability
+        }
 
+        # Check if any required field is empty
+        for field, value in required_fields.items():
+            if not value:  # empty string
+                self.show_warning("Missing Input", f"Please fill in: {field}")
+                return  # stop processing
+
+        # Check summary of analysis if no empty row
+        if not any(any(cell for cell in row) for row in summary_of_analysis.values()):
+            self.show_warning("Missing Input", "Please fill in the Summary of Analysis table.")
+            return
+
+        # Build coa_data for saving
+        coa_data = {
+            "customer_name": customer_name,
+            "color_code": color_code,
+            "lot_number": lot_number,
+            "po_number": po_number,
+            "delivery_receipt": delivery_receipt,
+            "quantity_delivered": quantity_delivered,
+            "delivery_date": delivery_date,
+            "production_date": production_date,
+            "creation_date": creation_date,
+            "certified_by": certified_by,
+            "storage": storage,
+            "shelf_life": shelf_life,
+            "suitability": suitability
+        }
+
+        # Save
+        try:
+            coa_id = db_con.save_certificate_of_analysis(coa_data, summary_of_analysis)
+            QMessageBox.information(self, "Success", f"Certificate saved successfully! (ID: {coa_id})")
+        except Exception as e:
+            self.show_warning("Database Error", str(e))
+
+    def add_row_to_table(self):
+        row_count = self.summary_analysis_table.rowCount()
+
+        # Ask user for header text
+        header_text, ok = QInputDialog.getText(self, "New Row", "Enter row header:")
+
+        if ok and header_text.strip():
+            # Add row
+            self.summary_analysis_table.insertRow(row_count)
+
+            # Update headers
+            current_headers = [self.summary_analysis_table.verticalHeaderItem(i).text()
+                               for i in range(row_count)]
+            current_headers.append(header_text.strip())
+            self.summary_analysis_table.setVerticalHeaderLabels(current_headers)
+
+            # Adjust table height
+            coa_data_entry.adjust_table_height(self)
+
+    def get_coa_summary_analysis_table_data(self):
+        data = {}
+        row_count = self.summary_analysis_table.rowCount()
+        col_count = self.summary_analysis_table.columnCount()
+
+        for row in range(row_count):
+            # Get row header (vertical header text)
+            header_item = self.summary_analysis_table.verticalHeaderItem(row)
+            row_header = header_item.text() if header_item else f"Row {row}"
+
+            # Get values in that row
+            row_values = []
+            for col in range(col_count):
+                cell_item = self.summary_analysis_table.item(row, col)
+                value = cell_item.text() if cell_item else ""
+                row_values.append(value)
+
+            # Store row header with its values
+            data[row_header] = row_values
+
+        return data
 
     def load_msds_table(self):
         self.msds_records_table.insertRow(0)
@@ -304,6 +407,41 @@ class MainWindow(QMainWindow):
             self.coa_search_bar.show()
         else:
             self.coa_search_bar.hide()
+
+    def show_warning(self, title, message):
+        msg = QMessageBox(self)
+        msg.setIcon(QMessageBox.Icon.Warning)
+        msg.setWindowTitle(title)
+        msg.setText(message)
+
+        # === Style the QMessageBox ===
+        msg.setStyleSheet("""
+            QMessageBox {
+                background-color: #fefefe;  /* soft white */
+                border-radius: 12px;
+                font-size: 16px;
+                font-family: Segoe UI, sans-serif;
+            }
+            QLabel {
+                color: #333333;
+                padding: 10px;
+            }
+            QPushButton {
+                background-color: #4CAF50;
+                color: white;
+                border-radius: 8px;
+                padding: 6px 15px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #45a049;
+            }
+            QPushButton:pressed {
+                background-color: #3e8e41;
+            }
+        """)
+
+        msg.exec()
 def main():
     app = QApplication(sys.argv)
     window = MainWindow()

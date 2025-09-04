@@ -16,20 +16,19 @@ def coa_data_entry_form(self):
     self.summary_analysis_table.setRowCount(3)
     self.summary_analysis_table.setHorizontalHeaderLabels(["Standard", "Delivery"])
     self.summary_analysis_table.setVerticalHeaderLabels([
-        "Color", "Light fastness (1-B)", "Heat Stability (1-5)"
+        "Color", "Light fastness (1-8)", "Heat Stability (1-5)"
     ])
     self.summary_analysis_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
     self.summary_analysis_table.resizeRowsToContents()
-    # Adjust height based on row count
-    row_height = sum([self.summary_analysis_table.rowHeight(i) for i in range(self.summary_analysis_table.rowCount())])
-    header_height = self.summary_analysis_table.horizontalHeader().height()
-    self.summary_analysis_table.setFixedHeight(row_height + header_height + 2)
+    adjust_table_height(self)
     # === Add Row Button ===
     btn_add_row = QPushButton("Add Row")
     btn_add_table_row = QHBoxLayout()
     btn_add_table_row.addStretch()
     btn_add_table_row.addWidget(btn_add_row)
     btn_add_table_row.addStretch()
+
+    btn_add_row.clicked.connect(self.add_row_to_table)
 
     # === Add widgets to form layout ===
     form_layout.addRow(header)
@@ -76,16 +75,11 @@ def coa_data_entry_form(self):
     self.coa_form_layout.addLayout(form_layout)
 
 
-def add_row_to_table(self):
-    row_name, ok = QInputDialog.getText(self, "Add Row", "Enter row header name:")
+def adjust_table_height(self):
+    """Resize table to fit rows dynamically."""
+    row_height = sum([self.summary_analysis_table.rowHeight(i)
+                      for i in range(self.summary_analysis_table.rowCount())])
+    header_height = self.summary_analysis_table.horizontalHeader().height()
+    self.summary_analysis_table.setFixedHeight(row_height + header_height + 2)
 
-    if ok and row_name.strip():  # If user pressed OK and input is not empty
-        current_row_count = self.summary_analysis_table.rowCount()
-        self.summary_analysis_table.insertRow(current_row_count)
 
-        self.summary_analysis_table.setVerticalHeaderItem(
-            current_row_count, QTableWidgetItem(row_name.strip())
-        )
-
-        for col in range(self.summary_analysis_table.columnCount()):
-            self.summary_analysis_table.setItem(current_row_count, col, QTableWidgetItem(""))
