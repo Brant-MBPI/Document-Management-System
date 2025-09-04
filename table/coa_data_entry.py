@@ -67,7 +67,6 @@ def coa_data_entry_form(self):
     form_layout.addRow("Shelf Life:", self.coa_shelf_life_input)
     form_layout.addRow("Suitability:", self.suitability_input)
 
-    self.btn_coa_submit.clicked.connect(self.coa_btn_submit_clicked)
     # Centered submit button
     submit_button_row = QHBoxLayout()
     submit_button_row.addStretch()

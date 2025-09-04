@@ -2,15 +2,15 @@
 import sys
 
 from PyQt6.QtCore import Qt, QDate
-from PyQt6.QtGui import QPixmap, QIcon, QIntValidator
+from PyQt6.QtGui import QIcon, QIntValidator
 
-import coa_data_entry
-import db.db_con
 from db import db_con
-from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QLabel, QWidget, QTabWidget, \
+from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QTabWidget, \
     QTableWidget, QLineEdit, QHeaderView, QTableWidgetItem, QScrollArea, QTextEdit, QPushButton, QDateEdit, \
     QInputDialog, QMessageBox
-import msds_data_entry
+from table import msds_data_entry, coa_data_entry
+
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -86,6 +86,8 @@ class MainWindow(QMainWindow):
         self.other_input = QTextEdit()
             #Submit Button
         self.btn_msds_submit = QPushButton("Submit")
+        self.btn_msds_submit.setProperty("class", "msds_submit_btn")
+        self.btn_msds_submit.clicked.connect(self.msds_btn_submit_clicked)
 
         # COA form init
             #summary of analysis table
@@ -111,6 +113,7 @@ class MainWindow(QMainWindow):
         self.coa_shelf_life_input = QLineEdit()
         self.suitability_input = QLineEdit()
         self.btn_coa_submit = QPushButton("Submit")
+        self.btn_coa_submit.clicked.connect(self.coa_btn_submit_clicked)
 
         self.po_number_input.setValidator((QIntValidator(0, 2147483647)))
         self.quantity_delivered_input.setValidator((QIntValidator(0, 2147483647)))
@@ -154,7 +157,8 @@ class MainWindow(QMainWindow):
         self.msds_sub_tabs.currentChanged.connect(self.toggle_msds_search_bar)
         self.coa_sub_tabs.currentChanged.connect(self.toggle_coa_search_bar)
 
-        self.msds_records_table = QTableWidget()   # MSDS Record Table
+        self.msds_records_table = QTableWidget()
+        self.msds_records_table.setProperty("class", "records_table")
 
         self.msds_records_layout = QVBoxLayout(self.msds_records_tab)  # inside MSDS sub-tab Records
         self.msds_records_layout.addWidget(self.msds_records_table)
@@ -177,10 +181,10 @@ class MainWindow(QMainWindow):
 
         #Inside COA Records Tab
         self.coa_records_table = QTableWidget()
+        self.coa_records_table.setProperty("class", "records_table")
 
         self.coa_records_layout = QVBoxLayout(self.coa_records_tab)  # inside COA sub-tab Records
         self.coa_records_layout.addWidget(self.coa_records_table)
-
 
         self.coa_data_entry_layout = QVBoxLayout(self.coa_data_entry_tab)  # inside COA sub-tab Data Entry
         self.coa_data_entry_layout.addLayout(self.coa_form_layout)
@@ -191,20 +195,34 @@ class MainWindow(QMainWindow):
         container.setLayout(self.main_layout)
         self.setCentralWidget(container)
         self.setStyleSheet(""" 
-            QTableWidget::item {
+            QTableWidget[class="records_table"]::item {
                 border-right: none;
                 border-bottom: 1px solid lightgray;
                 padding-left: 10px;
                 height: 36px;
             }
-            QTableWidget::item:selected {
+            QTableWidget[class="records_table"]::item:selected {
                 background-color: #3399FF;
                 color: black;
             }
-            QHeaderView::section {
+            QTableWidget[class="records_table"] QHeaderView::section {
                 border-right: none;
                 border-bottom: 1px solid lightgray;
                 background-color: #f0f0f0;
+            }
+            QPushButton[class="msds_submit_btn"] {
+                background-color: #4CAF50;
+                color: white;
+                padding: 10px 20px;
+                border: none;
+                border-radius: 4px;
+                font-size: 16px;
+            }
+            QPushButton[class="msds_submit_btn"]:hover {
+                background-color: #45a049;
+            }
+            QPushButton[class="msds_submit_btn"]:pressed {
+                background-color: #3e8e41;
             }
         """)
         self.msds_table_records_init()
@@ -216,8 +234,63 @@ class MainWindow(QMainWindow):
         msds_data_entry.create_form(self)
         msds_data_entry.from_btn(self)
 
+    def msds_btn_submit_clicked(self):
+        # Collect all required fields
+        required_fields = {
+            "Trade Name": self.trade_label_input.text(),
+            "Manufactured By": self.manufactured_label_input.toPlainText(),
+            "Telephone": self.tel_label_input.text(),
+            "Facsimile": self.facsimile_label_input.text(),
+            "Email": self.email_label_input.text(),
+            "Composition": self.composition_input.toPlainText(),
+            "Hazard Preliminaries": self.hazard_preliminaries_input.text(),
+            "Hazard Entry Route": self.hazard_entry_route_input.text(),
+            "Hazard Symptoms": self.hazard_symptoms_input.text(),
+            "Hazard Restrictive Condition": self.hazard_restrictive_condition_input.text(),
+            "Hazard Eyes": self.hazard_eyes_input.text(),
+            "Hazard General Note": self.hazard_general_note_input.text(),
+            "First Aid Inhalation": self.first_aid_inhalation_input.text(),
+            "First Aid Eyes": self.first_aid_eyes.text(),
+            "First Aid Skin": self.first_aid_skin_input.text(),
+            "First Aid Ingestion": self.first_aid_ingestion_input.text(),
+            "Fire Fighting Media": self.fire_fighting_media_input.toPlainText(),
+            "Accidental Release": self.accidental_release_input.toPlainText(),
+            "Handling": self.handling_input.text(),
+            "Storage": self.msds_storage_input.text(),
+            "Exposure Control": self.exposure_control_input.text(),
+            "Respiratory Protection": self.respiratory_protection_input.text(),
+            "Hand Protection": self.hand_protection_input.text(),
+            "Eye Protection": self.eye_protection_input.text(),
+            "Skin Protection": self.skin_protection_input.text(),
+            "Appearance": self.appearance_input.text(),
+            "Odor": self.odor_input.text(),
+            "Heat Stability": self.heat_stability_input.text(),
+            "Light Fastness": self.light_fastness_input.text(),
+            "Decomposition": self.decomposition_input.text(),
+            "Flash Point": self.flash_point_input.text(),
+            "Auto Ignition": self.auto_ignition_input.text(),
+            "Explosion Property": self.explosion_property_input.text(),
+            "Solubility": self.solubility_input.text(),
+            "Stability & Reactivity": self.stability_reactivity_input.toPlainText(),
+            "Toxicological": self.toxicological_input.toPlainText(),
+            "Ecological": self.ecological_input.toPlainText(),
+            "Disposal": self.disposal_input.toPlainText(),
+            "Transport": self.transport_input.toPlainText(),
+            "Regulatory": self.regulatory_input.toPlainText(),
+            "Shelf Life": self.msds_shelf_life_input.toPlainText(),
+            "Other": self.other_input.toPlainText()
+        }
+
+        # Check for empty values
+        for field, value in required_fields.items():
+            if not value.strip():  # empty string
+                self.show_warning("Missing Input", f"Please fill in: {field}")
+                return  # stop submission
+        # If all fields are filled, proceed to save
+        QMessageBox.information(self, "Success", "MSDS submitted successfully!")
+
     def coa_btn_submit_clicked(self):
-        print("COA Submit Clicked")
+
         customer_name = self.coa_customer_input.text()
         color_code = self.color_code_input.text()
         quantity_delivered = self.quantity_delivered_input.text()
@@ -232,7 +305,7 @@ class MainWindow(QMainWindow):
         storage = self.coa_storage_input.text()
         shelf_life = self.coa_shelf_life_input.text()
         suitability = self.suitability_input.text()
-        print(summary_of_analysis)
+
         required_fields = {
             "Customer Name": customer_name,
             "Color Code": color_code,
@@ -281,25 +354,6 @@ class MainWindow(QMainWindow):
         except Exception as e:
             self.show_warning("Database Error", str(e))
 
-    def add_row_to_coa_summary_table(self):
-        row_count = self.summary_analysis_table.rowCount()
-
-        # Ask user for header text
-        header_text, ok = QInputDialog.getText(self, "New Row", "Enter row header:")
-
-        if ok and header_text.strip():
-            # Add row
-            self.summary_analysis_table.insertRow(row_count)
-
-            # Update headers
-            current_headers = [self.summary_analysis_table.verticalHeaderItem(i).text()
-                               for i in range(row_count)]
-            current_headers.append(header_text.strip())
-            self.summary_analysis_table.setVerticalHeaderLabels(current_headers)
-
-            # Adjust table height
-            coa_data_entry.adjust_table_height(self)
-
     def get_coa_summary_analysis_table_data(self):
         data = {}
         row_count = self.summary_analysis_table.rowCount()
@@ -321,6 +375,25 @@ class MainWindow(QMainWindow):
             data[row_header] = row_values
 
         return data
+
+    def add_row_to_coa_summary_table(self):
+        row_count = self.summary_analysis_table.rowCount()
+
+        # Ask user for header text
+        header_text, ok = QInputDialog.getText(self, "New Row", "Enter row header:")
+
+        if ok and header_text.strip():
+            # Add row
+            self.summary_analysis_table.insertRow(row_count)
+
+            # Update headers
+            current_headers = [self.summary_analysis_table.verticalHeaderItem(i).text()
+                               for i in range(row_count)]
+            current_headers.append(header_text.strip())
+            self.summary_analysis_table.setVerticalHeaderLabels(current_headers)
+
+            # Adjust table height
+            coa_data_entry.adjust_table_height(self)
 
     def load_msds_table(self):
         self.msds_records_table.insertRow(0)
@@ -430,7 +503,7 @@ class MainWindow(QMainWindow):
                 background-color: #4CAF50;
                 color: white;
                 border-radius: 8px;
-                padding: 6px 15px;
+                padding: 6px 18px;
                 font-weight: bold;
             }
             QPushButton:hover {
@@ -442,6 +515,8 @@ class MainWindow(QMainWindow):
         """)
 
         msg.exec()
+
+
 def main():
     app = QApplication(sys.argv)
     window = MainWindow()

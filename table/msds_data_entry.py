@@ -5,13 +5,37 @@ from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout,
 
 def create_form(self):
     header = QLabel("Technical Data and Material Safety")
+    header.setStyleSheet("font-size: 18px; font-weight: bold; font-size: 24px;")
     section1_header = QLabel("1) Product Identification")
+    section1_header.setProperty("class", "sub_title")
 
     # Create form layout
+    form_widget = QWidget()
     form_layout = QFormLayout()
+    form_widget.setLayout(form_layout)
+    form_widget.setStyleSheet(""" 
+        QLabel {
+            margin-left: 60px;
+            font-size: 16px;
+        }
+        QLineEdit, QTextEdit {
+            font-size: 16px;
+            padding: 4px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .sub_title {
+            margin-left: 0;
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 12px;
+            margin-bottom: 8px;
+        }
+        
+    """)
     form_layout.setHorizontalSpacing(20)
     form_layout.setVerticalSpacing(12)
-    form_layout.setContentsMargins(20, 20, 20, 20)
+    form_layout.setContentsMargins(20, 20, 70, 20)
 
     #Section 1
     form_layout.addRow(section1_header)
@@ -23,11 +47,13 @@ def create_form(self):
 
     # Section 2
     section2_header = QLabel("2) Composition/Information on Ingredients")
+    section2_header.setProperty("class", "sub_title")
     form_layout.addRow(section2_header)
     form_layout.addRow(QLabel("Details:"), self.composition_input)
 
     # Section 3
     section3_header = QLabel("3) Hazard Information")
+    section3_header.setProperty("class", "sub_title")
     section3_label = QLabel("Adverse Human Health Effects")
 
     form_layout.addRow(section3_header)
@@ -41,7 +67,8 @@ def create_form(self):
 
     # Section 4
     section4_header = QLabel("4) First Aid Measures")
-
+    section4_header.setProperty("class", "sub_title")
+    form_layout.addRow(section4_header)
     form_layout.addRow(QLabel("Inhalation:"), self.first_aid_inhalation_input)
     form_layout.addRow(QLabel("Eyes:"), self.first_aid_eyes)
     form_layout.addRow(QLabel("Skin:"), self.first_aid_skin_input)
@@ -49,6 +76,7 @@ def create_form(self):
 
     # Section 5
     section5_header = QLabel("5) Fire Fighting Measures")
+    section5_header.setProperty("class", "sub_title")
     media_label = QLabel("Extinguishing media: ")
 
     form_layout.addRow(section5_header)
@@ -56,11 +84,13 @@ def create_form(self):
 
     # Section 6
     section6_header = QLabel("6) Accidental Release Measures")
+    section6_header.setProperty("class", "sub_title")
     form_layout.addRow(section6_header)
     form_layout.addRow(QLabel("Details:"), self.accidental_release_input)
 
     # Section 7
     section7_header = QLabel("7) Handling and Storage")
+    section7_header.setProperty("class", "sub_title")
 
     form_layout.addRow(section7_header)
     form_layout.addRow(QLabel("Handling:"), self.handling_input)
@@ -68,6 +98,7 @@ def create_form(self):
 
     # Section 8
     section8_header = QLabel("8) Exposure Controls/Personal Protection")
+    section8_header.setProperty("class", "sub_title")
 
     form_layout.addRow(section8_header)
     form_layout.addRow(QLabel("Exposure Control:"), self.exposure_control_input)
@@ -78,6 +109,7 @@ def create_form(self):
 
     # Section 9
     section9_header = QLabel("9) Physical & Chemical Properties")
+    section9_header.setProperty("class", "sub_title")
 
     form_layout.addRow(section9_header)
     form_layout.addRow(QLabel("Appearance:"), self.appearance_input)
@@ -92,22 +124,30 @@ def create_form(self):
 
     # Section 10
     section10_header = QLabel("10) Stability & Reactivity")
+    section10_header.setProperty("class", "sub_title")
 
     form_layout.addRow(section10_header)
     form_layout.addRow(QLabel("Details:"), self.stability_reactivity_input)
 
     # Section 11
     section11_header = QLabel("11) Toxicological Information")
+    section11_header.setProperty("class", "sub_title")
     form_layout.addRow(section11_header)
     form_layout.addRow(QLabel("Details:"),self.toxicological_input)
 
     # Section 12-17
     section12_header = QLabel("12) Ecological Information")
+    section12_header.setProperty("class", "sub_title")
     section13_header = QLabel("13) Disposal")
+    section13_header.setProperty("class", "sub_title")
     section14_header = QLabel("14) Transport Information")
+    section14_header.setProperty("class", "sub_title")
     section15_header = QLabel("15) Regulatory Information")
+    section15_header.setProperty("class", "sub_title")
     section16_header = QLabel("16) Shelf-Life")
+    section16_header.setProperty("class", "sub_title")
     section17_header = QLabel("17) Other Information")
+    section17_header.setProperty("class", "sub_title")
 
     form_layout.addRow(section12_header)
     form_layout.addRow(QLabel("Details:"), self.ecological_input)
@@ -123,7 +163,7 @@ def create_form(self):
     form_layout.addRow(QLabel("Details:"), self.other_input)
 
     self.msds_form_layout.addWidget(header)
-    self.msds_form_layout.addLayout(form_layout)
+    self.msds_form_layout.addWidget(form_widget)
 
 def from_btn(self):
     self.msds_btn_layout.addStretch()
