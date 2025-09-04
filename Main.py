@@ -1,8 +1,8 @@
 
 import sys
 
-from PyQt6.QtCore import Qt, QDate
-from PyQt6.QtGui import QIcon, QIntValidator
+from PyQt6.QtCore import Qt, QDate, QRegularExpression, QTimer
+from PyQt6.QtGui import QIcon, QIntValidator, QRegularExpressionValidator
 
 from db import db_con
 from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QTabWidget, \
@@ -29,8 +29,20 @@ class MainWindow(QMainWindow):
         self.trade_label_input = QLineEdit()
         self.manufactured_label_input = QTextEdit()
         self.tel_label_input = QLineEdit()
+        tel_regex = QRegularExpression(r'^(\d{7,12}|\(\d{1,4}\)\s?\d{6,10})$')
+        tel_validator = QRegularExpressionValidator(tel_regex)
+        self.tel_label_input.setValidator(tel_validator)
+        self.setup_finished_typing(self.tel_label_input, self.check_tel_number, delay=800)
+
         self.facsimile_label_input = QLineEdit()
+        self.facsimile_label_input.setValidator(tel_validator)
+        self.setup_finished_typing(self.facsimile_label_input, self.check_tel_number, delay=800)
         self.email_label_input = QLineEdit()
+        email_regex = QRegularExpression(r'^[\w\.-]+@[\w\.-]+\.\w{2,4}$')
+        email_validator = QRegularExpressionValidator(email_regex)
+        self.email_label_input.setValidator(email_validator)
+        self.setup_finished_typing(self.email_label_input, self.check_email, delay=800)
+
             #Section2
         self.composition_input = QTextEdit()
             #Section3
@@ -62,7 +74,9 @@ class MainWindow(QMainWindow):
         self.appearance_input = QLineEdit()
         self.odor_input = QLineEdit()
         self.heat_stability_input = QLineEdit()
+        self.heat_stability_input.setValidator((QIntValidator(1, 8)))
         self.light_fastness_input = QLineEdit()
+        self.light_fastness_input.setValidator((QIntValidator(1, 5)))
         self.decomposition_input = QLineEdit()
         self.flash_point_input = QLineEdit()
         self.auto_ignition_input = QLineEdit()
@@ -239,21 +253,21 @@ class MainWindow(QMainWindow):
         required_fields = {
             "Trade Name": self.trade_label_input.text(),
             "Manufactured By": self.manufactured_label_input.toPlainText(),
-            "Telephone": self.tel_label_input.text(),
+            "Telephone No.": self.tel_label_input.text(),
             "Facsimile": self.facsimile_label_input.text(),
-            "Email": self.email_label_input.text(),
-            "Composition": self.composition_input.toPlainText(),
+            "Email Adress": self.email_label_input.text(),
+            "Composition/Information on Ingredients": self.composition_input.toPlainText(),
             "Hazard Preliminaries": self.hazard_preliminaries_input.text(),
-            "Hazard Entry Route": self.hazard_entry_route_input.text(),
-            "Hazard Symptoms": self.hazard_symptoms_input.text(),
-            "Hazard Restrictive Condition": self.hazard_restrictive_condition_input.text(),
+            "Preliminary": self.hazard_entry_route_input.text(),
+            "Symptoms of Exposure": self.hazard_symptoms_input.text(),
+            "Restrictive Condition": self.hazard_restrictive_condition_input.text(),
             "Hazard Eyes": self.hazard_eyes_input.text(),
             "Hazard General Note": self.hazard_general_note_input.text(),
             "First Aid Inhalation": self.first_aid_inhalation_input.text(),
             "First Aid Eyes": self.first_aid_eyes.text(),
             "First Aid Skin": self.first_aid_skin_input.text(),
             "First Aid Ingestion": self.first_aid_ingestion_input.text(),
-            "Fire Fighting Media": self.fire_fighting_media_input.toPlainText(),
+            "Extinguishing Media": self.fire_fighting_media_input.toPlainText(),
             "Accidental Release": self.accidental_release_input.toPlainText(),
             "Handling": self.handling_input.text(),
             "Storage": self.msds_storage_input.text(),
@@ -275,7 +289,7 @@ class MainWindow(QMainWindow):
             "Toxicological": self.toxicological_input.toPlainText(),
             "Ecological": self.ecological_input.toPlainText(),
             "Disposal": self.disposal_input.toPlainText(),
-            "Transport": self.transport_input.toPlainText(),
+            "Transport Information": self.transport_input.toPlainText(),
             "Regulatory": self.regulatory_input.toPlainText(),
             "Shelf Life": self.msds_shelf_life_input.toPlainText(),
             "Other": self.other_input.toPlainText()
@@ -513,9 +527,39 @@ class MainWindow(QMainWindow):
                 background-color: #3e8e41;
             }
         """)
-
         msg.exec()
 
+    def setup_finished_typing(self, line_edit, callback, delay=800):
+        timer = QTimer()
+        timer.setSingleShot(True)
+
+        # Connect the timer timeout to the callback
+        timer.timeout.connect(callback)
+
+        # Restart timer on every text change
+        line_edit.textChanged.connect(lambda: timer.start(delay))
+
+        # Optionally return the timer in case you want to manipulate it later
+        return timer
+    def check_email(self):
+        text = self.email_label_input.text()
+        validator = self.email_label_input.validator()
+        if validator:
+            state = validator.validate(text, 0)[0]
+            if state != QRegularExpressionValidator.State.Acceptable and text:
+                msg = QMessageBox()
+                msg.setWindowTitle("Invalid Email")
+                msg.setText("❌ Please enter a valid email address!")
+                msg.setIcon(QMessageBox.Icon.Warning)
+                msg.exec()
+
+    def check_tel_number(self):
+        if not self.tel_label_input.hasAcceptableInput():
+            msg = QMessageBox()
+            msg.setWindowTitle("Invalid Telephone Number")
+            msg.setText("❌ Please enter a valid telephone number!")
+            msg.setIcon(QMessageBox.Icon.Warning)
+            msg.exec()
 
 def main():
     app = QApplication(sys.argv)
