@@ -4,9 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4da2a72a-3743-43f5-b62e-784d8664fbf7" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/coa_data_entry.py" beforeDir="false" afterPath="$PROJECT_DIR$/coa_data_entry.py" afterDir="false" />
-    </list>
+    <list default="true" id="4da2a72a-3743-43f5-b62e-784d8664fbf7" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
