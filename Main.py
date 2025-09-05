@@ -437,11 +437,19 @@ class MainWindow(QMainWindow):
 
         # Save
         try:
-            db_con.save_certificate_of_analysis(coa_data, summary_of_analysis)
-            QMessageBox.information(self, "Success", f"Certificate of Analysis saved successfully!")
+            if coa_data_entry.current_coa_id is not None:  # Update existing COA
+                db_con.update_certificate_of_analysis(coa_data_entry.current_coa_id, coa_data, summary_of_analysis)
+                QMessageBox.information(self, "Success", f"Certificate of Analysis updated successfully!")
+                coa_data_entry.current_coa_id = None
+
+            else:  # Save new COA
+                db_con.save_certificate_of_analysis(coa_data, summary_of_analysis)
+                QMessageBox.information(self, "Success", f"Certificate of Analysis saved successfully!")
         except Exception as e:
             self.show_warning("Database Error", str(e))
-
+        finally:
+            coa_data_entry.clear_coa_form(self)
+            table.load_coa_table(self)
     def get_coa_summary_analysis_table_data(self):
         data = {}
         row_count = self.summary_analysis_table.rowCount()
@@ -550,7 +558,6 @@ class MainWindow(QMainWindow):
     def toggle_msds_search_bar(self, index):
         if index == 0:  # Records tab
             self.msds_search_bar.show()
-            print(coa_data_entry.current_coa_id)
         else:  # Other tabs
             self.msds_search_bar.hide()
 

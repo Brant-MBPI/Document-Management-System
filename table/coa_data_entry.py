@@ -57,6 +57,7 @@ def load_coa_details(self, coa_id):
         )
     adjust_table_height(self)
 
+
 def coa_data_entry_form(self):
     form_layout = QFormLayout()
     form_layout.setHorizontalSpacing(20)

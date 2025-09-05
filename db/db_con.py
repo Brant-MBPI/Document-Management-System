@@ -266,6 +266,62 @@ def save_certificate_of_analysis(data, summary_of_analysis):
         raise e
 
 
+def update_certificate_of_analysis(coa_id, data, summary_of_analysis):
+    conn = get_connection()
+    try:
+        cur = conn.cursor()
+
+        # Insert into certificates_of_analysis
+        cur.execute("""
+            UPDATE certificates_of_analysis
+            SET 
+                customer_name = %s, 
+                color_code = %s, 
+                lot_number = %s, 
+                po_number = %s, 
+                delivery_receipt_number = %s, 
+                quantity_delivered = %s, 
+                delivery_date = %s, 
+                production_date = %s, 
+                certification_date = %s, 
+                certified_by = %s, 
+                storage_instructions = %s, 
+                shelf_life_coa = %s, 
+                suitability = %s
+            WHERE id = %s;
+        """, (
+            data["customer_name"], data["color_code"], data["lot_number"], data["po_number"],
+            data["delivery_receipt"], data["quantity_delivered"], data["delivery_date"],
+            data["production_date"], data["creation_date"], data["certified_by"],
+            data["storage"], data["shelf_life"], data["suitability"],
+            coa_id
+        ))
+        # Delete existing analysis results
+        cur.execute("""
+            DELETE FROM coa_analysis_results WHERE coa_id = %s;
+        """, (coa_id,))
+
+        # Insert analysis results
+        for parameter, values in summary_of_analysis.items():
+            standard_value = values[0]
+            delivery_value = values[1]
+
+            cur.execute("""
+                INSERT INTO coa_analysis_results (
+                    coa_id, parameter_name, standard_value, delivery_value
+                ) VALUES (%s, %s, %s, %s)
+            """, (coa_id, parameter, standard_value, delivery_value))
+
+        conn.commit()
+        cur.close()
+        conn.close()
+
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        raise e
+
+
 #     Read
 
 def get_all_coa_data():
