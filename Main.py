@@ -321,7 +321,7 @@ class MainWindow(QMainWindow):
         # Check for empty values
         for field, value in required_fields.items():
             if not value.strip():  # empty string
-                self.show_warning("Missing Input", f"Please fill in:   {field}")
+                self.show_message("Missing Input", f"Please fill in:   {field}", icon_type="warning")
                 return  # stop submission
         # If all fields are filled, proceed to save
         msds_data = {
@@ -378,10 +378,18 @@ class MainWindow(QMainWindow):
 
         # Save
         try:
-            db_con.save_msds_sheet(msds_data)
-            QMessageBox.information(self, "Success", "MSDS saved successfully!")
+            if msds_data_entry.current_msds_id is not None:  # Update existing MSDS
+                db_con.update_msds_sheet(msds_data_entry.current_msds_id, msds_data)
+                self.show_message("Success", "MSDS updated successfully!", icon_type="info")
+                msds_data_entry.current_msds_id = None
+            else:  # Save new MSDS
+                db_con.save_msds_sheet(msds_data)
+                self.show_message("Success", "MSDS saved successfully!", icon_type="info")
         except Exception as e:
-            self.show_warning("Database Error", str(e))
+            self.show_message("Database Error", str(e), icon_type="critical")
+        finally:
+            msds_data_entry.clear_msds_form(self)
+            table.load_msds_table(self)
 
     def coa_btn_submit_clicked(self):
 
@@ -416,12 +424,12 @@ class MainWindow(QMainWindow):
         # Check if any required field is empty
         for field, value in required_fields.items():
             if not value:  # empty string
-                self.show_warning("Missing Input", f"Please fill in:  {field}")
+                self.show_message("Missing Input", f"Please fill in:  {field}", icon_type="warning")
                 return  # stop processing
 
         # Check summary of analysis if no empty row
         if not any(any(cell for cell in row) for row in summary_of_analysis.values()):
-            self.show_warning("Missing Input", "Please fill in the Summary of Analysis table.")
+            self.show_message("Missing Input", "Please fill in the Summary of Analysis table.", icon_type="warning")
             return
 
         # Build coa_data for saving
@@ -445,14 +453,14 @@ class MainWindow(QMainWindow):
         try:
             if coa_data_entry.current_coa_id is not None:  # Update existing COA
                 db_con.update_certificate_of_analysis(coa_data_entry.current_coa_id, coa_data, summary_of_analysis)
-                QMessageBox.information(self, "Success", f"Certificate of Analysis updated successfully!")
+                self.show_message("Success", f"Certificate of Analysis updated successfully!", icon_type="info")
                 coa_data_entry.current_coa_id = None
 
             else:  # Save new COA
                 db_con.save_certificate_of_analysis(coa_data, summary_of_analysis)
-                QMessageBox.information(self, "Success", f"Certificate of Analysis saved successfully!")
+                self.show_message("Success", f"Certificate of Analysis saved successfully!", icon_type="info")
         except Exception as e:
-            self.show_warning("Database Error", str(e))
+            self.show_message("Database Error", str(e), icon_type="critical")
         finally:
             coa_data_entry.clear_coa_form(self)
             table.load_coa_table(self)
@@ -580,38 +588,47 @@ class MainWindow(QMainWindow):
         else:
             self.coa_search_bar.hide()
 
-    def show_warning(self, title, message):
+    def show_message(self, title, message, icon_type="info"):
         msg = QMessageBox(self)
-        msg.setIcon(QMessageBox.Icon.Warning)
+
+        # Map icon_type string to QMessageBox.Icon
+        icon_map = {
+            "info": QMessageBox.Icon.Information,
+            "warning": QMessageBox.Icon.Warning,
+            "critical": QMessageBox.Icon.Critical,
+            "question": QMessageBox.Icon.Question
+        }
+        msg.setIcon(icon_map.get(icon_type, QMessageBox.Icon.Information))
+
         msg.setWindowTitle(title)
         msg.setText(message)
 
         # === Style the QMessageBox ===
         msg.setStyleSheet("""
-            QMessageBox {
-                background-color: #fefefe;  /* soft white */
-                border-radius: 12px;
-                font-size: 16px;
-                font-family: Segoe UI, sans-serif;
-            }
-            QLabel {
-                color: #333333;
-                padding: 10px;
-            }
-            QPushButton {
-                background-color: #4CAF50;
-                color: white;
-                border-radius: 8px;
-                padding: 6px 18px;
-                font-weight: bold;
-            }
-            QPushButton:hover {
-                background-color: #45a049;
-            }
-            QPushButton:pressed {
-                background-color: #3e8e41;
-            }
-        """)
+                QMessageBox {
+                    background-color: #fefefe;
+                    border-radius: 12px;
+                    font-size: 16px;
+                    font-family: Segoe UI, sans-serif;
+                }
+                QLabel {
+                    color: #333333;
+                    padding: 10px;
+                }
+                QPushButton {
+                    background-color: #4CAF50;
+                    color: white;
+                    border-radius: 8px;
+                    padding: 6px 18px;
+                    font-weight: bold;
+                }
+                QPushButton:hover {
+                    background-color: #45a049;
+                }
+                QPushButton:pressed {
+                    background-color: #3e8e41;
+                }
+            """)
         msg.exec()
 
     def setup_finished_typing(self, line_edit, callback, delay=800):
