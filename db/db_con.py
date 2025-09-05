@@ -272,12 +272,40 @@ def get_all_coa_data():
     conn = get_connection()
     cur = conn.cursor()
 
-    cur.execute("""SELECT * 
-                    FROM certificates_of_analysis coa, coa_analysis_results coa_results 
-                    WHERE coa.id = coa_results.coa_id;
-                """)
+    cur.execute("SELECT * FROM certificates_of_analysis;")
     records = cur.fetchall()
 
     cur.close()
     conn.close()
     return records
+
+
+def get_single_coa_data(coa_id):
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute(
+        "SELECT * FROM certificates_of_analysis WHERE id = %s;",
+        (coa_id,)
+    )
+    record = cur.fetchone()  # only one row expected
+
+    cur.close()
+    conn.close()
+    return record
+
+
+def get_coa_analysis_results(coa_id):
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT parameter_name, standard_value, delivery_value 
+        FROM coa_analysis_results 
+        WHERE coa_id = %s;
+    """, (coa_id,))
+    results = cur.fetchall()
+
+    cur.close()
+    conn.close()
+    return results

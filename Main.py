@@ -2,19 +2,18 @@
 import sys
 
 from PyQt6.QtCore import Qt, QDate, QRegularExpression, QTimer, QEvent, QObject
-from PyQt6.QtGui import QIcon, QIntValidator, QRegularExpressionValidator
+from PyQt6.QtGui import QIcon, QIntValidator, QRegularExpressionValidator, QFont
 
 from db import db_con
 from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QTabWidget, \
     QTableWidget, QLineEdit, QHeaderView, QTableWidgetItem, QScrollArea, QTextEdit, QPushButton, QDateEdit, \
     QInputDialog, QMessageBox
-from table import msds_data_entry, coa_data_entry
+from table import msds_data_entry, coa_data_entry, table
 
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        db_con.create_tables()
         print(db_con.get_all_coa_data())
         self.main_layout = QVBoxLayout()
         self.main_tabs = QTabWidget()
@@ -142,7 +141,7 @@ class MainWindow(QMainWindow):
         self.coa_storage_input = QLineEdit()
         self.coa_shelf_life_input = QLineEdit()
         self.suitability_input = QLineEdit()
-        self.btn_coa_submit = QPushButton("Submit")
+        self.btn_coa_submit = QPushButton()
         self.btn_coa_submit.clicked.connect(self.coa_btn_submit_clicked)
 
         self.po_number_input.setValidator((QIntValidator(0, 2147483647)))
@@ -258,8 +257,10 @@ class MainWindow(QMainWindow):
         """)
         self.msds_table_records_init()
         self.coa_table_records_init()
-        self.load_msds_table()
-        self.load_coa_table()
+        self.msds_records_table.cellClicked.connect(self.msds_cell_clicked)
+        self.coa_records_table.cellClicked.connect(self.coa_cell_clicked)
+        table.load_msds_table(self)
+        table.load_coa_table(self)
         coa_data_entry.coa_data_entry_form(self)
 
         msds_data_entry.create_form(self)
@@ -483,37 +484,7 @@ class MainWindow(QMainWindow):
             # Adjust table height
             coa_data_entry.adjust_table_height(self)
 
-    def load_msds_table(self):
-        self.msds_records_table.insertRow(0)
-        self.msds_records_table.setItem(0, 0, self.create_readonly_item("JDS WA17857E MSDS TDS 08-22-25"))
-        self.msds_records_table.setItem(0, 1, self.create_readonly_item(icon_path="img/view_icon.png", selectable=False))
-        self.msds_records_table.setItem(0, 2, self.create_readonly_item(icon_path="img/delete_icon.png", selectable=False))
-        self.msds_records_table.setItem(0, 3, self.create_readonly_item(icon_path="img/print_icon.png", selectable=False))
-
-    def load_coa_table(self):
-        self.coa_records_table.insertRow(0)
-        self.coa_records_table.setItem(0, 0, self.create_readonly_item("JDS WA17857E MSDS TDS 08-22-25"))
-        self.coa_records_table.setItem(0, 1, self.create_readonly_item(icon_path="img/view_icon.png", selectable=False))
-        self.coa_records_table.setItem(0, 2, self.create_readonly_item(icon_path="img/delete_icon.png", selectable=False))
-        self.coa_records_table.setItem(0, 3, self.create_readonly_item(icon_path="img/print_icon.png", selectable=False))
-
-    def resize_columns(self, table: QTableWidget, event):
-        total_width = table.viewport().width()
-
-        # first column = 90%
-        first_col_width = int(total_width * 0.9)
-        table.setColumnWidth(0, first_col_width)
-
-        # remaining columns share 10%
-        remaining_width = total_width - first_col_width
-        other_cols = table.columnCount() - 1
-        if other_cols > 0:
-            each_width = int(remaining_width / other_cols)
-            for col in range(1, table.columnCount()):
-                table.setColumnWidth(col, each_width)
-        super(QTableWidget, table).resizeEvent(event)
-
-    def create_readonly_item(self, text=None, icon_path=None, selectable=True):
+    def create_readonly_item(self, text=None, icon_path=None, selectable=True, column_idx=None):
         item = QTableWidgetItem()
 
         if text is not None:
@@ -529,15 +500,20 @@ class MainWindow(QMainWindow):
             # Remove the selectable flag but keep enabled to accept clicks
             item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsSelectable | Qt.ItemFlag.ItemIsEnabled)
 
+        if column_idx == 0:
+            font = QFont()
+            font.setPointSize(12)  # make text larger
+            # font.setBold(True)  # make it bold
+            item.setFont(font)
         return item
 
     def msds_table_records_init(self):
-        self.msds_records_table.setColumnCount(4)
-        self.msds_records_table.setHorizontalHeaderLabels(["Name", "", "", ""])
+        self.msds_records_table.setColumnCount(5)
+        self.msds_records_table.setHorizontalHeaderLabels(["Name", "", "", "", ""])
         self.msds_records_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Fixed)
 
         # Override resize event
-        self.msds_records_table.resizeEvent = lambda event: self.resize_columns(self.msds_records_table, event)
+        self.msds_records_table.resizeEvent = lambda event: table.resize_columns(self, self.msds_records_table, event)
         self.msds_records_table.verticalHeader().setDefaultSectionSize(40)
         self.msds_records_table.verticalHeader().setFixedWidth(40)
         self.msds_records_table.verticalHeader().setDefaultAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -545,17 +521,33 @@ class MainWindow(QMainWindow):
         self.msds_records_table.setShowGrid(False)
 
     def coa_table_records_init(self):
-        self.coa_records_table.setColumnCount(4)
-        self.coa_records_table.setHorizontalHeaderLabels(["Name", "", "", ""])
+        self.coa_records_table.setColumnCount(5)
+        self.coa_records_table.setHorizontalHeaderLabels(["Name", "", "", "", ""])
         self.coa_records_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Fixed)
 
         # Override resize event
-        self.coa_records_table.resizeEvent = lambda event: self.resize_columns(self.coa_records_table, event)
+        self.coa_records_table.resizeEvent = lambda event: table.resize_columns(self, self.coa_records_table, event)
         self.coa_records_table.verticalHeader().setDefaultSectionSize(40)
         self.coa_records_table.verticalHeader().setFixedWidth(40)
         self.coa_records_table.verticalHeader().setDefaultAlignment(Qt.AlignmentFlag.AlignCenter)
         self.coa_records_table.horizontalHeader().setFixedHeight(40)
         self.coa_records_table.setShowGrid(False)
+
+    def msds_cell_clicked(self, row, column):
+        if column == 2:  # edit column
+            print("MSDS Edit clicked")
+
+    def coa_cell_clicked(self, row, column):
+        if column == 2:  # edit column
+            print("COA Edit clicked")
+            # Get COA id stored in the first column's UserRole
+            coa_id = self.coa_records_table.item(row, 0).data(Qt.ItemDataRole.UserRole)
+            print("Selected COA ID:", coa_id)
+            coa_data_entry.current_coa_id = coa_id  # Store the selected COA ID
+
+            coa_data_entry.load_coa_details(self, coa_id)
+            # Switch to the COA tab
+            self.coa_sub_tabs.setCurrentWidget(self.coa_data_entry_tab)
 
     def toggle_msds_search_bar(self, index):
         if index == 0:  # Records tab

@@ -2,6 +2,45 @@ from PyQt6.QtGui import QIntValidator
 from PyQt6.QtWidgets import QLabel, QHBoxLayout, QSizePolicy, QHeaderView, QPushButton, QInputDialog, QTableWidgetItem, \
     QFormLayout, QTableWidget, QLineEdit, QAbstractItemView
 
+from db import db_con
+
+current_coa_id = None  # Global variable to store the current COA ID
+
+
+def load_coa_details(self, coa_id):
+    field_result = db_con.get_single_coa_data(coa_id)
+    analysis_table_result = db_con.get_coa_analysis_results(coa_id)
+
+    # inputs variable
+    self.coa_customer_input.setText(str(field_result[1]))
+    self.color_code_input.setText(str(field_result[2]))
+    self.lot_number_input.setText(str(field_result[3]))
+    self.po_number_input.setText(str(field_result[4]))
+    self.delivery_receipt_input.setText(str(field_result[5]))
+    self.quantity_delivered_input.setText(str(field_result[6]))
+    self.delivery_date_input.setText(str(field_result[7]))
+    self.production_date_input.setText(str(field_result[8]))
+    self.creation_date_input.setText(str(field_result[9]))
+    self.certified_by_input.setText(str(field_result[10]))
+    self.coa_storage_input.setText(str(field_result[11]))
+    self.coa_shelf_life_input.setText(str(field_result[12]))
+    self.suitability_input.setText(str(field_result[13]))
+
+    self.btn_coa_submit.setText("Update")
+
+    self.summary_analysis_table.setRowCount(0)
+    for row_idx, (analysis_id, coa_id, parameter_name, standard_value, delivery_value) in enumerate(
+            analysis_table_result):
+        self.summary_analysis_table.insertRow(row_idx)
+
+        # set row header (parameter name)
+        self.summary_analysis_table.setVerticalHeaderItem(row_idx, QTableWidgetItem(parameter_name.upper()))
+
+        # standard value
+        self.summary_analysis_table.setItem(row_idx, 0, QTableWidgetItem(str(standard_value)))
+
+        # delivery value
+        self.summary_analysis_table.setItem(row_idx, 1, QTableWidgetItem(str(delivery_value)))
 
 def coa_data_entry_form(self):
     form_layout = QFormLayout()
@@ -66,7 +105,7 @@ def coa_data_entry_form(self):
     form_layout.addRow("Storage:", self.coa_storage_input)
     form_layout.addRow("Shelf Life:", self.coa_shelf_life_input)
     form_layout.addRow("Suitability:", self.suitability_input)
-
+    self.btn_coa_submit.setText("Submit")
     # Centered submit button
     submit_button_row = QHBoxLayout()
     submit_button_row.addStretch()
