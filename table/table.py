@@ -5,12 +5,29 @@ from db import db_con
 
 
 def load_msds_table(self):
-    self.msds_records_table.insertRow(0)
-    self.msds_records_table.setItem(0, 0, self.create_readonly_item("JDS WA17857E MSDS TDS 08-22-25", column_idx=0))
-    self.msds_records_table.setItem(0, 1, self.create_readonly_item(icon_path="img/view_icon.png", selectable=False))
-    self.msds_records_table.setItem(0, 2, self.create_readonly_item(icon_path="img/edit_icon.png", selectable=False))
-    self.msds_records_table.setItem(0, 3, self.create_readonly_item(icon_path="img/delete_icon.png", selectable=False))
-    self.msds_records_table.setItem(0, 4, self.create_readonly_item(icon_path="img/print_icon.png", selectable=False))
+    self.msds_records_table.setRowCount(0)
+
+    records = db_con.get_all_msds_data()
+    for row_idx, record in enumerate(records):
+        msds_id = record[0]
+        creation_date = record[3]
+        revision_date_str = creation_date.strftime("%m-%d-%Y")
+
+        display_text = f"MSDS {revision_date_str}".upper()
+
+        self.msds_records_table.insertRow(row_idx)
+        self.msds_records_table.setItem(row_idx, 0, self.create_readonly_item(display_text, column_idx=0))
+        self.msds_records_table.setItem(row_idx, 1,
+                                        self.create_readonly_item(icon_path="img/view_icon.png", selectable=False))
+        self.msds_records_table.setItem(row_idx, 2,
+                                        self.create_readonly_item(icon_path="img/edit_icon.png", selectable=False))
+        self.msds_records_table.setItem(row_idx, 3,
+                                        self.create_readonly_item(icon_path="img/delete_icon.png", selectable=False))
+        self.msds_records_table.setItem(row_idx, 4,
+                                        self.create_readonly_item(icon_path="img/print_icon.png", selectable=False))
+
+        # store msds_id as hidden data inside column 0
+        self.msds_records_table.item(row_idx, 0).setData(Qt.ItemDataRole.UserRole, msds_id)
 
 
 def load_coa_table(self):
@@ -67,5 +84,3 @@ def resize_columns(self, table: QTableWidget, event):
         table.setColumnWidth(0, remaining_width)
 
     super(QTableWidget, table).resizeEvent(event)
-
-

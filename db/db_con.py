@@ -324,6 +324,18 @@ def update_certificate_of_analysis(coa_id, data, summary_of_analysis):
 
 #     Read
 
+def get_all_msds_data():
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("SELECT * FROM msds_sheets;")
+    records = cur.fetchall()
+
+    cur.close()
+    conn.close()
+    return records
+
+
 def get_all_coa_data():
     conn = get_connection()
     cur = conn.cursor()
@@ -334,6 +346,21 @@ def get_all_coa_data():
     cur.close()
     conn.close()
     return records
+
+
+def get_single_msds_data(msds_id):
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute(
+        "SELECT * FROM msds_sheets WHERE id = %s;",
+        (msds_id,)
+    )
+    record = cur.fetchone()  # only one row expected
+
+    cur.close()
+    conn.close()
+    return record
 
 
 def get_single_coa_data(coa_id):

@@ -315,7 +315,7 @@ class MainWindow(QMainWindow):
         # Check for empty values
         for field, value in required_fields.items():
             if not value.strip():  # empty string
-                self.show_warning("Missing Input", f"Please fill in:    {field}")
+                self.show_warning("Missing Input", f"Please fill in:   {field}")
                 return  # stop submission
         # If all fields are filled, proceed to save
         msds_data = {
@@ -410,7 +410,7 @@ class MainWindow(QMainWindow):
         # Check if any required field is empty
         for field, value in required_fields.items():
             if not value:  # empty string
-                self.show_warning("Missing Input", f"Please fill in:   {field}")
+                self.show_warning("Missing Input", f"Please fill in:  {field}")
                 return  # stop processing
 
         # Check summary of analysis if no empty row
@@ -542,7 +542,12 @@ class MainWindow(QMainWindow):
 
     def msds_cell_clicked(self, row, column):
         if column == 2:  # edit column
-            print("MSDS Edit clicked")
+            # Get MSDS id stored in the first column's UserRole
+            msds_id = self.msds_records_table.item(row, 0).data(Qt.ItemDataRole.UserRole)
+            msds_data_entry.current_msds_id = msds_id  # Store the selected MSDS ID
+            msds_data_entry.load_msds_details(self, msds_id)
+            # Switch to the MSDS tab
+            self.msds_sub_tabs.setCurrentWidget(self.msds_data_entry_tab)
 
     def coa_cell_clicked(self, row, column):
         if column == 2:  # edit column
@@ -558,6 +563,7 @@ class MainWindow(QMainWindow):
     def toggle_msds_search_bar(self, index):
         if index == 0:  # Records tab
             self.msds_search_bar.show()
+            msds_data_entry.clear_msds_form(self)
         else:  # Other tabs
             self.msds_search_bar.hide()
 

@@ -2,6 +2,59 @@
 from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QLabel, QWidget, QTabWidget, \
     QTableWidget, QLineEdit, QHeaderView, QTableWidgetItem, QFormLayout
 
+from db import db_con
+
+current_msds_id = None  # Global variable to store the current MSDS ID
+
+
+def load_msds_details(self, msds_id):
+    field_result = db_con.get_single_msds_data(msds_id)
+
+    # inputs variable
+    self.trade_label_input.setText(str(field_result[1]))
+    self.manufactured_label_input.setPlainText(str(field_result[6]))
+    self.tel_label_input.setText(str(field_result[7]))
+    self.facsimile_label_input.setText(str(field_result[8]))
+    self.email_label_input.setText(str(field_result[9]))
+    self.composition_input.setPlainText(str(field_result[10]))
+    self.hazard_preliminaries_input.setText(str(field_result[11]))
+    self.hazard_entry_route_input.setText(str(field_result[12]))
+    self.hazard_symptoms_input.setText(str(field_result[13]))
+    self.hazard_restrictive_condition_input.setText(str(field_result[14]))
+    self.hazard_eyes_input.setText(str(field_result[15]))
+    self.hazard_general_note_input.setText(str(field_result[16]))
+    self.first_aid_inhalation_input.setText(str(field_result[17]))
+    self.first_aid_eyes.setText(str(field_result[18]))
+    self.first_aid_skin_input.setText(str(field_result[19]))
+    self.first_aid_ingestion_input.setText(str(field_result[20]))
+    self.fire_fighting_media_input.setPlainText(str(field_result[21]))
+    self.accidental_release_input.setPlainText(str(field_result[22]))
+    self.handling_input.setText(str(field_result[23]))
+    self.msds_storage_input.setText(str(field_result[24]))
+    self.exposure_control_input.setText(str(field_result[25]))
+    self.respiratory_protection_input.setText(str(field_result[26]))
+    self.hand_protection_input.setText(str(field_result[27]))
+    self.eye_protection_input.setText(str(field_result[28]))
+    self.skin_protection_input.setText(str(field_result[29]))
+    self.appearance_input.setText(str(field_result[30]))
+    self.odor_input.setText(str(field_result[31]))
+    self.heat_stability_input.setText(str(field_result[32]))
+    self.light_fastness_input.setText(str(field_result[33]))
+    self.decomposition_input.setText(str(field_result[34]))
+    self.flash_point_input.setText(str(field_result[35]))
+    self.auto_ignition_input.setText(str(field_result[36]))
+    self.explosion_property_input.setText(str(field_result[37]))
+    self.solubility_input.setText(str(field_result[38]))
+    self.stability_reactivity_input.setPlainText(str(field_result[39]))
+    self.toxicological_input.setPlainText(str(field_result[40]))
+    self.ecological_input.setPlainText(str(field_result[41]))
+    self.disposal_input.setPlainText(str(field_result[42]))
+    self.transport_input.setPlainText(str(field_result[43]))
+    self.regulatory_input.setPlainText(str(field_result[44]))
+    self.msds_shelf_life_input.setPlainText(str(field_result[45]))
+    self.other_input.setPlainText(str(field_result[46]))
+    self.btn_msds_submit.setText("Update")
+
 
 def create_form(self):
     header = QLabel("Technical Data and Material Safety")
@@ -170,3 +223,53 @@ def create_form(self):
 def form_btn(self):
     self.msds_btn_layout.addStretch()
     self.msds_btn_layout.addWidget(self.btn_msds_submit)
+
+
+def clear_msds_form(self):
+    """Clear all input fields and the summary table."""
+    global current_msds_id
+    current_msds_id = None  # Reset the global MSDS ID
+    # Clear QLineEdit/QTextEdit fields
+    self.trade_label_input.clear()
+    self.manufactured_label_input.clear()
+    self.tel_label_input.clear()
+    self.facsimile_label_input.clear()
+    self.email_label_input.clear()
+    self.composition_input.clear()
+    self.hazard_preliminaries_input.clear()
+    self.hazard_entry_route_input.clear()
+    self.hazard_symptoms_input.clear()
+    self.hazard_restrictive_condition_input.clear()
+    self.hazard_eyes_input.clear()
+    self.hazard_general_note_input.clear()
+    self.first_aid_inhalation_input.clear()
+    self.first_aid_eyes.clear()
+    self.first_aid_skin_input.clear()
+    self.first_aid_ingestion_input.clear()
+    self.fire_fighting_media_input.clear()
+    self.accidental_release_input.clear()
+    self.handling_input.clear()
+    self.msds_storage_input.clear()
+    self.exposure_control_input.clear()
+    self.respiratory_protection_input.clear()
+    self.hand_protection_input.clear()
+    self.eye_protection_input.clear()
+    self.skin_protection_input.clear()
+    self.appearance_input.clear()
+    self.odor_input.clear()
+    self.heat_stability_input.clear()
+    self.light_fastness_input.clear()
+    self.decomposition_input.clear()
+    self.flash_point_input.clear()
+    self.auto_ignition_input.clear()
+    self.explosion_property_input.clear()
+    self.solubility_input.clear()
+    self.stability_reactivity_input.clear()
+    self.toxicological_input.clear()
+    self.ecological_input.clear()
+    self.disposal_input.clear()
+    self.transport_input.clear()
+    self.regulatory_input.clear()
+    self.msds_shelf_life_input.clear()
+    self.other_input.clear()
+    self.btn_msds_submit.setText("Submit")
