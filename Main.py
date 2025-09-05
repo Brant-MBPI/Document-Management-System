@@ -15,7 +15,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         db_con.create_tables()
-
+        print(db_con.get_all_coa_data())
         self.main_layout = QVBoxLayout()
         self.main_tabs = QTabWidget()
 
@@ -33,16 +33,16 @@ class MainWindow(QMainWindow):
         tel_regex = QRegularExpression(r'^(\d{7,12}|\(\d{1,4}\)\s?\d{6,10})$')
         tel_validator = QRegularExpressionValidator(tel_regex)
         self.tel_label_input.setValidator(tel_validator)
-        self.setup_finished_typing(self.tel_label_input, self.check_tel_number, delay=800)
+        self.setup_finished_typing(self.tel_label_input, self.check_tel_number, delay=3000)
 
         self.facsimile_label_input = QLineEdit()
         self.facsimile_label_input.setValidator(tel_validator)
-        self.setup_finished_typing(self.facsimile_label_input, self.check_tel_number, delay=800)
+        self.setup_finished_typing(self.facsimile_label_input, self.check_tel_number, delay=3000)
         self.email_label_input = QLineEdit()
         email_regex = QRegularExpression(r'^[\w\.-]+@[\w\.-]+\.\w{2,4}$')
         email_validator = QRegularExpressionValidator(email_regex)
         self.email_label_input.setValidator(email_validator)
-        self.setup_finished_typing(self.email_label_input, self.check_email, delay=800)
+        self.setup_finished_typing(self.email_label_input, self.check_email, delay=3000)
 
             #Section2
         self.composition_input = QTextEdit()
@@ -77,10 +77,14 @@ class MainWindow(QMainWindow):
             #Section9
         self.appearance_input = QLineEdit()
         self.odor_input = QLineEdit()
+        heat_regex = QRegularExpression(r'^[1-5](-[1-5])?$')
+        heat_validator = QRegularExpressionValidator(heat_regex)
         self.heat_stability_input = QLineEdit()
-        self.heat_stability_input.setValidator((QIntValidator(1, 8)))
+        self.heat_stability_input.setValidator(heat_validator)
+        light_regex = QRegularExpression(r'^[1-8](-[1-8])?$')
+        light_validator = QRegularExpressionValidator(light_regex)
         self.light_fastness_input = QLineEdit()
-        self.light_fastness_input.setValidator((QIntValidator(1, 5)))
+        self.light_fastness_input.setValidator(light_validator)
         self.decomposition_input = QLineEdit()
         self.flash_point_input = QLineEdit()
         self.auto_ignition_input = QLineEdit()
@@ -314,7 +318,64 @@ class MainWindow(QMainWindow):
                 self.show_warning("Missing Input", f"Please fill in:    {field}")
                 return  # stop submission
         # If all fields are filled, proceed to save
-        QMessageBox.information(self, "Success", "MSDS submitted successfully!")
+        msds_data = {
+            "trade_name": self.trade_label_input.text(),
+            "manufacturer_info": self.manufactured_label_input.toPlainText(),
+            "contact_tel": self.tel_label_input.text(),
+            "contact_facsimile": self.facsimile_label_input.text(),
+            "contact_email": self.email_label_input.text(),
+
+            "composition_info": self.composition_input.toPlainText(),
+
+            "hazard_preliminaries": self.hazard_preliminaries_input.text(),
+            "hazard_entry_route": self.hazard_entry_route_input.text(),
+            "hazard_symptoms": self.hazard_symptoms_input.text(),
+            "hazard_restrictive_conditions": self.hazard_restrictive_condition_input.text(),
+            "hazard_eyes": self.hazard_eyes_input.text(),
+            "hazard_general_note": self.hazard_general_note_input.text(),
+
+            "first_aid_inhalation": self.first_aid_inhalation_input.text(),
+            "first_aid_eyes": self.first_aid_eyes.text(),
+            "first_aid_skin": self.first_aid_skin_input.text(),
+            "first_aid_ingestion": self.first_aid_ingestion_input.text(),
+
+            "fire_fighting_media": self.fire_fighting_media_input.toPlainText(),
+            "accidental_release_info": self.accidental_release_input.toPlainText(),
+            "handling_info": self.handling_input.text(),
+            "storage_info": self.msds_storage_input.text(),
+
+            "exposure_control_info": self.exposure_control_input.text(),
+            "respiratory_protection": self.respiratory_protection_input.text(),
+            "hand_protection": self.hand_protection_input.text(),
+            "eye_protection": self.eye_protection_input.text(),
+            "skin_protection": self.skin_protection_input.text(),
+
+            "appearance": self.appearance_input.text(),
+            "odor": self.odor_input.text(),
+            "heat_stability": self.heat_stability_input.text(),
+            "light_fastness": self.light_fastness_input.text(),
+            "decomposition_temp": self.decomposition_input.text(),
+            "flash_point": self.flash_point_input.text(),
+            "auto_ignition_temp": self.auto_ignition_input.text(),
+            "explosion_property": self.explosion_property_input.text(),
+            "solubility_water": self.solubility_input.text(),
+
+            "stability_reactivity": self.stability_reactivity_input.toPlainText(),
+            "toxicological_info": self.toxicological_input.toPlainText(),
+            "ecological_info": self.ecological_input.toPlainText(),
+            "disposal_info": self.disposal_input.toPlainText(),
+            "transport_info": self.transport_input.toPlainText(),
+            "regulatory_info": self.regulatory_input.toPlainText(),
+            "shelf_life_info": self.msds_shelf_life_input.toPlainText(),
+            "other_info": self.other_input.toPlainText()
+        }
+
+        # Save
+        try:
+            db_con.save_msds_sheet(msds_data)
+            QMessageBox.information(self, "Success", "MSDS saved successfully!")
+        except Exception as e:
+            self.show_warning("Database Error", str(e))
 
     def coa_btn_submit_clicked(self):
 
@@ -377,7 +438,7 @@ class MainWindow(QMainWindow):
         # Save
         try:
             db_con.save_certificate_of_analysis(coa_data, summary_of_analysis)
-            QMessageBox.information(self, "Success", f"Certificate saved successfully!")
+            QMessageBox.information(self, "Success", f"Certificate of Analysis saved successfully!")
         except Exception as e:
             self.show_warning("Database Error", str(e))
 

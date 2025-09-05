@@ -1,6 +1,7 @@
 
 import psycopg2
 
+
 def get_connection():
     return psycopg2.connect(
         host="localhost",
@@ -9,6 +10,8 @@ def get_connection():
         password="password",
         port="5433"
     )
+
+
 def create_tables():
     conn = get_connection()
     cur = conn.cursor()
@@ -122,18 +125,114 @@ def create_tables():
     conn.close()
 
 
-def save_certificate_of_analysis(data, summary_of_analysis):
+# Create
+def save_msds_sheet(data):
+    conn = get_connection()
+
     try:
-        conn = get_connection()
+        cur = conn.cursor()
+
+        cur.execute("""
+            INSERT INTO msds_sheets (
+                trade_name,
+                manufacturer_info,
+                contact_tel,
+                contact_facsimile,
+                contact_email,
+                composition_info,
+                hazard_preliminaries,
+                hazard_entry_route,
+                hazard_symptoms,
+                hazard_restrictive_conditions,
+                hazard_eyes,
+                hazard_general_note,
+                first_aid_inhalation,
+                first_aid_eyes,
+                first_aid_skin,
+                first_aid_ingestion,
+                fire_fighting_media,
+                accidental_release_info,
+                handling_info,
+                storage_info,
+                exposure_control_info,
+                respiratory_protection,
+                hand_protection,
+                eye_protection,
+                skin_protection,
+                appearance,
+                odor,
+                heat_stability,
+                light_fastness,
+                decomposition_temp,
+                flash_point,
+                auto_ignition_temp,
+                explosion_property,
+                solubility_water,
+                stability_reactivity,
+                toxicological_info,
+                ecological_info,
+                disposal_info,
+                transport_info,
+                regulatory_info,
+                shelf_life_info,
+                other_info
+            )
+            VALUES (
+                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                %s, %s
+            )
+            RETURNING id;
+        """, (
+            data["trade_name"], data["manufacturer_info"], data["contact_tel"],
+            data["contact_facsimile"], data["contact_email"], data["composition_info"],
+            data["hazard_preliminaries"], data["hazard_entry_route"], data["hazard_symptoms"],
+            data["hazard_restrictive_conditions"], data["hazard_eyes"], data["hazard_general_note"],
+            data["first_aid_inhalation"], data["first_aid_eyes"], data["first_aid_skin"],
+            data["first_aid_ingestion"], data["fire_fighting_media"], data["accidental_release_info"],
+            data["handling_info"], data["storage_info"], data["exposure_control_info"],
+            data["respiratory_protection"], data["hand_protection"], data["eye_protection"],
+            data["skin_protection"], data["appearance"], data["odor"],
+            data["heat_stability"], data["light_fastness"], data["decomposition_temp"],
+            data["flash_point"], data["auto_ignition_temp"], data["explosion_property"],
+            data["solubility_water"], data["stability_reactivity"], data["toxicological_info"],
+            data["ecological_info"], data["disposal_info"], data["transport_info"],
+            data["regulatory_info"], data["shelf_life_info"], data["other_info"]
+        ))
+
+        conn.commit()
+        cur.close()
+        conn.close()
+
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        raise e
+
+
+def save_certificate_of_analysis(data, summary_of_analysis):
+    conn = get_connection()
+    try:
         cur = conn.cursor()
 
         # Insert into certificates_of_analysis
         cur.execute("""
             INSERT INTO certificates_of_analysis (
-                customer_name, color_code, lot_number, po_number, 
-                delivery_receipt_number, quantity_delivered, delivery_date, 
-                production_date, certification_date, certified_by, 
-                storage_instructions, shelf_life_coa, suitability
+                customer_name, 
+                color_code, 
+                lot_number, 
+                po_number, 
+                delivery_receipt_number, 
+                quantity_delivered, 
+                delivery_date, 
+                production_date, 
+                certification_date, 
+                certified_by, 
+                storage_instructions, 
+                shelf_life_coa, 
+                suitability
             )
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             RETURNING id;
@@ -165,3 +264,20 @@ def save_certificate_of_analysis(data, summary_of_analysis):
         if conn:
             conn.rollback()
         raise e
+
+
+#     Read
+
+def get_all_coa_data():
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("""SELECT * 
+                    FROM certificates_of_analysis coa, coa_analysis_results coa_results 
+                    WHERE coa.id = coa_results.coa_id;
+                """)
+    records = cur.fetchall()
+
+    cur.close()
+    conn.close()
+    return records
