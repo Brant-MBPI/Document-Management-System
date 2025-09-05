@@ -31,16 +31,22 @@ class MainWindow(QMainWindow):
         tel_regex = QRegularExpression(r'^(\d{7,12}|\(\d{1,4}\)\s?\d{6,10})$')
         tel_validator = QRegularExpressionValidator(tel_regex)
         self.tel_label_input.setValidator(tel_validator)
-        self.setup_finished_typing(self.tel_label_input, self.check_tel_number, delay=3000)
+        self.tel_label_timer = self.setup_finished_typing(
+            self.tel_label_input, self.check_tel_number, delay=3000
+        )
 
         self.facsimile_label_input = QLineEdit()
         self.facsimile_label_input.setValidator(tel_validator)
-        self.setup_finished_typing(self.facsimile_label_input, self.check_tel_number, delay=3000)
+        self.facsimile_label_timer = self.setup_finished_typing(
+            self.facsimile_label_input, self.check_tel_number, delay=3000
+        )
         self.email_label_input = QLineEdit()
         email_regex = QRegularExpression(r'^[\w\.-]+@[\w\.-]+\.\w{2,4}$')
         email_validator = QRegularExpressionValidator(email_regex)
         self.email_label_input.setValidator(email_validator)
-        self.setup_finished_typing(self.email_label_input, self.check_email, delay=3000)
+        self.email_label_timer = self.setup_finished_typing(
+            self.email_label_input, self.check_email, delay=3000
+        )
 
             #Section2
         self.composition_input = QTextEdit()
