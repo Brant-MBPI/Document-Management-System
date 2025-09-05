@@ -14,7 +14,6 @@ from table import msds_data_entry, coa_data_entry, table
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        print(db_con.get_all_coa_data())
         self.main_layout = QVBoxLayout()
         self.main_tabs = QTabWidget()
 
@@ -539,10 +538,9 @@ class MainWindow(QMainWindow):
 
     def coa_cell_clicked(self, row, column):
         if column == 2:  # edit column
-            print("COA Edit clicked")
             # Get COA id stored in the first column's UserRole
             coa_id = self.coa_records_table.item(row, 0).data(Qt.ItemDataRole.UserRole)
-            print("Selected COA ID:", coa_id)
+
             coa_data_entry.current_coa_id = coa_id  # Store the selected COA ID
 
             coa_data_entry.load_coa_details(self, coa_id)
@@ -552,12 +550,14 @@ class MainWindow(QMainWindow):
     def toggle_msds_search_bar(self, index):
         if index == 0:  # Records tab
             self.msds_search_bar.show()
+            print(coa_data_entry.current_coa_id)
         else:  # Other tabs
             self.msds_search_bar.hide()
 
     def toggle_coa_search_bar(self, index):
         if index == 0:  # Records tab
             self.coa_search_bar.show()
+            coa_data_entry.clear_coa_form(self)
         else:
             self.coa_search_bar.hide()
 

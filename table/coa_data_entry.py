@@ -1,3 +1,6 @@
+from datetime import datetime
+
+from PyQt6.QtCore import QDate
 from PyQt6.QtGui import QIntValidator
 from PyQt6.QtWidgets import QLabel, QHBoxLayout, QSizePolicy, QHeaderView, QPushButton, QInputDialog, QTableWidgetItem, \
     QFormLayout, QTableWidget, QLineEdit, QAbstractItemView
@@ -18,9 +21,9 @@ def load_coa_details(self, coa_id):
     self.po_number_input.setText(str(field_result[4]))
     self.delivery_receipt_input.setText(str(field_result[5]))
     self.quantity_delivered_input.setText(str(field_result[6]))
-    self.delivery_date_input.setText(str(field_result[7]))
-    self.production_date_input.setText(str(field_result[8]))
-    self.creation_date_input.setText(str(field_result[9]))
+    self.delivery_date_input.setDate(QDate(field_result[7].year, field_result[7].month, field_result[7].day))
+    self.production_date_input.setDate(QDate(field_result[8].year, field_result[8].month, field_result[8].day))
+    self.creation_date_input.setDate(QDate(field_result[9].year, field_result[9].month, field_result[9].day))
     self.certified_by_input.setText(str(field_result[10]))
     self.coa_storage_input.setText(str(field_result[11]))
     self.coa_shelf_life_input.setText(str(field_result[12]))
@@ -28,19 +31,31 @@ def load_coa_details(self, coa_id):
 
     self.btn_coa_submit.setText("Update")
 
-    self.summary_analysis_table.setRowCount(0)
-    for row_idx, (analysis_id, coa_id, parameter_name, standard_value, delivery_value) in enumerate(
-            analysis_table_result):
-        self.summary_analysis_table.insertRow(row_idx)
+    # clear the table before loading
+    self.summary_analysis_table.clearContents()
+    self.summary_analysis_table.setRowCount(len(analysis_table_result))
+    self.summary_analysis_table.setColumnCount(2)  # standard + delivery
+    self.summary_analysis_table.setHorizontalHeaderLabels(["Standard Value", "Delivery Value"])
 
+    for row_idx, (parameter_name, standard_value, delivery_value) in enumerate(analysis_table_result):
         # set row header (parameter name)
-        self.summary_analysis_table.setVerticalHeaderItem(row_idx, QTableWidgetItem(parameter_name.upper()))
+        self.summary_analysis_table.setVerticalHeaderItem(
+            row_idx,
+            QTableWidgetItem(parameter_name)
+        )
 
         # standard value
-        self.summary_analysis_table.setItem(row_idx, 0, QTableWidgetItem(str(standard_value)))
+        self.summary_analysis_table.setItem(
+            row_idx, 0,
+            QTableWidgetItem(str(standard_value) if standard_value is not None else "")
+        )
 
         # delivery value
-        self.summary_analysis_table.setItem(row_idx, 1, QTableWidgetItem(str(delivery_value)))
+        self.summary_analysis_table.setItem(
+            row_idx, 1,
+            QTableWidgetItem(str(delivery_value) if delivery_value is not None else "")
+        )
+    adjust_table_height(self)
 
 def coa_data_entry_form(self):
     form_layout = QFormLayout()
@@ -117,6 +132,7 @@ def coa_data_entry_form(self):
 
 
 def adjust_table_height(self):
+    self.summary_analysis_table.verticalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Fixed)
     """Resize table to fit rows dynamically."""
     row_height = sum([self.summary_analysis_table.rowHeight(i)
                       for i in range(self.summary_analysis_table.rowCount())])
@@ -124,3 +140,35 @@ def adjust_table_height(self):
     self.summary_analysis_table.setFixedHeight(row_height + header_height + 2)
 
 
+def clear_coa_form(self):
+    """Clear all input fields and the summary table."""
+    # Clear QLineEdit/QTextEdit fields
+    global current_coa_id
+    current_coa_id = None  # Reset the global COA ID
+    self.coa_customer_input.clear()
+    self.color_code_input.clear()
+    self.lot_number_input.clear()
+    self.po_number_input.clear()
+    self.delivery_receipt_input.clear()
+    self.quantity_delivered_input.clear()
+    self.certified_by_input.clear()
+    self.coa_storage_input.clear()
+    self.coa_shelf_life_input.clear()
+    self.suitability_input.clear()
+
+    # Clear QDateEdit fields
+    self.delivery_date_input.setDate(QDate.currentDate())
+    self.production_date_input.setDate(QDate.currentDate())
+    self.creation_date_input.setDate(QDate.currentDate())
+
+    # Reset table
+    self.summary_analysis_table.clearContents()
+    self.summary_analysis_table.setColumnCount(2)
+    self.summary_analysis_table.setRowCount(3)
+    self.summary_analysis_table.setHorizontalHeaderLabels(["Standard", "Delivery"])
+    self.summary_analysis_table.setVerticalHeaderLabels([
+        "Color", "Light fastness (1-8)", "Heat Stability (1-5)"
+    ])
+
+    # Reset submit button
+    self.btn_coa_submit.setText("Submit")
