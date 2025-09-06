@@ -9,7 +9,7 @@ from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout,
     QTableWidget, QLineEdit, QHeaderView, QTableWidgetItem, QScrollArea, QTextEdit, QPushButton, QDateEdit, \
     QInputDialog, QMessageBox
 from table import msds_data_entry, coa_data_entry, table
-
+from print.print_msds import FileMSDS
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -288,7 +288,7 @@ class MainWindow(QMainWindow):
 
         msds_data_entry.create_form(self)
 
-
+        self.open_second_window()
     def msds_btn_submit_clicked(self):
         # Collect all required fields
         required_fields = {
@@ -767,6 +767,12 @@ class MainWindow(QMainWindow):
             msg.setText("❌ Please enter a valid telephone number!")
             msg.setIcon(QMessageBox.Icon.Warning)
             msg.exec()
+
+    def open_second_window(self):
+        self.second = FileMSDS()  # create the widget
+        self.second.generate_and_preview()  # generate + preview inside it
+        self.second.resize(900, 600)
+        self.second.show()
 
 def main():
     app = QApplication(sys.argv)
