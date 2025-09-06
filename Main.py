@@ -260,9 +260,16 @@ class MainWindow(QMainWindow):
                 background-color: #3e8e41;
             }
         """)
+
+        self.last_hovered = None
         self.msds_table_records_init()
         self.coa_table_records_init()
+        # connect hover and clicked functions on table
+        self.msds_records_table.setMouseTracking(True)
+        self.msds_records_table.cellEntered.connect(self.on_cell_hover)
         self.msds_records_table.cellClicked.connect(self.msds_cell_clicked)
+        self.coa_records_table.setMouseTracking(True)
+        self.coa_records_table.cellEntered.connect(self.on_cell_hover)
         self.coa_records_table.cellClicked.connect(self.coa_cell_clicked)
         table.load_msds_table(self)
         table.load_coa_table(self)
@@ -464,6 +471,7 @@ class MainWindow(QMainWindow):
         finally:
             coa_data_entry.clear_coa_form(self)
             table.load_coa_table(self)
+
     def get_coa_summary_analysis_table_data(self):
         data = {}
         row_count = self.summary_analysis_table.rowCount()
@@ -554,6 +562,40 @@ class MainWindow(QMainWindow):
         self.coa_records_table.horizontalHeader().setFixedHeight(40)
         self.coa_records_table.setShowGrid(False)
 
+    def on_cell_hover(self, row, column):
+        table = self.sender()
+
+        # Restore last hovered cell
+        if hasattr(self, "last_hovered") and self.last_hovered:
+            last_row, last_col, last_item = self.last_hovered
+            if last_item:
+                if last_col == 1:
+                    last_item.setIcon(QIcon("img/view_icon.png"))  # normal view icon
+                elif last_col == 2:
+                    last_item.setIcon(QIcon("img/edit_icon.png"))  # normal edit icon
+                elif last_col == 3:
+                    last_item.setIcon(QIcon("img/delete_icon.png"))  # normal delete icon
+                elif last_col == 4:
+                    last_item.setIcon(QIcon("img/print_icon.png"))  # normal print icon
+            self.last_hovered = None
+
+        # Apply highlight to the current cell
+        item = table.item(row, column)
+        if item:
+            if column == 1:
+                item.setIcon(QIcon("img/hover_view_icon.png"))
+                self.last_hovered = (row, column, item)
+            elif column == 2:
+                item.setIcon(QIcon("img/hover_edit_icon.png"))
+                self.last_hovered = (row, column, item)
+            elif column == 3:
+                item.setIcon(QIcon("img/hover_delete_icon.png"))
+                self.last_hovered = (row, column, item)
+            elif column == 4:
+                item.setIcon(QIcon("img/hover_print_icon.png"))
+                self.last_hovered = (row, column, item)
+
+
     def msds_cell_clicked(self, row, column):
         if column == 2:  # edit column
             # Get MSDS id stored in the first column's UserRole
@@ -562,6 +604,19 @@ class MainWindow(QMainWindow):
             msds_data_entry.load_msds_details(self, msds_id)
             # Switch to the MSDS tab
             self.msds_sub_tabs.setCurrentWidget(self.msds_data_entry_tab)
+        if column == 3:  # delete column
+            msds_id = self.msds_records_table.item(row, 0).data(Qt.ItemDataRole.UserRole)
+            confirm = self.show_message("Confirm Deletion",
+                                        "Are you sure you want to delete this MSDS record?",
+                                        icon_type="question", is_confirmation=True)
+            if confirm:
+                try:
+                    db_con.delete_msds_sheet(msds_id)
+                    self.show_message("Deleted", "MSDS record deleted successfully.", icon_type="info")
+                except Exception as e:
+                    self.show_message("Error", str(e), icon_type="critical")
+                finally:
+                    table.load_msds_table(self)
 
     def coa_cell_clicked(self, row, column):
         if column == 2:  # edit column
@@ -573,6 +628,19 @@ class MainWindow(QMainWindow):
             coa_data_entry.load_coa_details(self, coa_id)
             # Switch to the COA tab
             self.coa_sub_tabs.setCurrentWidget(self.coa_data_entry_tab)
+        if column == 3:  # delete column
+            coa_id = self.coa_records_table.item(row, 0).data(Qt.ItemDataRole.UserRole)
+            confirm = self.show_message("Confirm Deletion",
+                                        "Are you sure you want to delete this Certificate of Analysis record?",
+                                        icon_type="question", is_confirmation=True)
+            if confirm:
+                try:
+                    db_con.delete_certificate_of_analysis(coa_id)
+                    self.show_message("Deleted", "Certificate of Analysis record deleted successfully.", icon_type="info")
+                except Exception as e:
+                    self.show_message("Error", str(e), icon_type="critical")
+                finally:
+                    table.load_coa_table(self)
 
     def toggle_msds_search_bar(self, index):
         if index == 0:  # Records tab
@@ -588,7 +656,7 @@ class MainWindow(QMainWindow):
         else:
             self.coa_search_bar.hide()
 
-    def show_message(self, title, message, icon_type="info"):
+    def show_message(self, title, message, icon_type="info", is_confirmation=False):
         msg = QMessageBox(self)
 
         # Map icon_type string to QMessageBox.Icon
@@ -603,33 +671,58 @@ class MainWindow(QMainWindow):
         msg.setWindowTitle(title)
         msg.setText(message)
 
-        # === Style the QMessageBox ===
+        # If it's a confirmation dialog, set Yes/No buttons
+        if is_confirmation:
+            msg.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+            msg.setDefaultButton(QMessageBox.StandardButton.No)  # Optional: default to No
+
+        # Style the QMessageBox
         msg.setStyleSheet("""
-                QMessageBox {
-                    background-color: #fefefe;
-                    border-radius: 12px;
-                    font-size: 16px;
-                    font-family: Segoe UI, sans-serif;
-                }
-                QLabel {
-                    color: #333333;
-                    padding: 10px;
-                }
-                QPushButton {
-                    background-color: #4CAF50;
-                    color: white;
-                    border-radius: 8px;
-                    padding: 6px 18px;
-                    font-weight: bold;
-                }
-                QPushButton:hover {
-                    background-color: #45a049;
-                }
-                QPushButton:pressed {
-                    background-color: #3e8e41;
-                }
-            """)
-        msg.exec()
+            QMessageBox {
+                background-color: #fefefe;
+                border-radius: 12px;
+                font-size: 16px;
+                font-family: Segoe UI, sans-serif;
+            }
+            QLabel {
+                color: #333333;
+                padding: 10px;
+            }
+            QPushButton {
+                background-color: #4CAF50;
+                color: white;
+                border-radius: 8px;
+                padding: 6px 18px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #45a049;
+            }
+            QPushButton:pressed {
+                background-color: #3e8e41;
+            }
+        """)
+
+        if is_confirmation:
+            no_button = msg.button(QMessageBox.StandardButton.No)
+            if no_button:  # Ensure button exists
+                no_button.setStyleSheet("""
+                        QPushButton {
+                            background-color: #f44336; /* Red */
+                            color: white;
+                            border-radius: 8px;
+                            padding: 6px 18px;
+                            font-weight: bold;
+                        }
+                        QPushButton:hover { background-color: #e53935; }
+                        QPushButton:pressed { background-color: #d32f2f; }
+                    """)
+
+        result = msg.exec()
+
+        # Return True if Yes, False if No
+        if is_confirmation:
+            return result == QMessageBox.StandardButton.Yes
 
     def setup_finished_typing(self, line_edit, callback, delay=800):
         timer = QTimer()

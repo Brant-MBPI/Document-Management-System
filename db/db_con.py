@@ -403,7 +403,6 @@ def update_certificate_of_analysis(coa_id, data, summary_of_analysis):
 
 
 #     Read
-
 def get_all_msds_data():
     conn = get_connection()
     cur = conn.cursor()
@@ -472,3 +471,36 @@ def get_coa_analysis_results(coa_id):
     cur.close()
     conn.close()
     return results
+
+
+# Delete
+def delete_msds_sheet(msds_id):
+    conn = get_connection()
+
+    try:
+        cur = conn.cursor()
+        cur.execute("DELETE FROM msds_sheets WHERE id = %s;", (msds_id,))
+
+        conn.commit()
+        cur.close()
+        conn.close()
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        raise e
+
+
+def delete_certificate_of_analysis(coa_id):
+    conn = get_connection()
+
+    try:
+        cur = conn.cursor()
+        cur.execute("DELETE FROM certificates_of_analysis WHERE id = %s;", (coa_id,))
+
+        conn.commit()
+        cur.close()
+        conn.close()
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        raise e
