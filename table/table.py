@@ -84,3 +84,23 @@ def resize_columns(self, table: QTableWidget, event):
         table.setColumnWidth(0, remaining_width)
 
     super(QTableWidget, table).resizeEvent(event)
+
+
+def search_msds(self, query):
+    query = query.strip().lower()
+    for row in range(self.msds_records_table.rowCount()):
+        item = self.msds_records_table.item(row, 0)  # column 0 has display_text
+        if item:
+            text = item.text().lower()
+            match = query in text
+            self.msds_records_table.setRowHidden(row, not match)
+
+
+def search_coa(self, query):
+    query = query.strip().lower()
+    for row in range(self.coa_records_table.rowCount()):
+        item = self.coa_records_table.item(row, 0)  # column 0 has display_text
+        if item:
+            text = item.text().lower()
+            match = query in text
+            self.coa_records_table.setRowHidden(row, not match)

@@ -268,9 +268,20 @@ class MainWindow(QMainWindow):
         self.msds_records_table.setMouseTracking(True)
         self.msds_records_table.cellEntered.connect(self.on_cell_hover)
         self.msds_records_table.cellClicked.connect(self.msds_cell_clicked)
+        # connect search function
+        self.msds_label_timer = self.setup_finished_typing(
+            self.msds_search_bar,
+            lambda: table.search_msds(self, self.msds_search_bar.text()),
+            delay=600
+        )
         self.coa_records_table.setMouseTracking(True)
         self.coa_records_table.cellEntered.connect(self.on_cell_hover)
         self.coa_records_table.cellClicked.connect(self.coa_cell_clicked)
+        self.coa_label_timer = self.setup_finished_typing(
+            self.coa_search_bar,
+            lambda: table.search_coa(self, self.coa_search_bar.text()),
+            delay=600
+        )
         table.load_msds_table(self)
         table.load_coa_table(self)
         coa_data_entry.coa_data_entry_form(self)
