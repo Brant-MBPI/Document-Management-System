@@ -771,7 +771,7 @@ class MainWindow(QMainWindow):
     def open_second_window(self):
         self.second = FileMSDS()  # create the widget
         self.second.generate_and_preview()  # generate + preview inside it
-        self.second.resize(900, 600)
+        self.second.resize(900, 800)
         self.second.show()
 
 def main():
