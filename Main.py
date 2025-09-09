@@ -10,6 +10,7 @@ from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout,
     QInputDialog, QMessageBox
 from table import msds_data_entry, coa_data_entry, table
 from print.print_msds import FileMSDS
+from print.print_coa import FileCOA
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -631,6 +632,9 @@ class MainWindow(QMainWindow):
 
     def coa_cell_clicked(self, row, column):
         coa_id = self.coa_records_table.item(row, 0).data(Qt.ItemDataRole.UserRole)
+        if column == 1:  # view column
+            display_text = self.coa_records_table.item(row, 0).text()
+            self.open_coa_preview(coa_id, display_text)
         if column == 2:  # edit column
             coa_data_entry.current_coa_id = coa_id  # Store the selected COA ID
 
@@ -766,10 +770,16 @@ class MainWindow(QMainWindow):
             msg.exec()
 
     def open_msds_preview(self, msds_id, filename):
-        self.second = FileMSDS()  # create the widget
-        self.second.generate_and_preview(msds_id, filename)
-        self.second.resize(900, 800)
-        self.second.show()
+        self.msds_widget = FileMSDS()  # create the widget
+        self.msds_widget.generate_and_preview(msds_id, filename)
+        self.msds_widget.resize(900, 800)
+        self.msds_widget.show()
+
+    def open_coa_preview(self, coa_id, filename):
+        self.coa_widget = FileCOA()  # create the widget
+        self.coa_widget.generate_and_preview(coa_id, filename)
+        self.coa_widget.resize(900, 800)
+        self.coa_widget.show()
 
 
 def main():
