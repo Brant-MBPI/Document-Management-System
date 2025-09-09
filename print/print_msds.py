@@ -20,6 +20,7 @@ from db import db_con
 class FileMSDS(QWidget):
     def __init__(self):
         super().__init__()
+        self.setWindowTitle("Material Safety Data Sheet Preview")
         main_layout = QVBoxLayout(self)
 
         # PDF Document + Viewer

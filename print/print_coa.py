@@ -1,3 +1,6 @@
+
+import platform
+
 from PyQt6.QtPdf import QPdfDocument
 from PyQt6.QtPdfWidgets import QPdfView
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QPushButton, QHBoxLayout
@@ -6,13 +9,14 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, Tabl
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
-
+from datetime import datetime
 from db import db_con
 
 
 class FileCOA(QWidget):
     def __init__(self):
         super().__init__()
+        self.setWindowTitle("Certificate of Analysis Preview")
         main_layout = QVBoxLayout(self)
 
         # PDF Document + Viewer
@@ -48,7 +52,7 @@ class FileCOA(QWidget):
         main_layout.addLayout(viewer_container)
 
     def generate_pdf(self, coa_id, filename):
-        field_result = db_con.get_single_msds_data(coa_id)
+        field_result = db_con.get_single_coa_data(coa_id)
 
         # Create PDF
         doc = SimpleDocTemplate(
@@ -64,8 +68,9 @@ class FileCOA(QWidget):
         IndentedText = ParagraphStyle(
             'IndentedText',
             parent=styles['NormalText'],  # inherit font size, leading, etc.
-            leftIndent=40  # indent in points
+            leftIndent=20  # indent in points
         )
+        date_format = "%-d" if platform.system() != "Windows" else "%#d"
         content = []
         page_width = letter[0] - 50 - 50
         col_widths = [0.23 * page_width, 0.25 * page_width, 0.28 * page_width, 0.16 * page_width, 0.08 * page_width]
@@ -75,11 +80,11 @@ class FileCOA(QWidget):
         details = [
             ["Customer:", Paragraph(str(field_result[1]), styles['NormalText']), "", "", ""],
             ["Color Code:", Paragraph(str(field_result[2]), styles['NormalText']), "", "", ""],
-            ["Quantity Deliver:", Paragraph(str(field_result[3]), styles['NormalText']), "", "", ""],
-            ["Delivery Date:", Paragraph(str(field_result[5]), styles['NormalText']), "", "", ""],
-            ["Lot Number:", Paragraph(str(field_result[6]), styles['NormalText']), "", "", ""],
-            ["Production Date:", Paragraph(str(field_result[7]), styles['NormalText']), "", "", ""],
-            ["Delivery receipt Number:", Paragraph(str(field_result[8]), styles['NormalText']), "", "P.O Number:", Paragraph(str(field_result[4]))],
+            ["Quantity Deliver:", Paragraph(str(field_result[6]), styles['NormalText']), "", "", ""],
+            ["Delivery Date:", Paragraph(str(field_result[7].strftime(f"%B {date_format}, %Y")), styles['NormalText']), "", "", ""],
+            ["Lot Number:", Paragraph(str(field_result[3]), styles['NormalText']), "", "", ""],
+            ["Production Date:", Paragraph(str(field_result[8].strftime(f"%B {date_format}, %Y")), styles['NormalText']), "", "", ""],
+            ["Delivery receipt Number:", Paragraph(str(field_result[5]), styles['NormalText']), "", "P.O Number:", Paragraph(str(field_result[4]))],
         ]
         table = Table(details, colWidths=col_widths, spaceBefore=12, spaceAfter=12)
         table.setStyle(TableStyle([
@@ -90,14 +95,18 @@ class FileCOA(QWidget):
             ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
         ]))
         content.append(table)
-        content.append(Paragraph("<b>Summary of Analysis</b>", styles["NormalText"]))
         content.append(Spacer(1, 12))
-        summary_data = [
-            ["", "Standard", "Delivery"],
-            ["Color", "Mustard Yellow", "Mustard Yellow"],
-            ["Light fastness (1-8)", "7", "7"],
-            ["Heat Stability (1-5)", "4", "4"]
-        ]
+        content.append(Paragraph("<b>Summary of Analysis</b>", styles["SubHeading"]))
+        content.append(Spacer(1, 12))
+        # Summary of Analysis Table
+        db_con.get_coa_analysis_results(coa_id)
+        rows = db_con.get_coa_analysis_results(coa_id)
+        summary_data = [["", "Standard", "Delivery"]]
+        for rows in rows:
+            parameter = rows[0]
+            standard_value = rows[1]
+            delivery_value = rows[2]
+            summary_data.append([parameter, standard_value, delivery_value])
 
         summary_table = Table(summary_data, colWidths=[180, 150, 150], hAlign="CENTER")
         summary_table.setStyle(TableStyle([
@@ -110,23 +119,26 @@ class FileCOA(QWidget):
             ('TOPPADDING', (0, 0), (-1, -1), 6),
         ]))
         content.append(summary_table)
-        content.append(Spacer(1, 12))
+        content.append(Spacer(1, 20))
+
+        name_len = len(field_result[10])
+        lines = "_"
+        for i in range(name_len):
+            lines += "_"
 
 
         content.append(Paragraph("Certified by:", styles["NormalText"]))
-        content.append(Spacer(1, 20))
-        content.append(Paragraph("Geelyn Raeanne Rellin", styles["NormalText"]))
-        content.append(Paragraph("Date: July 31, 2025", styles["NormalText"]))
+        content.append(Spacer(1, 12))
+        content.append(Paragraph(lines, styles["NormalText"]))
+        content.append(Paragraph(str(field_result[10]), styles["NormalText"]))
+        content.append(Paragraph("Date: " + str(field_result[9].strftime(f"%B {date_format}, %Y")), styles["NormalText"]))
         content.append(Spacer(1, 20))
 
         # Storage section
-        content.append(Paragraph("<b>STORAGE</b>", styles["NormalText"]))
-        content.append(Paragraph("Should be stored cool and dry in unbroken packaging.", styles["NormalText"]))
-        content.append(Paragraph("Shelf Life: 12 months", styles["NormalText"]))
-        content.append(Paragraph(
-            "Shelf life is stated as a maximum from the date of production when the product is stored in unbroken packaging.",
-            styles["NormalText"]
-        ))
+        content.append(Paragraph("<b>Storage</b>", styles["NormalText"]))
+        content.append(Paragraph(str(field_result[11]), IndentedText))
+        content.append(Paragraph("<b>Shelf Life: </b>", styles["NormalText"]))
+        content.append(Paragraph(str(field_result[11]), IndentedText))
 
         doc.build(content)
         return filename
