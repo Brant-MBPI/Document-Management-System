@@ -2,7 +2,7 @@
 import sys
 
 from PyQt6.QtCore import Qt, QDate, QRegularExpression, QTimer, QEvent, QObject
-from PyQt6.QtGui import QIcon, QIntValidator, QRegularExpressionValidator, QFont
+from PyQt6.QtGui import QIcon, QIntValidator, QRegularExpressionValidator, QFont, QAction
 
 from db import db_con
 from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QTabWidget, \
@@ -183,8 +183,12 @@ class MainWindow(QMainWindow):
 
         self.msds_search_bar = QLineEdit()
         self.msds_search_bar.setPlaceholderText("Search...")
+        search_icon_msds = QAction(QIcon("img/search_icon.png"), "Search", self.msds_search_bar)
+        self.msds_search_bar.addAction(search_icon_msds, QLineEdit.ActionPosition.TrailingPosition)
         self.coa_search_bar = QLineEdit()
         self.coa_search_bar.setPlaceholderText("Search...")
+        search_icon_coa = QAction(QIcon("img/search_icon.png"), "Search", self.coa_search_bar)
+        self.coa_search_bar.addAction(search_icon_coa, QLineEdit.ActionPosition.TrailingPosition)
 
         self.msds_sub_tabs.setCornerWidget(self.msds_search_bar)
         self.coa_sub_tabs.setCornerWidget(self.coa_search_bar)
@@ -229,6 +233,19 @@ class MainWindow(QMainWindow):
         container = QWidget()
         container.setLayout(self.main_layout)
         self.setCentralWidget(container)
+        search_style = """
+            QLineEdit {
+                border: 1px solid #ccc;
+                border-radius: 15px;
+                padding: 6px 30px 6px 10px;  /* left=10, right=30 for the icon */
+                background-color: #f9f9f9;
+                font-size: 12pt;
+            }
+            QLineEdit:focus {
+                border: 1px solid #4a90e2;   /* blue highlight */
+                background-color: #ffffff;
+            }
+        """
         self.setStyleSheet(""" 
             QTableWidget[class="records_table"]::item {
                 border-right: none;
@@ -261,6 +278,74 @@ class MainWindow(QMainWindow):
                 background-color: #3e8e41;
             }
         """)
+        tab_menu_style = """
+            QTabBar::tab {
+                background: #f5f5f5;       
+                color: #333;                
+                padding: 8px 18px;          
+                font-size: 14px;
+                border: 1px solid #ccc;      
+                border-bottom: none;          
+                border-top-left-radius: 6px;
+                border-top-right-radius: 6px;
+                margin-right: 4px;        
+            }
+        
+            QTabBar::tab:selected {
+                background: #ffffff;   
+                color: #0078d7;          
+                font-weight: bold;
+                border: 1px solid #0078d7;
+                border-bottom: 2px solid white;
+            }
+        
+            QTabBar::tab:hover {
+                background: #e9f3ff;      
+                color: #005a9e;
+            }
+        
+            QTabWidget::pane {
+                border: 1px solid #ccc;    
+                top: -1px;                    
+                border-radius: 6px;
+                background: #ffffff;
+            }
+        """
+        main_tab_style = """
+            QTabBar::tab {
+                background: #fafafa;            
+                color: #444;                    
+                padding: 7px 18px;              
+                font-size: 14px;                
+                border: 1px solid #bbb;               
+                border-radius: 4px 4px 0 0;     
+                margin-right: 3px;              
+            }
+
+            QTabBar::tab:selected {
+                background: #ffffff;            
+                color: #0066cc;                 
+                font-weight: bold;         
+                border: 1px solid #0066cc;      
+            }
+
+            QTabBar::tab:hover {
+                background: #f0f7ff;            
+                color: #004a99;                 
+            }
+
+            QTabWidget::pane {
+                border: 1px solid #bbb;         
+                top: -1px;
+                border-radius: 4px;             
+                background: #ffffff;
+            }
+        """
+        self.main_tabs.tabBar().setStyleSheet(main_tab_style)
+        self.msds_sub_tabs.tabBar().setStyleSheet(tab_menu_style)
+        self.coa_sub_tabs.tabBar().setStyleSheet(tab_menu_style)
+        self.msds_search_bar.setStyleSheet(search_style)
+        self.coa_search_bar.setStyleSheet(search_style)
 
         self.last_hovered = None
         self.msds_table_records_init()

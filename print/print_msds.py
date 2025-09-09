@@ -15,7 +15,7 @@ from pdf2image import convert_from_path
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QScrollArea, QLabel, QPushButton, QHBoxLayout
 
 from db import db_con
-
+from print.pdf_header import add_first_page_header
 
 class FileMSDS(QWidget):
     def __init__(self):
@@ -63,25 +63,31 @@ class FileMSDS(QWidget):
         doc = SimpleDocTemplate(
             filename,
             pagesize=letter,
-            rightMargin=50, leftMargin=50, topMargin=50, bottomMargin=50
+            rightMargin=50, leftMargin=50, topMargin=90, bottomMargin=50
         )
         styles = getSampleStyleSheet()
         styles.add(
             ParagraphStyle(name="SectionHeader", fontSize=14, leading=14, spaceAfter=12, spaceBefore=6, bold=True))
         styles.add(ParagraphStyle(name="NormalText", fontSize=10, leading=14, spaceAfter=4))
-        styles.add(ParagraphStyle(name="TableText", fontSize=10, leading=12))
         IndentedText = ParagraphStyle(
             'IndentedText',
             parent=styles['NormalText'],  # inherit font size, leading, etc.
             leftIndent=40  # indent in points
         )
+        styles.add(ParagraphStyle(
+            name="TitleSans",
+            fontName="Helvetica-Bold",  # built-in font
+            fontSize=16,
+            leading=22,
+            spaceAfter=12
+        ))
         content = []
         page_width = letter[0] - 50 - 50
         table_width = 0.90 * page_width
         col_widths = [0.3 * table_width, 0.05 * table_width, 0.65 * table_width]
 
         # Title
-        content.append(Paragraph("TECHNICAL DATA AND MATERIAL SAFETY DATA SHEET", styles['Title']))
+        content.append(Paragraph("TECHNICAL DATA AND MATERIAL SAFETY DATA SHEET", styles['TitleSans']))
         content.append(Spacer(1, 12))
 
         # Section 1
@@ -252,7 +258,7 @@ class FileMSDS(QWidget):
         content.append(Paragraph(str(field_result[45]), IndentedText))
         content.append(PageBreak())
 
-        doc.build(content)
+        doc.build(content, onFirstPage=add_first_page_header)
         return filename
 
     def show_pdf_preview(self, filename: str):

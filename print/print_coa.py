@@ -5,12 +5,15 @@ from PyQt6.QtPdf import QPdfDocument
 from PyQt6.QtPdfWidgets import QPdfView
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QPushButton, QHBoxLayout
 from reportlab.lib.enums import TA_CENTER
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.lib.units import cm
+from reportlab.lib.utils import ImageReader
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 from datetime import datetime
 from db import db_con
+from print.pdf_header import add_first_page_header
 
 
 class FileCOA(QWidget):
@@ -58,23 +61,27 @@ class FileCOA(QWidget):
         doc = SimpleDocTemplate(
             filename,
             pagesize=letter,
-            rightMargin=50, leftMargin=50, topMargin=50, bottomMargin=50
+            rightMargin=50, leftMargin=50, topMargin=90, bottomMargin=50
         )
         styles = getSampleStyleSheet()
         styles.add(
             ParagraphStyle(name="SectionHeader", fontSize=14, leading=14, spaceAfter=12, spaceBefore=6, bold=True))
         styles.add(ParagraphStyle(name="SubHeading", fontSize=12, leading=14, spaceAfter=4, alignment=TA_CENTER))
         styles.add(ParagraphStyle(name="NormalText", fontSize=10, leading=14, spaceAfter=4))
-        IndentedText = ParagraphStyle(
-            'IndentedText',
-            parent=styles['NormalText'],  # inherit font size, leading, etc.
-            leftIndent=20  # indent in points
-        )
+        IndentedText = ParagraphStyle('IndentedText', parent=styles['NormalText'], leftIndent=20)
+        styles.add(ParagraphStyle(
+            name="TitleSans",
+            fontName="Helvetica-Bold",  # built-in font
+            fontSize=32,
+            leading=22,
+            alignment=1,  # center
+            spaceAfter=12
+        ))
         date_format = "%-d" if platform.system() != "Windows" else "%#d"
         content = []
         page_width = letter[0] - 50 - 50
         col_widths = [0.23 * page_width, 0.25 * page_width, 0.28 * page_width, 0.16 * page_width, 0.08 * page_width]
-        content.append(Paragraph("Certificate of Analysis", styles['Title']))
+        content.append(Paragraph("Certificate of Analysis", styles['TitleSans']))
         content.append(Spacer(1, 12))
 
         details = [
@@ -140,7 +147,7 @@ class FileCOA(QWidget):
         content.append(Paragraph("<b>Shelf Life: </b>", styles["NormalText"]))
         content.append(Paragraph(str(field_result[11]), IndentedText))
 
-        doc.build(content)
+        doc.build(content, onFirstPage=add_first_page_header)
         return filename
 
     def show_pdf_preview(self, filename: str):
@@ -153,3 +160,5 @@ class FileCOA(QWidget):
             filename += ".pdf"
         pdf_file = self.generate_pdf(coa_id, filename)
         self.show_pdf_preview(pdf_file)
+
+
