@@ -142,9 +142,9 @@ class FileMSDS(QWidget):
         content.append(Paragraph("4) First Aid Measures", styles['SectionHeader']))
         section4_content = [
             [Paragraph('• Inhalation', styles['NormalText']), ':', Paragraph(str(field_result[16]), styles['NormalText'])],
-            [Paragraph('• Eyes', styles['NormalText']), ':', Paragraph('N/A', styles['NormalText'])],
-            [Paragraph('• Skin', styles['NormalText']), ':', Paragraph('N/A',styles['NormalText'])],
-            [Paragraph('• Ingestion', styles['NormalText']), ':', Paragraph('N/A', styles['NormalText'])],
+            [Paragraph('• Eyes', styles['NormalText']), ':', Paragraph(str(field_result[17]), styles['NormalText'])],
+            [Paragraph('• Skin', styles['NormalText']), ':', Paragraph(str(field_result[18]),styles['NormalText'])],
+            [Paragraph('• Ingestion', styles['NormalText']), ':', Paragraph(str(field_result[19]), styles['NormalText'])],
            ]
 
         # Create the table
@@ -155,31 +155,34 @@ class FileMSDS(QWidget):
 
         # Section 5
         content.append(Paragraph("5) Fire Fighting Measures", styles['SectionHeader']))
-        content.append(Paragraph("• Water spray, dry powder, foam, carbon dioxide", IndentedText))
+        content.append(Paragraph(str(field_result[20]), IndentedText))
         content.append(Spacer(1, 12))
 
         # Section 6
         content.append(Paragraph("6) Accidental Release Measures", styles['SectionHeader']))
-        content.append(Paragraph("Use any mechanical means to remove pellet. Prevent entry to natural waterways.",
+        content.append(Paragraph(str(field_result[21]),
                                  IndentedText))
         content.append(Spacer(1, 12))
 
         # Section 7
-        content.append(Paragraph("7) Handling/ Storage", styles['SectionHeader']))
-        content.append(
-            Paragraph("Store in a dry place and shaded area. Close bag after use to prevent moisture intake & soiling.",
-                      IndentedText))
+        content.append(Paragraph("7) Handling and Storage", styles['SectionHeader']))
+        section7_content = [
+            [Paragraph('• Handling', styles['NormalText']), ':', Paragraph(str(field_result[22]), styles['NormalText'])],
+            [Paragraph('• Storage', styles['NormalText']), ':', Paragraph(str(field_result[23]), styles['NormalText'])]
+        ]
+        table = Table(section7_content, colWidths=col_widths, hAlign='RIGHT', spaceBefore=12)
+        table_style(table)
+        content.append(table)
         content.append(Spacer(1, 12))
 
         # Section 8
         content.append(Paragraph("8) Exposure Controls/ Personal Protection", styles['SectionHeader']))
         section8_content = [
-            [Paragraph('Exposure Control', styles['NormalText']), ':',
-             Paragraph('Generally, handle in accordance with good industrial hygiene and safety practices.',styles['NormalText'])],
-            [Paragraph('Respiratory Protection', styles['NormalText']), ':', Paragraph('None', styles['NormalText'])],
-            [Paragraph('Hand Protection', styles['NormalText']), ':', Paragraph('None', styles['NormalText'])],
-            [Paragraph('Eye Protection', styles['NormalText']), ':', Paragraph('None', styles['NormalText'])],
-            [Paragraph('Skin Protection', styles['NormalText']), ':', Paragraph('None', styles['NormalText'])]
+            [Paragraph('Exposure Control', styles['NormalText']), ':', Paragraph(str(field_result[24]),styles['NormalText'])],
+            [Paragraph('Respiratory Protection', styles['NormalText']), ':', Paragraph(str(field_result[25]), styles['NormalText'])],
+            [Paragraph('Hand Protection', styles['NormalText']), ':', Paragraph(str(field_result[26]), styles['NormalText'])],
+            [Paragraph('Eye Protection', styles['NormalText']), ':', Paragraph(str(field_result[27]), styles['NormalText'])],
+            [Paragraph('Skin Protection', styles['NormalText']), ':', Paragraph(str(field_result[28]), styles['NormalText'])]
         ]
         table = Table(section8_content, colWidths=col_widths, hAlign='RIGHT', spaceBefore=12)
         table_style(table)
@@ -189,20 +192,15 @@ class FileMSDS(QWidget):
         # Section 9
         content.append(Paragraph("9) Physical & Chemical Properties", styles['SectionHeader']))
         section9_content = [
-            [Paragraph('Appearance', styles['NormalText']), ':', Paragraph('White pellet form', styles['NormalText'])],
-            [Paragraph('Odor', styles['NormalText']), ':', Paragraph('Odorless', styles['NormalText'])],
-            [Paragraph('Packaging', styles['NormalText']), ':', Paragraph('25 kgs.', styles['NormalText'])],
-            [Paragraph('Carrier Material', styles['NormalText']), ':',
-             Paragraph('Polyolefin resin', styles['NormalText'])],
-            [Paragraph('Resin Suitability', styles['NormalText']), ':', Paragraph('Polyolefin', styles['NormalText'])],
-            [Paragraph('Light fastness (1-8)', styles['NormalText']), ':', Paragraph('7-8', styles['NormalText'])],
-            [Paragraph('Heat Stability (1-5)', styles['NormalText']), ':', Paragraph('4-5', styles['NormalText'])],
-            [Paragraph('Non-Toxicity', styles['NormalText']), ':',
-             Paragraph('Non-toxic, colorant contains no heavy metal', styles['NormalText'])],
-            [Paragraph('Flash Point', styles['NormalText']), ':', Paragraph('N/A', styles['NormalText'])],
-            [Paragraph('Auto Ignition', styles['NormalText']), ':', Paragraph('N/A', styles['NormalText'])],
-            [Paragraph('Explosion Property', styles['NormalText']), ':', Paragraph('N/A', styles['NormalText'])],
-            [Paragraph('Solubility (Water)', styles['NormalText']), ':', Paragraph('Insoluble', styles['NormalText'])]
+            [Paragraph('Appearance', styles['NormalText']), ':', Paragraph(str(field_result[29]), styles['NormalText'])],
+            [Paragraph('Odor', styles['NormalText']), ':', Paragraph(str(field_result[30]), styles['NormalText'])],
+            [Paragraph('Heat Stability (1-5)', styles['NormalText']), ':', Paragraph(str(field_result[31]), styles['NormalText'])],
+            [Paragraph('Light fastness (1-8)', styles['NormalText']), ':', Paragraph(str(field_result[32]), styles['NormalText'])],
+            [Paragraph('Decomposition (°C)', styles['NormalText']), ':', Paragraph(str(field_result[33]), styles['NormalText'])],
+            [Paragraph('Flash Point (°C)', styles['NormalText']), ':', Paragraph(str(field_result[34]), styles['NormalText'])],
+            [Paragraph('Auto Ignition (°C)', styles['NormalText']), ':', Paragraph(str(field_result[35]), styles['NormalText'])],
+            [Paragraph('Explosion Property', styles['NormalText']), ':', Paragraph(str(field_result[36]), styles['NormalText'])],
+            [Paragraph('Solubility (Water)', styles['NormalText']), ':', Paragraph(str(field_result[37]), styles['NormalText'])]
         ]
 
         # Create the table
@@ -213,56 +211,44 @@ class FileMSDS(QWidget):
 
         # Section 10
         content.append(Paragraph("10) Stability & Reactivity", styles['SectionHeader']))
-        section10_content = [
-            [Paragraph('Product Stability', styles['NormalText']), ':',
-             Paragraph('Chemically stable and non-reactive', styles['NormalText'])],
-            [Paragraph('Conditions to avoid', styles['NormalText']), ':', Paragraph('None', styles['NormalText'])],
-            [Paragraph('Materials to avoid', styles['NormalText']), ':', Paragraph('None', styles['NormalText'])],
-            [Paragraph('Hazardous decomposition', styles['NormalText']), ':', Paragraph('None', styles['NormalText'])]
-        ]
-        table = Table(section10_content, colWidths=col_widths, hAlign='RIGHT', spaceBefore=12)
-        content.append(table)
+        content.append(Paragraph(str(field_result[38]), IndentedText))
         content.append(Spacer(1, 12))
 
         # Section 11
         content.append(Paragraph("11) Toxicological Information", styles['SectionHeader']))
-        content.append(Paragraph("This product is non-toxic and physiologically harmless.", IndentedText))
+        content.append(Paragraph(str(field_result[39]), IndentedText))
         content.append(Spacer(1, 12))
 
         # Section 12
         content.append(Paragraph("12) Ecological Information", styles['SectionHeader']))
-        content.append(Paragraph("No known harmful effects to human lives or to the environment.", IndentedText))
+        content.append(Paragraph(str(field_result[40]), IndentedText))
         content.append(Spacer(1, 12))
         # Section 13
         content.append(Paragraph("13) Disposal", styles['SectionHeader']))
-        content.append(Paragraph("If recycling is not practicable, dispose in compliance with local regulation.",
-                                 IndentedText))
+        content.append(Paragraph(str(field_result[41]), IndentedText))
         content.append(Spacer(1, 12))
 
         # Section 14
         content.append(Paragraph("14) Transport Information", styles['SectionHeader']))
         content.append(
-            Paragraph("This material is not classified as a dangerous good by the International Transport regulation.",
-                      IndentedText))
+            Paragraph(str(field_result[42]), IndentedText))
         content.append(Spacer(1, 12))
 
         # Section 15
         content.append(Paragraph("15) Regulatory Information", styles['SectionHeader']))
         content.append(Paragraph(
-            "This product is not classified in the list of controlled substances implemented by the government.",
-            IndentedText))
+            str(field_result[43]), IndentedText))
         content.append(Spacer(1, 12))
 
         # Section 16
         content.append(Paragraph("16) Shelf-Life", styles['SectionHeader']))
         content.append(
-            Paragraph("Twelve months from date of production when the product is stored in unbroken packaging.",
-                      IndentedText))
+            Paragraph(str(field_result[44]), IndentedText))
         content.append(Spacer(1, 12))
 
         # Section 17
         content.append(Paragraph("17) Other Information", styles['SectionHeader']))
-        content.append(Paragraph("None", IndentedText))
+        content.append(Paragraph(str(field_result[45]), IndentedText))
         content.append(PageBreak())
 
         doc.build(content)
