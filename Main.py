@@ -7,7 +7,7 @@ from PyQt6.QtGui import QIcon, QIntValidator, QRegularExpressionValidator, QFont
 from db import db_con
 from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QTabWidget, \
     QTableWidget, QLineEdit, QHeaderView, QTableWidgetItem, QScrollArea, QTextEdit, QPushButton, QDateEdit, \
-    QInputDialog, QMessageBox
+    QInputDialog, QMessageBox, QAbstractItemView
 from table import msds_data_entry, coa_data_entry, table
 from print.print_msds import FileMSDS
 from print.print_coa import FileCOA
@@ -180,6 +180,8 @@ class MainWindow(QMainWindow):
 
         self.main_tabs.addTab(self.msds_tab, "MSDS")
         self.main_tabs.addTab(self.coa_tab, "CoA")
+        self.msds_tab.setObjectName("msds_tab")
+        self.coa_tab.setObjectName("coa_tab")
 
         self.msds_search_bar = QLineEdit()
         self.msds_search_bar.setPlaceholderText("Search...")
@@ -258,9 +260,19 @@ class MainWindow(QMainWindow):
                 color: black;
             }
             QTableWidget[class="records_table"] QHeaderView::section {
+                font-size: 16px;
                 border-right: none;
                 border-bottom: 1px solid lightgray;
                 background-color: #f0f0f0;
+            }
+            QTableCornerButton::section {
+                background-color: #f0f0f0;
+                border: 1px solid lightgray;
+            }
+            QTableWidget[class="records_table"]::item:selected {
+                background-color: transparent;  
+                border: 2px solid #0078d7;     
+                color: black;                 
             }
             QPushButton[class="msds_submit_btn"] {
                 background-color: #4CAF50;
@@ -276,6 +288,11 @@ class MainWindow(QMainWindow):
             }
             QPushButton[class="msds_submit_btn"]:pressed {
                 background-color: #3e8e41;
+            }
+            
+            QWidget#msds_tab, QWidget#coa_tab, QTabWidget {
+                background-color: #f2f2f2; 
+                border: none;
             }
         """)
         tab_menu_style = """
@@ -351,6 +368,7 @@ class MainWindow(QMainWindow):
         self.msds_table_records_init()
         self.coa_table_records_init()
         # connect hover and clicked functions on table
+        self.msds_records_table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
         self.msds_records_table.setMouseTracking(True)
         self.msds_records_table.cellEntered.connect(self.on_cell_hover)
         self.msds_records_table.cellClicked.connect(self.msds_cell_clicked)
@@ -360,6 +378,7 @@ class MainWindow(QMainWindow):
             lambda: table.search_msds(self, self.msds_search_bar.text()),
             delay=600
         )
+        self.coa_records_table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
         self.coa_records_table.setMouseTracking(True)
         self.coa_records_table.cellEntered.connect(self.on_cell_hover)
         self.coa_records_table.cellClicked.connect(self.coa_cell_clicked)
