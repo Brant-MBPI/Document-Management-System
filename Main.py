@@ -548,8 +548,8 @@ class MainWindow(QMainWindow):
         return item
 
     def msds_table_records_init(self):
-        self.msds_records_table.setColumnCount(5)
-        self.msds_records_table.setHorizontalHeaderLabels(["Name", "", "", "", ""])
+        self.msds_records_table.setColumnCount(4)
+        self.msds_records_table.setHorizontalHeaderLabels(["Name", "", "", ""])
         self.msds_records_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Fixed)
 
         # Override resize event
@@ -561,8 +561,8 @@ class MainWindow(QMainWindow):
         self.msds_records_table.setShowGrid(False)
 
     def coa_table_records_init(self):
-        self.coa_records_table.setColumnCount(5)
-        self.coa_records_table.setHorizontalHeaderLabels(["Name", "", "", "", ""])
+        self.coa_records_table.setColumnCount(4)
+        self.coa_records_table.setHorizontalHeaderLabels(["Name", "", "", ""])
         self.coa_records_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Fixed)
 
         # Override resize event

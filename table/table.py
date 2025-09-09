@@ -23,8 +23,6 @@ def load_msds_table(self):
                                         self.create_readonly_item(icon_path="img/edit_icon.png", selectable=False))
         self.msds_records_table.setItem(row_idx, 3,
                                         self.create_readonly_item(icon_path="img/delete_icon.png", selectable=False))
-        self.msds_records_table.setItem(row_idx, 4,
-                                        self.create_readonly_item(icon_path="img/print_icon.png", selectable=False))
 
         # store msds_id as hidden data inside column 0
         self.msds_records_table.item(row_idx, 0).setData(Qt.ItemDataRole.UserRole, msds_id)
@@ -59,8 +57,6 @@ def load_coa_table(self):
                                        self.create_readonly_item(icon_path="img/edit_icon.png", selectable=False))
         self.coa_records_table.setItem(row_idx, 3,
                                        self.create_readonly_item(icon_path="img/delete_icon.png", selectable=False))
-        self.coa_records_table.setItem(row_idx, 4,
-                                       self.create_readonly_item(icon_path="img/print_icon.png", selectable=False))
 
         # store coa_id as hidden data inside column 0
         self.coa_records_table.item(row_idx, 0).setData(Qt.ItemDataRole.UserRole, coa_id)
