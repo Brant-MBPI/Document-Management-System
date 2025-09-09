@@ -14,6 +14,8 @@ import os
 from pdf2image import convert_from_path
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QScrollArea, QLabel, QPushButton, QHBoxLayout
 
+from db import db_con
+
 
 class FileMSDS(QWidget):
     def __init__(self):
@@ -29,15 +31,22 @@ class FileMSDS(QWidget):
         self.pdf_viewer.setPageMode(QPdfView.PageMode.MultiPage)
         self.pdf_viewer.setZoomMode(QPdfView.ZoomMode.FitToWidth)
 
-        # Set the viewer widget to match letter size (8.5x11 inches at 96 DPI)
         dpi = 96
         letter_width = int(8.5 * dpi)  # 816 px
         self.pdf_viewer.setFixedWidth(letter_width)
 
-        # Add Generate button at the top
-        generate_btn = QPushButton("Download")
-        generate_btn.clicked.connect(self.generate_and_preview)
-        main_layout.addWidget(generate_btn, alignment=Qt.AlignmentFlag.AlignCenter)
+        btn_download = QPushButton("Download")
+        btn_print = QPushButton("Print")
+
+        # Put them in a horizontal layout and center
+        button_layout = QHBoxLayout()
+        button_layout.addStretch(1)
+        button_layout.addWidget(btn_download)
+        button_layout.addSpacing(20)  # space between buttons
+        button_layout.addWidget(btn_print)
+        button_layout.addStretch(1)
+
+        main_layout.addLayout(button_layout)
         # Center the viewer using a horizontal layout
         viewer_container = QHBoxLayout()
         viewer_container.addStretch(1)  # left stretch
@@ -46,7 +55,9 @@ class FileMSDS(QWidget):
         main_layout.addLayout(viewer_container)
 
 
-    def generate_pdf(self, filename):
+    def generate_pdf(self, msds_id, filename):
+        field_result = db_con.get_single_msds_data(msds_id)
+
         # Create PDF
         doc = SimpleDocTemplate(
             filename,
@@ -64,8 +75,8 @@ class FileMSDS(QWidget):
             leftIndent=40  # indent in points
         )
         content = []
-        page_width = letter[0] - 50 - 50  # letter[0] is width, subtract left/right margins
-        table_width = 0.90 * page_width  # make table 85% of page width
+        page_width = letter[0] - 50 - 50
+        table_width = 0.90 * page_width
         col_widths = [0.3 * table_width, 0.05 * table_width, 0.65 * table_width]
 
         # Title
@@ -75,19 +86,19 @@ class FileMSDS(QWidget):
         # Section 1
         content.append(Paragraph("1) Product Identification", styles['SectionHeader']))
         section1_content = [
-            [Paragraph('Trade Name', styles['NormalText']), ':', Paragraph('Masterbatch White WA17857E', styles['NormalText'])],
-            [Paragraph('Manufactured by', styles['NormalText']), ':', Paragraph('Masterbatch Philippines, Inc. 24 Diamond Road, Caloocan Industrial Subdivision, Bo. Kaybiga, Caloocan City, Philippines', styles['NormalText'])],
-            [Paragraph('Tel No', styles['NormalText']), ':', Paragraph('(632) 87088681', styles['NormalText'])],
-            [Paragraph('Facsimile', styles['NormalText']), ':', Paragraph('(632) 83747085', styles['NormalText'])],
-            [Paragraph('Email Address', styles['NormalText']), ':', Paragraph('sales@polycolor.biz', styles['NormalText'])]
+            [Paragraph('Trade Name', styles['NormalText']), ':', Paragraph(str(field_result[1]), styles['NormalText'])],
+            [Paragraph('Manufactured by', styles['NormalText']), ':', Paragraph(str(field_result[5]), styles['NormalText'])],
+            [Paragraph('Tel No', styles['NormalText']), ':', Paragraph(str(field_result[6]), styles['NormalText'])],
+            [Paragraph('Facsimile', styles['NormalText']), ':', Paragraph(str(field_result[7]), styles['NormalText'])],
+            [Paragraph('Email Address', styles['NormalText']), ':', Paragraph(str(field_result[8]), styles['NormalText'])]
         ]
 
         # Create the table
         table = Table(section1_content, colWidths=col_widths, hAlign='RIGHT', spaceBefore=12)  # Adjust column widths as needed
 
         # Apply styles
-        def table_style(table ):
-            return table.setStyle(TableStyle([
+        def table_style(table_design):
+            return table_design.setStyle(TableStyle([
                 ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
                 ('FONTSIZE', (0, 0), (-1, -1), 12),
                 ('VALIGN', (0, 0), (-1, -1), 'TOP'),
@@ -106,19 +117,31 @@ class FileMSDS(QWidget):
 
         # Section 2
         content.append(Paragraph("2) Composition / Information on Ingredients", styles['SectionHeader']))
-        content.append(Paragraph("The preparation consists of organic pigments, polyolefin resin, and other additives.",
-                                 IndentedText))
+        content.append(Paragraph(str(field_result[9]), IndentedText))
         content.append(Spacer(1, 12))
 
         # Section 3
         content.append(Paragraph("3) Hazard Information", styles['SectionHeader']))
-        content.append(Paragraph("No known harmful effects to human lives or to the environment.", IndentedText))
+        section3_content = [
+            [Paragraph("• Preliminaries", styles['NormalText']), ":", Paragraph(str(field_result[10]), styles['NormalText'])],
+            [Paragraph("• Preliminary route of entry", styles['NormalText']), ":", Paragraph(str(field_result[11]), styles['NormalText'])],
+            [Paragraph("• Symptoms of exposure", styles['NormalText']), ":", Paragraph(str(field_result[12]), styles['NormalText'])],
+            [Paragraph("• Restrictive conditions", styles['NormalText']), ":", Paragraph(str(field_result[13]), styles['NormalText'])],
+            [Paragraph("• Eyes", styles['NormalText']), ":", Paragraph(str(field_result[14]), styles['NormalText'])]
+        ]
+
+        table = Table(section3_content, colWidths=col_widths, hAlign='RIGHT', spaceBefore=12)
+        table_style(table)
+        content.append(Paragraph("Adverse Human Health Effects", IndentedText))
+        content.append(table)
+        content.append(Spacer(1, 12))
+        content.append(Paragraph(str(field_result[15]), IndentedText))
         content.append(Spacer(1, 12))
 
         # Section 4
         content.append(Paragraph("4) First Aid Measures", styles['SectionHeader']))
         section4_content = [
-            [Paragraph('• Inhalation', styles['NormalText']), ':', Paragraph('N/A', styles['NormalText'])],
+            [Paragraph('• Inhalation', styles['NormalText']), ':', Paragraph(str(field_result[16]), styles['NormalText'])],
             [Paragraph('• Eyes', styles['NormalText']), ':', Paragraph('N/A', styles['NormalText'])],
             [Paragraph('• Skin', styles['NormalText']), ':', Paragraph('N/A',styles['NormalText'])],
             [Paragraph('• Ingestion', styles['NormalText']), ':', Paragraph('N/A', styles['NormalText'])],
@@ -249,6 +272,9 @@ class FileMSDS(QWidget):
         self.pdf_doc.load(filename)
         self.pdf_viewer.setZoomMode(QPdfView.ZoomMode.FitToWidth)
 
-    def generate_and_preview(self):
-        pdf_file = self.generate_pdf("test.pdf")
+    def generate_and_preview(self, msds_id, filename):
+        filename = filename.upper()
+        if not filename.endswith(".pdf"):
+            filename += ".pdf"
+        pdf_file = self.generate_pdf(msds_id, filename)
         self.show_pdf_preview(pdf_file)

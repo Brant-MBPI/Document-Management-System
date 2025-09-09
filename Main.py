@@ -288,7 +288,6 @@ class MainWindow(QMainWindow):
 
         msds_data_entry.create_form(self)
 
-        self.open_second_window()
     def msds_btn_submit_clicked(self):
         # Collect all required fields
         required_fields = {
@@ -608,15 +607,16 @@ class MainWindow(QMainWindow):
 
 
     def msds_cell_clicked(self, row, column):
+        msds_id = self.msds_records_table.item(row, 0).data(Qt.ItemDataRole.UserRole)
+        if column == 1:  # view column
+            display_text = self.msds_records_table.item(row, 0).text()
+            self.open_msds_preview(msds_id, display_text)
         if column == 2:  # edit column
-            # Get MSDS id stored in the first column's UserRole
-            msds_id = self.msds_records_table.item(row, 0).data(Qt.ItemDataRole.UserRole)
             msds_data_entry.current_msds_id = msds_id  # Store the selected MSDS ID
             msds_data_entry.load_msds_details(self, msds_id)
             # Switch to the MSDS tab
             self.msds_sub_tabs.setCurrentWidget(self.msds_data_entry_tab)
         if column == 3:  # delete column
-            msds_id = self.msds_records_table.item(row, 0).data(Qt.ItemDataRole.UserRole)
             confirm = self.show_message("Confirm Deletion",
                                         "Are you sure you want to delete this MSDS record?",
                                         icon_type="question", is_confirmation=True)
@@ -630,17 +630,14 @@ class MainWindow(QMainWindow):
                     table.load_msds_table(self)
 
     def coa_cell_clicked(self, row, column):
+        coa_id = self.coa_records_table.item(row, 0).data(Qt.ItemDataRole.UserRole)
         if column == 2:  # edit column
-            # Get COA id stored in the first column's UserRole
-            coa_id = self.coa_records_table.item(row, 0).data(Qt.ItemDataRole.UserRole)
-
             coa_data_entry.current_coa_id = coa_id  # Store the selected COA ID
 
             coa_data_entry.load_coa_details(self, coa_id)
             # Switch to the COA tab
             self.coa_sub_tabs.setCurrentWidget(self.coa_data_entry_tab)
         if column == 3:  # delete column
-            coa_id = self.coa_records_table.item(row, 0).data(Qt.ItemDataRole.UserRole)
             confirm = self.show_message("Confirm Deletion",
                                         "Are you sure you want to delete this Certificate of Analysis record?",
                                         icon_type="question", is_confirmation=True)
@@ -768,11 +765,12 @@ class MainWindow(QMainWindow):
             msg.setIcon(QMessageBox.Icon.Warning)
             msg.exec()
 
-    def open_second_window(self):
+    def open_msds_preview(self, msds_id, filename):
         self.second = FileMSDS()  # create the widget
-        self.second.generate_and_preview()  # generate + preview inside it
+        self.second.generate_and_preview(msds_id, filename)
         self.second.resize(900, 800)
         self.second.show()
+
 
 def main():
     app = QApplication(sys.argv)
