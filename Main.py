@@ -201,7 +201,6 @@ class MainWindow(QMainWindow):
 
         self.msds_records_table = QTableWidget()
         self.msds_records_table.setProperty("class", "records_table")
-        self.msds_records_table.setAlternatingRowColors(True)
 
         self.msds_records_layout = QVBoxLayout(self.msds_records_tab)  # inside MSDS sub-tab Records
         self.msds_records_layout.addWidget(self.msds_records_table)
@@ -241,7 +240,6 @@ class MainWindow(QMainWindow):
         #Inside COA Records Tab
         self.coa_records_table = QTableWidget()
         self.coa_records_table.setProperty("class", "records_table")
-        self.coa_records_table.setAlternatingRowColors(True)
 
         self.coa_records_layout = QVBoxLayout(self.coa_records_tab)  # inside COA sub-tab Records
         self.coa_records_layout.addWidget(self.coa_records_table)
@@ -274,9 +272,6 @@ class MainWindow(QMainWindow):
                 padding-left: 10px;
                 height: 36px;
             }
-            QTableWidget[class="records_table"]::item:alternate  {
-                background-color: #f9f9f9;
-            }
             QTableWidget[class="records_table"] QHeaderView::section {
                 font-size: 14px;
                 border-bottom: 1px solid lightgray;
@@ -284,6 +279,7 @@ class MainWindow(QMainWindow):
             }
             QTableWidget[class="records_table"] QHeaderView::section:horizontal {
                 border-right: none;
+                background-color: #f0f0f0;
                 border-bottom:3px solid qlineargradient(
                     x1:0, y1:0, x2:0, y2:1,
                     stop:0 #fdfdfd, stop:1 #dcdcdc
@@ -632,11 +628,10 @@ class MainWindow(QMainWindow):
     def add_row_to_coa_summary_table(self):
         row_count = self.summary_analysis_table.rowCount()
 
-        # Ask user for header text
-        header_text, ok = QInputDialog.getText(self, "New Row", "Enter row header:")
+        # Use the styled input function
+        header_text, ok = window_alert.show_text_input(self, "New Row", "Enter row header:")
 
         if ok and header_text.strip():
-            # Add row
             self.summary_analysis_table.insertRow(row_count)
 
             # Update headers

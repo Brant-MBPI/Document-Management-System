@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QMessageBox
+from PyQt6.QtWidgets import QMessageBox, QInputDialog, QPushButton, QDialogButtonBox
 
 
 def show_message(self, title, message, icon_type="info", is_confirmation=False):
@@ -68,3 +68,69 @@ def show_message(self, title, message, icon_type="info", is_confirmation=False):
     # Return True if Yes, False if No
     if is_confirmation:
         return result == QMessageBox.StandardButton.Yes
+
+
+def show_text_input(self, title, label, default_text=""):
+    input_dialog = QInputDialog(self)
+    input_dialog.setWindowTitle(title)
+    input_dialog.setLabelText(label)
+    input_dialog.setTextValue(default_text)
+
+    # Style the main dialog
+    input_dialog.setStyleSheet("""
+        QInputDialog {
+            background-color: #fefefe;
+            border-radius: 12px;
+            font-size: 14px;
+            font-family: Segoe UI, sans-serif;
+        }
+        QLabel {
+            color: #333333;
+            padding: 10px;
+            font-size: 14px;
+        }
+        QLineEdit {
+            font-size: 14px;
+            padding: 6px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+    """)
+
+    # Show the dialog non-modally first to create buttons
+    input_dialog.show()
+    input_dialog.repaint()  # Ensure UI is rendered
+
+    button_box = input_dialog.findChild(QDialogButtonBox)
+    if button_box:
+        ok_button = button_box.button(QDialogButtonBox.StandardButton.Ok)
+        cancel_button = button_box.button(QDialogButtonBox.StandardButton.Cancel)
+
+        if ok_button:
+            ok_button.setStyleSheet("""
+                QPushButton {
+                    background-color: #4CAF50; /* Green */
+                    color: white;
+                    border-radius: 8px;
+                    padding: 6px 18px;
+                    font-weight: bold;
+                }
+                QPushButton:hover { background-color: #45a049; }
+                QPushButton:pressed { background-color: #3e8e41; }
+            """)
+        if cancel_button:
+            cancel_button.setStyleSheet("""
+                QPushButton {
+                    background-color: #f44336; /* Red */
+                    color: white;
+                    border-radius: 8px;
+                    padding: 6px 18px;
+                    font-weight: bold;
+                }
+                QPushButton:hover { background-color: #e53935; }
+                QPushButton:pressed { background-color: #d32f2f; }
+            """)
+
+    result = input_dialog.exec()
+    return input_dialog.textValue(), result == QInputDialog.DialogCode.Accepted

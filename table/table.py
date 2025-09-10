@@ -117,3 +117,4 @@ def search_coa(self, query):
             text = item.text().lower()
             match = query in text
             self.coa_records_table.setRowHidden(row, not match)
+

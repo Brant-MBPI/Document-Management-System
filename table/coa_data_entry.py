@@ -65,9 +65,8 @@ def coa_data_entry_form(self):
                 border-radius: 4px;
             }
             .sub_title {
-                margin-left: 0;
                 font-size: 20px;
-                font-weight: bold;
+                font-weight: semi-bold;
                 margin-top: 12px;
                 margin-bottom: 8px;
             }
@@ -101,10 +100,14 @@ def coa_data_entry_form(self):
     receipt_row.addWidget(self.po_number_input)
     form_layout.addRow(QLabel("Delivery Receipt:"), receipt_row)
 
-    # === Section 2: Summary of Analysis ===
+
     section2_header = QLabel("Summary of Analysis")
     section2_header.setProperty("class", "sub_title")
-    form_layout.addRow(section2_header)
+    soa_layout = QHBoxLayout()
+    soa_layout.addStretch()
+    soa_layout.addWidget(section2_header)
+    soa_layout.addStretch()
+    form_layout.addRow(soa_layout)
 
     self.summary_analysis_table.setColumnCount(2)
     self.summary_analysis_table.setRowCount(3)
@@ -146,10 +149,52 @@ def coa_data_entry_form(self):
 
     btn_add_row = QPushButton("Add Row")
     btn_add_row.clicked.connect(self.add_row_to_coa_summary_table)
+    btn_delete_row = QPushButton("Delete Row")
+    btn_delete_row.setProperty("class", "delete")
+
+    button_style = """
+        QPushButton {
+            background-color: #4CAF50;  /* Green */
+            color: white;
+            font-size: 14px;
+            font-weight: semi-bold;
+            padding: 6px 14px;
+            border: 1px solid #388E3C;
+            border-radius: 6px;
+            min-width: 80px;
+        }
+        QPushButton[class="delete"] {
+            background-color: #E53935;  /* Red */
+            border: 1px solid #C62828;
+        }
+        QPushButton:hover {
+            background-color: #45A049;
+        }
+        QPushButton[class="delete"]:hover {
+            background-color: #D32F2F;
+        }
+        QPushButton:pressed {
+            background-color: #397D3A;
+        }
+        QPushButton[class="delete"]:pressed {
+            background-color: #B71C1C;
+        }
+    """
+
+    # Apply styles
+    btn_add_row.setStyleSheet(button_style)
+    btn_delete_row.setStyleSheet(button_style)
+    self.btn_coa_submit.setStyleSheet(button_style)
 
     btn_add_table_row = QHBoxLayout()
     btn_add_table_row.addStretch()
+    btn_add_table_row.addStretch()
+    btn_add_table_row.addStretch()
     btn_add_table_row.addWidget(btn_add_row)
+    btn_add_table_row.addStretch()
+    btn_add_table_row.addWidget(btn_delete_row)
+    btn_add_table_row.addStretch()
+    btn_add_table_row.addStretch()
     btn_add_table_row.addStretch()
     form_layout.addRow(btn_add_table_row)
 
