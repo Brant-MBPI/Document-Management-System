@@ -51,6 +51,45 @@ class FileMSDS(QWidget):
         button_layout.addWidget(btn_print)
         button_layout.addStretch(1)
 
+        btn_download.setStyleSheet("""
+            QPushButton {
+                background-color: #4CAF50;  /* Green */
+                color: white;
+                font-size: 14px;
+                font-weight: semi-bold;
+                padding: 8px 16px;
+                border: 1px solid #388E3C;
+                border-radius: 6px;
+                min-width: 80px;
+            }
+            QPushButton:hover {
+                background-color: #45A049;
+            }
+            QPushButton:pressed {
+                background-color: #397D3A;
+            }
+        """)
+
+        # Blue Print button
+        btn_print.setStyleSheet("""
+            QPushButton {
+                background-color: #2196F3;  /* Blue */
+                color: white;
+                font-size: 14px;
+                font-weight: semi-bold;
+                padding: 8px 16px;
+                border: 1px solid #1976D2;
+                border-radius: 6px;
+                min-width: 80px;
+            }
+            QPushButton:hover {
+                background-color: #1E88E5;
+            }
+            QPushButton:pressed {
+                background-color: #1565C0;
+            }
+        """)
+
         main_layout.addLayout(button_layout)
         # Center the viewer using a horizontal layout
         viewer_container = QHBoxLayout()

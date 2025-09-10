@@ -5,6 +5,7 @@ from PyQt6.QtGui import QIntValidator
 from PyQt6.QtWidgets import QLabel, QHBoxLayout, QSizePolicy, QHeaderView, QPushButton, QInputDialog, QTableWidgetItem, \
     QFormLayout, QTableWidget, QLineEdit, QAbstractItemView, QWidget
 
+from alert import window_alert
 from db import db_con
 
 current_coa_id = None  # Global variable to store the current COA ID
@@ -150,6 +151,7 @@ def coa_data_entry_form(self):
     btn_add_row = QPushButton("Add Row")
     btn_add_row.clicked.connect(self.add_row_to_coa_summary_table)
     btn_delete_row = QPushButton("Delete Row")
+    btn_delete_row.clicked.connect(self.delete_row_from_coa_summary_table)
     btn_delete_row.setProperty("class", "delete")
 
     button_style = """
@@ -265,3 +267,26 @@ def clear_coa_form(self):
     # Reset submit button
     self.btn_coa_submit.setText("Submit")
 
+
+def delete_row_from_coa_summary_table(self):
+    selected_indexes = self.summary_analysis_table.selectionModel().selectedRows()
+
+    if not selected_indexes:
+        # No row selected, show a warning
+        window_alert.show_message(self, "Warning", "Please select a row to delete.", icon_type="warning")
+        return
+
+    row_to_delete = selected_indexes[0].row()  # Single selection, take the first
+
+    # Show confirmation message
+    confirm = window_alert.show_message(
+        self,
+        "Confirm Delete",
+        f"Are you sure you want to delete row {row_to_delete + 1}?",
+        icon_type="question",
+        is_confirmation=True
+    )
+
+    if confirm:
+        self.summary_analysis_table.removeRow(row_to_delete)
+        adjust_table_height(self)

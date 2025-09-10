@@ -256,7 +256,7 @@ class MainWindow(QMainWindow):
             QLineEdit {
                 border: 1px solid #ccc;
                 border-radius: 15px;
-                padding: 6px 20px 8px 10px;  
+                padding: 4px 20px 6px 10px;  
                 background-color: #f9f9f9;
                 font-size: 12px;
             }
