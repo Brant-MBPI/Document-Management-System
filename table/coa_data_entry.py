@@ -3,7 +3,7 @@ from datetime import datetime
 from PyQt6.QtCore import QDate
 from PyQt6.QtGui import QIntValidator
 from PyQt6.QtWidgets import QLabel, QHBoxLayout, QSizePolicy, QHeaderView, QPushButton, QInputDialog, QTableWidgetItem, \
-    QFormLayout, QTableWidget, QLineEdit, QAbstractItemView
+    QFormLayout, QTableWidget, QLineEdit, QAbstractItemView, QWidget
 
 from db import db_con
 
@@ -14,7 +14,7 @@ def load_coa_details(self, coa_id):
     field_result = db_con.get_single_coa_data(coa_id)
     analysis_table_result = db_con.get_coa_analysis_results(coa_id)
 
-    # inputs variable
+    # === Populate inputs ===
     self.coa_customer_input.setText(str(field_result[1]))
     self.color_code_input.setText(str(field_result[2]))
     self.lot_number_input.setText(str(field_result[3]))
@@ -28,108 +28,120 @@ def load_coa_details(self, coa_id):
     self.coa_storage_input.setText(str(field_result[11]))
     self.coa_shelf_life_input.setText(str(field_result[12]))
     self.suitability_input.setText(str(field_result[13]))
-
     self.btn_coa_submit.setText("Update")
 
-    # clear the table before loading
+    # === Populate table ===
     self.summary_analysis_table.clearContents()
     self.summary_analysis_table.setRowCount(len(analysis_table_result))
-    self.summary_analysis_table.setColumnCount(2)  # standard + delivery
+    self.summary_analysis_table.setColumnCount(2)
     self.summary_analysis_table.setHorizontalHeaderLabels(["Standard Value", "Delivery Value"])
 
     for row_idx, (parameter_name, standard_value, delivery_value) in enumerate(analysis_table_result):
-        # set row header (parameter name)
-        self.summary_analysis_table.setVerticalHeaderItem(
-            row_idx,
-            QTableWidgetItem(parameter_name)
-        )
+        self.summary_analysis_table.setVerticalHeaderItem(row_idx, QTableWidgetItem(parameter_name))
+        self.summary_analysis_table.setItem(row_idx, 0, QTableWidgetItem(str(standard_value) if standard_value else ""))
+        self.summary_analysis_table.setItem(row_idx, 1, QTableWidgetItem(str(delivery_value) if delivery_value else ""))
 
-        # standard value
-        self.summary_analysis_table.setItem(
-            row_idx, 0,
-            QTableWidgetItem(str(standard_value) if standard_value is not None else "")
-        )
-
-        # delivery value
-        self.summary_analysis_table.setItem(
-            row_idx, 1,
-            QTableWidgetItem(str(delivery_value) if delivery_value is not None else "")
-        )
     adjust_table_height(self)
 
 
 def coa_data_entry_form(self):
+    form_widget = QWidget()
     form_layout = QFormLayout()
+    form_widget.setLayout(form_layout)
+
     form_layout.setHorizontalSpacing(20)
     form_layout.setVerticalSpacing(12)
-    form_layout.setContentsMargins(20, 20, 20, 20)
+    form_layout.setContentsMargins(20, 20, 70, 20)
 
+    form_widget.setStyleSheet("""
+            QLabel {
+                margin-left: 60px;
+                font-size: 16px;
+            }
+            QLineEdit, QTextEdit, QDateEdit {
+                font-size: 16px;
+                padding: 4px;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+            }
+            .sub_title {
+                margin-left: 0;
+                font-size: 20px;
+                font-weight: bold;
+                margin-top: 12px;
+                margin-bottom: 8px;
+            }
+        """)
+
+    # === Header ===
     header = QLabel("Certificate of Analysis")
-    header.setStyleSheet("font-size: 18px; font-weight: bold; ")
+    header.setStyleSheet("font-size: 24px; font-weight: bold;")
+    self.coa_form_layout.addWidget(header)
 
-    # === Table ===
-    self.summary_analysis_table.setColumnCount(2)
-    self.summary_analysis_table.setRowCount(3)
-    self.summary_analysis_table.setHorizontalHeaderLabels(["Standard", "Delivery"])
-    self.summary_analysis_table.setVerticalHeaderLabels([
-        "Color", "Light fastness (1-8)", "Heat Stability (1-5)"
-    ])
-    self.summary_analysis_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
-    self.summary_analysis_table.resizeRowsToContents()
-    self.summary_analysis_table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
-    adjust_table_height(self)
+    # === Section 1: General Info ===
+    section1_header = QLabel("1) General Information")
+    section1_header.setProperty("class", "sub_title")
+    form_layout.addRow(section1_header)
+    form_layout.addRow(QLabel("Customer:"), self.coa_customer_input)
+    form_layout.addRow(QLabel("Color Code:"), self.color_code_input)
+    form_layout.addRow(QLabel("Quantity Delivered:"), self.quantity_delivered_input)
+    form_layout.addRow(QLabel("Delivery Date:"), self.delivery_date_input)
+    form_layout.addRow(QLabel("Lot Number:"), self.lot_number_input)
+    form_layout.addRow(QLabel("Production Date:"), self.production_date_input)
 
-    # === Add Row Button ===
-    btn_add_row = QPushButton("Add Row")
-    btn_add_table_row = QHBoxLayout()
-    btn_add_table_row.addStretch()
-    btn_add_table_row.addWidget(btn_add_row)
-    btn_add_table_row.addStretch()
-
-    btn_add_row.clicked.connect(self.add_row_to_coa_summary_table)
-
-    # === Add widgets to form layout ===
-    form_layout.addRow(header)
-
-    form_layout.addRow("Customer:", self.coa_customer_input)
-    form_layout.addRow("Color Code:", self.color_code_input)
-    form_layout.addRow("Quantity Delivered:", self.quantity_delivered_input)
-    form_layout.addRow("Delivery Date:", self.delivery_date_input)
-    form_layout.addRow("Lot Number:", self.lot_number_input)
-    form_layout.addRow("Production Date:", self.production_date_input)
-
-    # Row with multiple widgets
     receipt_row = QHBoxLayout()
     receipt_row.addWidget(self.delivery_receipt_input)
     receipt_row.addWidget(QLabel("P.O Number:"))
     receipt_row.addWidget(self.po_number_input)
-    form_layout.addRow("Delivery Receipt:", receipt_row)
+    form_layout.addRow(QLabel("Delivery Receipt:"), receipt_row)
 
-    # Table with header
-    summary_header = QLabel("Summary of Analysis")
-    summary_header.setStyleSheet("font-weight: bold; margin-top: 12px;")
-    form_layout.addRow(summary_header)
+    # === Section 2: Summary of Analysis ===
+    section2_header = QLabel("2) Summary of Analysis")
+    section2_header.setProperty("class", "sub_title")
+    form_layout.addRow(section2_header)
+
+    self.summary_analysis_table.setColumnCount(2)
+    self.summary_analysis_table.setRowCount(3)
+    self.summary_analysis_table.setHorizontalHeaderLabels(["Standard", "Delivery"])
+    self.summary_analysis_table.setVerticalHeaderLabels(["Color", "Light fastness (1-8)", "Heat Stability (1-5)"])
+    self.summary_analysis_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+    self.summary_analysis_table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
+    adjust_table_height(self)
+
     form_layout.addRow(self.summary_analysis_table)
+
+    btn_add_row = QPushButton("Add Row")
+    btn_add_row.clicked.connect(self.add_row_to_coa_summary_table)
+
+    btn_add_table_row = QHBoxLayout()
+    btn_add_table_row.addStretch()
+    btn_add_table_row.addWidget(btn_add_row)
+    btn_add_table_row.addStretch()
     form_layout.addRow(btn_add_table_row)
+
+    # === Section 3: Certification ===
+    section3_header = QLabel("3) Certification")
+    section3_header.setProperty("class", "sub_title")
+    form_layout.addRow(section3_header)
 
     certified_row = QHBoxLayout()
     certified_row.addWidget(self.certified_by_input)
     certified_row.addWidget(QLabel("Date:"))
     certified_row.addWidget(self.creation_date_input)
-    form_layout.addRow("Certified by:", certified_row)
+    form_layout.addRow(QLabel("Certified by:"), certified_row)
 
-    form_layout.addRow("Storage:", self.coa_storage_input)
-    form_layout.addRow("Shelf Life:", self.coa_shelf_life_input)
-    form_layout.addRow("Suitability:", self.suitability_input)
-    self.btn_coa_submit.setText("Submit")
-    # Centered submit button
+    form_layout.addRow(QLabel("Storage:"), self.coa_storage_input)
+    form_layout.addRow(QLabel("Shelf Life:"), self.coa_shelf_life_input)
+    form_layout.addRow(QLabel("Suitability:"), self.suitability_input)
+
+    # === Submit button centered ===
     submit_button_row = QHBoxLayout()
     submit_button_row.addStretch()
     submit_button_row.addWidget(self.btn_coa_submit)
     submit_button_row.addStretch()
     form_layout.addRow(submit_button_row)
 
-    self.coa_form_layout.addLayout(form_layout)
+    self.coa_form_layout.addWidget(form_widget)
 
 
 def adjust_table_height(self):

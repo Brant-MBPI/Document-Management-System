@@ -204,21 +204,37 @@ class MainWindow(QMainWindow):
         self.msds_records_layout = QVBoxLayout(self.msds_records_tab)  # inside MSDS sub-tab Records
         self.msds_records_layout.addWidget(self.msds_records_table)
 
-        scroll_area = QScrollArea(self.msds_data_entry_tab)
-        scroll_area.setWidgetResizable(True)
+        msds_scroll_area = QScrollArea(self.msds_data_entry_tab)
+        msds_scroll_area.setWidgetResizable(True)
 
         # Form container inside the scroll area
-        form_container = QWidget()
-        form_layout = QVBoxLayout(form_container)
+        msds_form_container = QWidget()
+        msds_form_layout = QVBoxLayout(msds_form_container)
 
-        form_layout.addLayout(self.msds_form_layout)
-        form_layout.addLayout(self.msds_btn_layout)
+        msds_form_layout.addLayout(self.msds_form_layout)
+        msds_form_layout.addLayout(self.msds_btn_layout)
 
-        scroll_area.setWidget(form_container)
+        msds_scroll_area.setWidget(msds_form_container)
 
         # Final layout for the tab
         self.msds_data_entry_layout = QVBoxLayout(self.msds_data_entry_tab)
-        self.msds_data_entry_layout.addWidget(scroll_area)
+        self.msds_data_entry_layout.addWidget(msds_scroll_area)
+
+        # === COA Scroll Area ===
+        coa_scroll_area = QScrollArea(self.coa_data_entry_tab)
+        coa_scroll_area.setWidgetResizable(True)
+
+        # Form container inside the scroll area
+        coa_form_container = QWidget()
+        coa_form_layout = QVBoxLayout(coa_form_container)
+
+        coa_form_layout.addLayout(self.coa_form_layout)
+        coa_form_layout.addLayout(self.coa_btn_layout)
+
+        coa_scroll_area.setWidget(coa_form_container)
+
+        self.coa_data_entry_layout = QVBoxLayout(self.coa_data_entry_tab)
+        self.coa_data_entry_layout.addWidget(coa_scroll_area)
 
         #Inside COA Records Tab
         self.coa_records_table = QTableWidget()
@@ -239,9 +255,9 @@ class MainWindow(QMainWindow):
             QLineEdit {
                 border: 1px solid #ccc;
                 border-radius: 15px;
-                padding: 6px 30px 6px 10px;  /* left=10, right=30 for the icon */
+                padding: 6px 20px 8px 10px;  
                 background-color: #f9f9f9;
-                font-size: 12pt;
+                font-size: 12px;
             }
             QLineEdit:focus {
                 border: 1px solid #4a90e2;   /* blue highlight */
@@ -260,7 +276,7 @@ class MainWindow(QMainWindow):
                 color: black;
             }
             QTableWidget[class="records_table"] QHeaderView::section {
-                font-size: 16px;
+                font-size: 14px;
                 border-right: none;
                 border-bottom: 1px solid lightgray;
                 background-color: #f0f0f0;
@@ -277,11 +293,11 @@ class MainWindow(QMainWindow):
             QPushButton[class="msds_submit_btn"] {
                 background-color: #4CAF50;
                 color: white;
-                padding: 14px 30px;
+                padding: 12px 26px;
                 margin: 0 70px 20px 0;
                 border: none;
                 border-radius: 8px;
-                font-size: 18px;
+                font-size: 14px;
             }
             QPushButton[class="msds_submit_btn"]:hover {
                 background-color: #45a049;
@@ -299,7 +315,7 @@ class MainWindow(QMainWindow):
             QTabBar::tab {
                 background: #f5f5f5;       
                 color: #333;                
-                padding: 8px 18px;          
+                padding: 8px 14px;          
                 font-size: 14px;
                 border: 1px solid #ccc;      
                 border-bottom: none;          
@@ -332,7 +348,7 @@ class MainWindow(QMainWindow):
             QTabBar::tab {
                 background: #fafafa;            
                 color: #444;                    
-                padding: 7px 18px;              
+                padding: 7px 16px;              
                 font-size: 14px;                
                 border: 1px solid #bbb;               
                 border-radius: 4px 4px 0 0;     
@@ -646,8 +662,7 @@ class MainWindow(QMainWindow):
 
         if column_idx == 0:
             font = QFont()
-            font.setPointSize(12)  # make text larger
-            # font.setBold(True)  # make it bold
+            font.setPointSize(11)
             item.setFont(font)
         return item
 
@@ -797,7 +812,7 @@ class MainWindow(QMainWindow):
             QMessageBox {
                 background-color: #fefefe;
                 border-radius: 12px;
-                font-size: 16px;
+                font-size: 14px;
                 font-family: Segoe UI, sans-serif;
             }
             QLabel {
