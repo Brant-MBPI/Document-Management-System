@@ -643,6 +643,30 @@ class MainWindow(QMainWindow):
             # Adjust table height
             coa_data_entry.adjust_table_height(self)
 
+    def delete_row_from_coa_summary_table(self):
+        selected_indexes = self.summary_analysis_table.selectionModel().selectedRows()
+
+        if not selected_indexes:
+            # No row selected, show a warning
+            print(selected_indexes)
+            window_alert.show_message(self, "Warning", "Please select a row to delete.", icon_type="warning")
+            return
+
+        row_to_delete = selected_indexes[0].row()  # Single selection, take the first
+
+        # Show confirmation message
+        confirm = window_alert.show_message(
+            self,
+            "Confirm Delete",
+            f"Are you sure you want to delete row {row_to_delete + 1}?",
+            icon_type="question",
+            is_confirmation=True
+        )
+
+        if confirm:
+            self.summary_analysis_table.removeRow(row_to_delete)
+            coa_data_entry.adjust_table_height(self)
+
     def create_readonly_item(self, text=None, icon_path=None, selectable=True, column_idx=None):
         item = QTableWidgetItem()
 

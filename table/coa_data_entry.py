@@ -119,6 +119,7 @@ def coa_data_entry_form(self):
     self.summary_analysis_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
     self.summary_analysis_table.resizeRowsToContents()
     self.summary_analysis_table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
+    self.summary_analysis_table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
     self.summary_analysis_table.setStyleSheet("""
         QTableWidget {
             font-size: 14px;  
@@ -268,25 +269,3 @@ def clear_coa_form(self):
     self.btn_coa_submit.setText("Submit")
 
 
-def delete_row_from_coa_summary_table(self):
-    selected_indexes = self.summary_analysis_table.selectionModel().selectedRows()
-
-    if not selected_indexes:
-        # No row selected, show a warning
-        window_alert.show_message(self, "Warning", "Please select a row to delete.", icon_type="warning")
-        return
-
-    row_to_delete = selected_indexes[0].row()  # Single selection, take the first
-
-    # Show confirmation message
-    confirm = window_alert.show_message(
-        self,
-        "Confirm Delete",
-        f"Are you sure you want to delete row {row_to_delete + 1}?",
-        icon_type="question",
-        is_confirmation=True
-    )
-
-    if confirm:
-        self.summary_analysis_table.removeRow(row_to_delete)
-        adjust_table_height(self)
