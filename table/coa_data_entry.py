@@ -71,14 +71,7 @@ def coa_data_entry_form(self):
                 margin-top: 12px;
                 margin-bottom: 8px;
             }
-            QTableCornerButton::section {
-                background-color: #f0f0f0;  /* match header background */
-                border: 1px solid lightgray;
-            }
-            QHeaderView::section {
-                background-color: #f0f0f0;  /* same color for consistency */
-                border: 1px solid lightgray;
-            }
+            
         """)
 
     # === Header ===
@@ -87,15 +80,20 @@ def coa_data_entry_form(self):
     self.coa_form_layout.addWidget(header)
 
     # === Section 1: General Info ===
-    section1_header = QLabel("1) General Information")
-    section1_header.setProperty("class", "sub_title")
-    form_layout.addRow(section1_header)
     form_layout.addRow(QLabel("Customer:"), self.coa_customer_input)
     form_layout.addRow(QLabel("Color Code:"), self.color_code_input)
     form_layout.addRow(QLabel("Quantity Delivered:"), self.quantity_delivered_input)
-    form_layout.addRow(QLabel("Delivery Date:"), self.delivery_date_input)
+    deliver_date_layout = QHBoxLayout()
+    deliver_date_layout.addWidget(self.delivery_date_input)
+    deliver_date_layout.addStretch()
+    deliver_date_layout.addStretch()
+    form_layout.addRow(QLabel("Delivery Date:"), deliver_date_layout)
     form_layout.addRow(QLabel("Lot Number:"), self.lot_number_input)
-    form_layout.addRow(QLabel("Production Date:"), self.production_date_input)
+    production_date_layout = QHBoxLayout()
+    production_date_layout.addWidget(self.production_date_input)
+    production_date_layout.addStretch()
+    production_date_layout.addStretch()
+    form_layout.addRow(QLabel("Production Date:"), production_date_layout)
 
     receipt_row = QHBoxLayout()
     receipt_row.addWidget(self.delivery_receipt_input)
@@ -104,19 +102,35 @@ def coa_data_entry_form(self):
     form_layout.addRow(QLabel("Delivery Receipt:"), receipt_row)
 
     # === Section 2: Summary of Analysis ===
-    section2_header = QLabel("2) Summary of Analysis")
+    section2_header = QLabel("Summary of Analysis")
     section2_header.setProperty("class", "sub_title")
     form_layout.addRow(section2_header)
 
     self.summary_analysis_table.setColumnCount(2)
     self.summary_analysis_table.setRowCount(3)
     self.summary_analysis_table.setHorizontalHeaderLabels(["Standard", "Delivery"])
-    self.summary_analysis_table.setVerticalHeaderLabels(["Color", "Light fastness (1-8)", "Heat Stability (1-5)"])
+    self.summary_analysis_table.setVerticalHeaderLabels([
+        "Color", "Light fastness (1-8)", "Heat Stability (1-5)"
+    ])
     self.summary_analysis_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
     self.summary_analysis_table.resizeRowsToContents()
     self.summary_analysis_table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
     self.summary_analysis_table.setStyleSheet("""
-        
+        QTableWidget {
+            font-size: 14px;  
+        }
+        QHeaderView::section:horizontal,
+        QHeaderView::section:vertical{
+            font-size: 16px;
+            padding: 0 4px;
+            font-weight: semi-bold;
+            background-color: #f0f0f0;  
+            border: 1px solid lightgray;
+        }
+        QTableCornerButton::section {
+            background-color: #f0f0f0;
+            border: 1px solid lightgray;
+        }
     """)
     adjust_table_height(self)
 
@@ -138,11 +152,6 @@ def coa_data_entry_form(self):
     btn_add_table_row.addWidget(btn_add_row)
     btn_add_table_row.addStretch()
     form_layout.addRow(btn_add_table_row)
-
-    # === Section 3: Certification ===
-    section3_header = QLabel("3) Certification")
-    section3_header.setProperty("class", "sub_title")
-    form_layout.addRow(section3_header)
 
     certified_row = QHBoxLayout()
     certified_row.addWidget(self.certified_by_input)
@@ -166,11 +175,16 @@ def coa_data_entry_form(self):
 
 def adjust_table_height(self):
     self.summary_analysis_table.verticalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Fixed)
-    """Resize table to fit rows dynamically."""
-    row_height = sum([self.summary_analysis_table.rowHeight(i)
-                      for i in range(self.summary_analysis_table.rowCount())])
+
+    fixed_row_height = 40
+    for i in range(self.summary_analysis_table.rowCount()):
+        self.summary_analysis_table.setRowHeight(i, fixed_row_height)
+    # Total height = all rows + horizontal header + frame
+    row_height_total = self.summary_analysis_table.rowCount() * fixed_row_height
     header_height = self.summary_analysis_table.horizontalHeader().height()
-    self.summary_analysis_table.setFixedHeight(row_height + header_height + 2)
+    frame = 2 * self.summary_analysis_table.frameWidth()
+
+    self.summary_analysis_table.setFixedHeight(row_height_total + header_height + frame)
 
 
 def clear_coa_form(self):

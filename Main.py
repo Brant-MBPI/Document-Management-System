@@ -201,6 +201,7 @@ class MainWindow(QMainWindow):
 
         self.msds_records_table = QTableWidget()
         self.msds_records_table.setProperty("class", "records_table")
+        self.msds_records_table.setAlternatingRowColors(True)
 
         self.msds_records_layout = QVBoxLayout(self.msds_records_tab)  # inside MSDS sub-tab Records
         self.msds_records_layout.addWidget(self.msds_records_table)
@@ -240,6 +241,7 @@ class MainWindow(QMainWindow):
         #Inside COA Records Tab
         self.coa_records_table = QTableWidget()
         self.coa_records_table.setProperty("class", "records_table")
+        self.coa_records_table.setAlternatingRowColors(True)
 
         self.coa_records_layout = QVBoxLayout(self.coa_records_tab)  # inside COA sub-tab Records
         self.coa_records_layout.addWidget(self.coa_records_table)
@@ -272,15 +274,20 @@ class MainWindow(QMainWindow):
                 padding-left: 10px;
                 height: 36px;
             }
-            QTableWidget[class="records_table"]::item:selected {
-                background-color: #3399FF;
-                color: black;
+            QTableWidget[class="records_table"]::item:alternate  {
+                background-color: #f9f9f9;
             }
             QTableWidget[class="records_table"] QHeaderView::section {
                 font-size: 14px;
-                border-right: none;
                 border-bottom: 1px solid lightgray;
                 background-color: #f0f0f0;
+            }
+            QTableWidget[class="records_table"] QHeaderView::section:horizontal {
+                border-right: none;
+                border-bottom:3px solid qlineargradient(
+                    x1:0, y1:0, x2:0, y2:1,
+                    stop:0 #fdfdfd, stop:1 #dcdcdc
+                );
             }
             QTableCornerButton::section {
                 background-color: #f0f0f0;
@@ -306,43 +313,43 @@ class MainWindow(QMainWindow):
             QPushButton[class="msds_submit_btn"]:pressed {
                 background-color: #3e8e41;
             }
-            
             QWidget#msds_tab, QWidget#coa_tab, QTabWidget {
                 background-color: #f2f2f2; 
                 border: none;
             }
         """)
         tab_menu_style = """
+            QTabWidget::pane {
+                border: 1px solid #0066cc;
+                border-radius: 6px;
+                background-color: #f0f0f0;
+                top: -1px; 
+            }
             QTabBar::tab {
-                background: #f5f5f5;       
-                color: #333;                
-                padding: 8px 14px;          
+                background: #f5f5f5;
+                color: #333;
+                padding: 6px 12px;
                 font-size: 14px;
-                border: 1px solid #ccc;      
-                border-bottom: none;          
+                border: 1px solid #ccc;
+                border-bottom:1px solid #0066cc;   
                 border-top-left-radius: 6px;
                 border-top-right-radius: 6px;
-                margin-right: 4px;        
+                margin-right: 4px;
+                margin-top: 2px;   
             }
-        
+            
             QTabBar::tab:selected {
-                background: #ffffff;   
-                color: #0078d7;          
+                background: #ffffff;
+                color: #0078d7;
                 font-weight: bold;
                 border: 1px solid #0078d7;
-                border-bottom: 2px solid white;
+                border-bottom: none;  
+                margin-top: 0px;     
             }
         
             QTabBar::tab:hover {
                 background: #e9f3ff;      
                 color: #005a9e;
-            }
-        
-            QTabWidget::pane {
-                border: 1px solid #ccc;    
-                top: -1px;                    
-                border-radius: 6px;
-                background: #ffffff;
             }
         """
         main_tab_style = """
@@ -368,16 +375,12 @@ class MainWindow(QMainWindow):
                 color: #004a99;                 
             }
 
-            QTabWidget::pane {
-                border: 1px solid #bbb;         
-                top: -1px;
-                border-radius: 4px;             
-                background: #ffffff;
-            }
+            
         """
+
         self.main_tabs.tabBar().setStyleSheet(main_tab_style)
-        self.msds_sub_tabs.tabBar().setStyleSheet(tab_menu_style)
-        self.coa_sub_tabs.tabBar().setStyleSheet(tab_menu_style)
+        self.msds_sub_tabs.setStyleSheet(tab_menu_style)
+        self.coa_sub_tabs.setStyleSheet(tab_menu_style)
         self.msds_search_bar.setStyleSheet(search_style)
         self.coa_search_bar.setStyleSheet(search_style)
 
