@@ -1,12 +1,13 @@
 
 import platform
-
-from PyQt6.QtPdf import QPdfDocument
+import io
+from PyQt6.QtCore import QBuffer, QIODevice
+from PyQt6.QtGui import QPainter
+from PyQt6.QtPdf import QPdfDocument, QPdfDocumentRenderOptions
 from PyQt6.QtPdfWidgets import QPdfView
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QPushButton, QHBoxLayout
 from reportlab.lib.enums import TA_CENTER
-from reportlab.lib.units import cm
-from reportlab.lib.utils import ImageReader
+from PyQt6.QtPrintSupport import QPrinter, QPrintDialog
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
@@ -35,8 +36,11 @@ class FileCOA(QWidget):
         letter_width = int(8.5 * dpi)  # 816 px
         self.pdf_viewer.setFixedWidth(letter_width)
 
+        self.file_name = None
+
         btn_download = QPushButton("Download")
         btn_print = QPushButton("Print")
+        btn_print.clicked.connect(self.print_pdf)
 
         # Put them in a horizontal layout and center
         button_layout = QHBoxLayout()
@@ -54,12 +58,13 @@ class FileCOA(QWidget):
         viewer_container.addStretch(1)  # right stretch
         main_layout.addLayout(viewer_container)
 
-    def generate_pdf(self, coa_id, filename):
+    def generate_pdf(self, coa_id):
         field_result = db_con.get_single_coa_data(coa_id)
 
         # Create PDF
+        buffer = io.BytesIO()
         doc = SimpleDocTemplate(
-            filename,
+            buffer,
             pagesize=letter,
             rightMargin=50, leftMargin=50, topMargin=90, bottomMargin=50
         )
@@ -148,17 +153,55 @@ class FileCOA(QWidget):
         content.append(Paragraph(str(field_result[11]), IndentedText))
 
         doc.build(content, onFirstPage=add_first_page_header)
-        return filename
+        buffer.seek(0)
+        return buffer.getvalue()  # returns PDF bytes
 
-    def show_pdf_preview(self, filename: str):
-        self.pdf_doc.load(filename)
+    def show_pdf_preview(self, coa_id, filename):
+        pdf_bytes = self.generate_pdf(coa_id)
+        # Wrap the PDF bytes in a QBuffer
+        self.buffer = QBuffer()  # keep it as an instance attribute so it's not garbage collected
+        self.buffer.setData(pdf_bytes)
+        self.buffer.open(QIODevice.OpenModeFlag.ReadOnly)
+
+        # Load PDF from QBuffer
+        self.pdf_doc.load(self.buffer)
         self.pdf_viewer.setZoomMode(QPdfView.ZoomMode.FitToWidth)
+        self.file_name = filename
 
-    def generate_and_preview(self, coa_id, filename):
-        filename = filename.upper()
+    def download_pdf(self, coa_id, filename):
         if not filename.endswith(".pdf"):
             filename += ".pdf"
-        pdf_file = self.generate_pdf(coa_id, filename)
-        self.show_pdf_preview(pdf_file)
 
+        pdf_bytes = self.generate_pdf(coa_id)
+        with open(filename, "wb") as f:
+            f.write(pdf_bytes)
+        return filename
 
+    def print_pdf(self):
+        if not self.pdf_doc or self.pdf_doc.pageCount() == 0:
+            return  # nothing to print
+
+        printer = QPrinter(QPrinter.PrinterMode.HighResolution)
+
+        dialog = QPrintDialog(printer, self)
+        dialog.setWindowTitle("Print Certificate of Analysis")
+
+        if dialog.exec():
+            painter = QPainter(printer)
+            render_opts = QPdfDocumentRenderOptions()
+
+            for page_number in range(self.pdf_doc.pageCount()):
+                if page_number > 0:
+                    printer.newPage()
+
+                target_rect = printer.pageRect(QPrinter.Unit.Point).toRectF()
+
+                # Scale the page to fit the printer page
+                self.pdf_doc.renderPage(
+                    painter,
+                    page_number,
+                    target_rect,
+                    render_opts
+                )
+
+            painter.end()

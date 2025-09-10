@@ -902,7 +902,7 @@ class MainWindow(QMainWindow):
 
     def open_coa_preview(self, coa_id, filename):
         self.coa_widget = FileCOA()  # create the widget
-        self.coa_widget.generate_and_preview(coa_id, filename)
+        self.coa_widget.show_pdf_preview(coa_id, filename)
         self.coa_widget.resize(900, 800)
         self.coa_widget.show()
 
