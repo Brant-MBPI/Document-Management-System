@@ -5,14 +5,15 @@ from PyQt6.QtCore import QBuffer, QIODevice
 from PyQt6.QtGui import QPainter
 from PyQt6.QtPdf import QPdfDocument, QPdfDocumentRenderOptions
 from PyQt6.QtPdfWidgets import QPdfView
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QPushButton, QHBoxLayout
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QPushButton, QHBoxLayout, QFileDialog
 from reportlab.lib.enums import TA_CENTER
 from PyQt6.QtPrintSupport import QPrinter, QPrintDialog
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
-from datetime import datetime
+
+from alert import window_alert
 from db import db_con
 from print.pdf_header import add_first_page_header
 
@@ -37,9 +38,11 @@ class FileCOA(QWidget):
         self.pdf_viewer.setFixedWidth(letter_width)
 
         self.file_name = None
+        self.coa_id = None
 
         btn_download = QPushButton("Download")
         btn_print = QPushButton("Print")
+        btn_download.clicked.connect(lambda: self.download_pdf(self.coa_id, self.file_name))
         btn_print.clicked.connect(self.print_pdf)
 
         # Put them in a horizontal layout and center
@@ -157,6 +160,8 @@ class FileCOA(QWidget):
         return buffer.getvalue()  # returns PDF bytes
 
     def show_pdf_preview(self, coa_id, filename):
+        self.file_name = filename
+        self.coa_id = coa_id
         pdf_bytes = self.generate_pdf(coa_id)
         # Wrap the PDF bytes in a QBuffer
         self.buffer = QBuffer()  # keep it as an instance attribute so it's not garbage collected
@@ -166,16 +171,26 @@ class FileCOA(QWidget):
         # Load PDF from QBuffer
         self.pdf_doc.load(self.buffer)
         self.pdf_viewer.setZoomMode(QPdfView.ZoomMode.FitToWidth)
-        self.file_name = filename
 
     def download_pdf(self, coa_id, filename):
-        if not filename.endswith(".pdf"):
-            filename += ".pdf"
+        file_path, _ = QFileDialog.getSaveFileName(
+            self,
+            "Save PDF",
+            filename,  # default name
+            "PDF Files (*.pdf)"
+        )
+
+        if not file_path:  # user cancelled
+            return None
+
+        if not file_path.endswith(".pdf"):
+            file_path += ".pdf"
 
         pdf_bytes = self.generate_pdf(coa_id)
-        with open(filename, "wb") as f:
+        with open(file_path, "wb") as f:
             f.write(pdf_bytes)
-        return filename
+
+        window_alert.show_message(self, "Success", "File downloaded!", icon_type="info")
 
     def print_pdf(self):
         if not self.pdf_doc or self.pdf_doc.pageCount() == 0:

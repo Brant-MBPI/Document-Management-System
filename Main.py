@@ -3,14 +3,15 @@ import sys
 
 from PyQt6.QtCore import Qt, QDate, QRegularExpression, QTimer, QEvent, QObject
 from PyQt6.QtGui import QIcon, QIntValidator, QRegularExpressionValidator, QFont, QAction
-
-from db import db_con
 from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QTabWidget, \
     QTableWidget, QLineEdit, QHeaderView, QTableWidgetItem, QScrollArea, QTextEdit, QPushButton, QDateEdit, \
     QInputDialog, QMessageBox, QAbstractItemView
+from db import db_con
+from alert import window_alert
 from table import msds_data_entry, coa_data_entry, table
 from print.print_msds import FileMSDS
 from print.print_coa import FileCOA
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -459,7 +460,7 @@ class MainWindow(QMainWindow):
         # Check for empty values
         for field, value in required_fields.items():
             if not value.strip():  # empty string
-                self.show_message("Missing Input", f"Please fill in:   {field}", icon_type="warning")
+                window_alert.show_message("Missing Input", f"Please fill in:   {field}", icon_type="warning")
                 return  # stop submission
         # If all fields are filled, proceed to save
         msds_data = {
@@ -518,13 +519,13 @@ class MainWindow(QMainWindow):
         try:
             if msds_data_entry.current_msds_id is not None:  # Update existing MSDS
                 db_con.update_msds_sheet(msds_data_entry.current_msds_id, msds_data)
-                self.show_message("Success", "MSDS updated successfully!", icon_type="info")
+                window_alert.show_message("Success", "MSDS updated successfully!", icon_type="info")
                 msds_data_entry.current_msds_id = None
             else:  # Save new MSDS
                 db_con.save_msds_sheet(msds_data)
-                self.show_message("Success", "MSDS saved successfully!", icon_type="info")
+                window_alert.show_message("Success", "MSDS saved successfully!", icon_type="info")
         except Exception as e:
-            self.show_message("Database Error", str(e), icon_type="critical")
+            window_alert.show_message("Database Error", str(e), icon_type="critical")
         finally:
             msds_data_entry.clear_msds_form(self)
             table.load_msds_table(self)
@@ -562,12 +563,12 @@ class MainWindow(QMainWindow):
         # Check if any required field is empty
         for field, value in required_fields.items():
             if not value:  # empty string
-                self.show_message("Missing Input", f"Please fill in:  {field}", icon_type="warning")
+                window_alert.show_message("Missing Input", f"Please fill in:  {field}", icon_type="warning")
                 return  # stop processing
 
         # Check summary of analysis if no empty row
         if not any(any(cell for cell in row) for row in summary_of_analysis.values()):
-            self.show_message("Missing Input", "Please fill in the Summary of Analysis table.", icon_type="warning")
+            window_alert.show_message("Missing Input", "Please fill in the Summary of Analysis table.", icon_type="warning")
             return
 
         # Build coa_data for saving
@@ -591,14 +592,14 @@ class MainWindow(QMainWindow):
         try:
             if coa_data_entry.current_coa_id is not None:  # Update existing COA
                 db_con.update_certificate_of_analysis(coa_data_entry.current_coa_id, coa_data, summary_of_analysis)
-                self.show_message("Success", f"Certificate of Analysis updated successfully!", icon_type="info")
+                window_alert.show_message("Success", f"Certificate of Analysis updated successfully!", icon_type="info")
                 coa_data_entry.current_coa_id = None
 
             else:  # Save new COA
                 db_con.save_certificate_of_analysis(coa_data, summary_of_analysis)
-                self.show_message("Success", f"Certificate of Analysis saved successfully!", icon_type="info")
+                window_alert.show_message("Success", f"Certificate of Analysis saved successfully!", icon_type="info")
         except Exception as e:
-            self.show_message("Database Error", str(e), icon_type="critical")
+            window_alert.show_message("Database Error", str(e), icon_type="critical")
         finally:
             coa_data_entry.clear_coa_form(self)
             table.load_coa_table(self)
@@ -737,15 +738,15 @@ class MainWindow(QMainWindow):
             # Switch to the MSDS tab
             self.msds_sub_tabs.setCurrentWidget(self.msds_data_entry_tab)
         if column == 3:  # delete column
-            confirm = self.show_message("Confirm Deletion",
+            confirm = window_alert.show_message("Confirm Deletion",
                                         "Are you sure you want to delete this MSDS record?",
                                         icon_type="question", is_confirmation=True)
             if confirm:
                 try:
                     db_con.delete_msds_sheet(msds_id)
-                    self.show_message("Deleted", "MSDS record deleted successfully.", icon_type="info")
+                    window_alert.show_message("Deleted", "MSDS record deleted successfully.", icon_type="info")
                 except Exception as e:
-                    self.show_message("Error", str(e), icon_type="critical")
+                    window_alert.show_message("Error", str(e), icon_type="critical")
                 finally:
                     table.load_msds_table(self)
 
@@ -761,15 +762,15 @@ class MainWindow(QMainWindow):
             # Switch to the COA tab
             self.coa_sub_tabs.setCurrentWidget(self.coa_data_entry_tab)
         if column == 3:  # delete column
-            confirm = self.show_message("Confirm Deletion",
+            confirm = window_alert.show_message("Confirm Deletion",
                                         "Are you sure you want to delete this Certificate of Analysis record?",
                                         icon_type="question", is_confirmation=True)
             if confirm:
                 try:
                     db_con.delete_certificate_of_analysis(coa_id)
-                    self.show_message("Deleted", "Certificate of Analysis record deleted successfully.", icon_type="info")
+                    window_alert.show_message("Deleted", "Certificate of Analysis record deleted successfully.", icon_type="info")
                 except Exception as e:
-                    self.show_message("Error", str(e), icon_type="critical")
+                    window_alert.show_message("Error", str(e), icon_type="critical")
                 finally:
                     table.load_coa_table(self)
 
@@ -786,74 +787,6 @@ class MainWindow(QMainWindow):
             coa_data_entry.clear_coa_form(self)
         else:
             self.coa_search_bar.hide()
-
-    def show_message(self, title, message, icon_type="info", is_confirmation=False):
-        msg = QMessageBox(self)
-
-        # Map icon_type string to QMessageBox.Icon
-        icon_map = {
-            "info": QMessageBox.Icon.Information,
-            "warning": QMessageBox.Icon.Warning,
-            "critical": QMessageBox.Icon.Critical,
-            "question": QMessageBox.Icon.Question
-        }
-        msg.setIcon(icon_map.get(icon_type, QMessageBox.Icon.Information))
-
-        msg.setWindowTitle(title)
-        msg.setText(message)
-
-        # If it's a confirmation dialog, set Yes/No buttons
-        if is_confirmation:
-            msg.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
-            msg.setDefaultButton(QMessageBox.StandardButton.No)  # Optional: default to No
-
-        # Style the QMessageBox
-        msg.setStyleSheet("""
-            QMessageBox {
-                background-color: #fefefe;
-                border-radius: 12px;
-                font-size: 14px;
-                font-family: Segoe UI, sans-serif;
-            }
-            QLabel {
-                color: #333333;
-                padding: 10px;
-            }
-            QPushButton {
-                background-color: #4CAF50;
-                color: white;
-                border-radius: 8px;
-                padding: 6px 18px;
-                font-weight: bold;
-            }
-            QPushButton:hover {
-                background-color: #45a049;
-            }
-            QPushButton:pressed {
-                background-color: #3e8e41;
-            }
-        """)
-
-        if is_confirmation:
-            no_button = msg.button(QMessageBox.StandardButton.No)
-            if no_button:  # Ensure button exists
-                no_button.setStyleSheet("""
-                        QPushButton {
-                            background-color: #f44336; /* Red */
-                            color: white;
-                            border-radius: 8px;
-                            padding: 6px 18px;
-                            font-weight: bold;
-                        }
-                        QPushButton:hover { background-color: #e53935; }
-                        QPushButton:pressed { background-color: #d32f2f; }
-                    """)
-
-        result = msg.exec()
-
-        # Return True if Yes, False if No
-        if is_confirmation:
-            return result == QMessageBox.StandardButton.Yes
 
     def setup_finished_typing(self, line_edit, callback, delay=800):
         timer = QTimer()
