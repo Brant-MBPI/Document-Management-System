@@ -40,6 +40,8 @@ class FileMSDS(QWidget):
 
         btn_download = QPushButton("Download")
         btn_print = QPushButton("Print")
+        btn_download.clicked.connect(lambda: self.download_pdf(self.msds_id, self.file_name))
+        btn_print.clicked.connect(self.print_pdf)
 
         # Put them in a horizontal layout and center
         button_layout = QHBoxLayout()
@@ -265,13 +267,64 @@ class FileMSDS(QWidget):
         buffer.seek(0)
         return buffer.getvalue()  # returns PDF bytes
 
-    def show_pdf_preview(self, filename: str):
-        self.pdf_doc.load(filename)
+    def show_pdf_preview(self, msds_id, filename):
+        self.file_name = filename
+        self.msds_id = msds_id
+        pdf_bytes = self.generate_pdf(msds_id)
+        # Wrap the PDF bytes in a QBuffer
+        self.buffer = QBuffer()  # keep it as an instance attribute so it's not garbage collected
+        self.buffer.setData(pdf_bytes)
+        self.buffer.open(QIODevice.OpenModeFlag.ReadOnly)
+
+        # Load PDF from QBuffer
+        self.pdf_doc.load(self.buffer)
         self.pdf_viewer.setZoomMode(QPdfView.ZoomMode.FitToWidth)
 
-    def generate_and_preview(self, msds_id, filename):
-        filename = filename.upper()
-        if not filename.endswith(".pdf"):
-            filename += ".pdf"
-        pdf_file = self.generate_pdf(msds_id, filename)
-        self.show_pdf_preview(pdf_file)
+    def download_pdf(self, msds_id, filename):
+        file_path, _ = QFileDialog.getSaveFileName(
+            self,
+            "Save PDF",
+            filename,  # default name
+            "PDF Files (*.pdf)"
+        )
+
+        if not file_path:  # user cancelled
+            return None
+
+        if not file_path.endswith(".pdf"):
+            file_path += ".pdf"
+
+        pdf_bytes = self.generate_pdf(msds_id)
+        with open(file_path, "wb") as f:
+            f.write(pdf_bytes)
+
+        window_alert.show_message(self, "Success", "File downloaded!", icon_type="info")
+
+    def print_pdf(self):
+        if not self.pdf_doc or self.pdf_doc.pageCount() == 0:
+            return  # nothing to print
+
+        printer = QPrinter(QPrinter.PrinterMode.HighResolution)
+
+        dialog = QPrintDialog(printer, self)
+        dialog.setWindowTitle("Print Certificate of Analysis")
+
+        if dialog.exec():
+            painter = QPainter(printer)
+            render_opts = QPdfDocumentRenderOptions()
+
+            for page_number in range(self.pdf_doc.pageCount()):
+                if page_number > 0:
+                    printer.newPage()
+
+                target_rect = printer.pageRect(QPrinter.Unit.Point).toRectF()
+
+                # Scale the page to fit the printer page
+                self.pdf_doc.renderPage(
+                    painter,
+                    page_number,
+                    target_rect,
+                    render_opts
+                )
+
+            painter.end()

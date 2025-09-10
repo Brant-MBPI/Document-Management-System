@@ -829,7 +829,7 @@ class MainWindow(QMainWindow):
 
     def open_msds_preview(self, msds_id, filename):
         self.msds_widget = FileMSDS()  # create the widget
-        self.msds_widget.generate_and_preview(msds_id, filename)
+        self.msds_widget.show_pdf_preview(msds_id, filename)
         self.msds_widget.resize(900, 800)
         self.msds_widget.show()
 
