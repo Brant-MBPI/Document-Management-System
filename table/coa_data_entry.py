@@ -71,6 +71,14 @@ def coa_data_entry_form(self):
                 margin-top: 12px;
                 margin-bottom: 8px;
             }
+            QTableCornerButton::section {
+                background-color: #f0f0f0;  /* match header background */
+                border: 1px solid lightgray;
+            }
+            QHeaderView::section {
+                background-color: #f0f0f0;  /* same color for consistency */
+                border: 1px solid lightgray;
+            }
         """)
 
     # === Header ===
@@ -105,10 +113,22 @@ def coa_data_entry_form(self):
     self.summary_analysis_table.setHorizontalHeaderLabels(["Standard", "Delivery"])
     self.summary_analysis_table.setVerticalHeaderLabels(["Color", "Light fastness (1-8)", "Heat Stability (1-5)"])
     self.summary_analysis_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+    self.summary_analysis_table.resizeRowsToContents()
     self.summary_analysis_table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
+    self.summary_analysis_table.setStyleSheet("""
+        
+    """)
     adjust_table_height(self)
 
-    form_layout.addRow(self.summary_analysis_table)
+    table_container = QHBoxLayout()
+    table_container.addStretch()
+
+    table_container.addWidget(self.summary_analysis_table)
+    table_container.addStretch()
+
+    self.coa_data_entry_tab.resizeEvent = lambda event: self.resize_summary_table()
+    # Add to form layout
+    form_layout.addRow(table_container)
 
     btn_add_row = QPushButton("Add Row")
     btn_add_row.clicked.connect(self.add_row_to_coa_summary_table)
@@ -185,3 +205,4 @@ def clear_coa_form(self):
 
     # Reset submit button
     self.btn_coa_submit.setText("Submit")
+

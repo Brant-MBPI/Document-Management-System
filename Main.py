@@ -147,7 +147,7 @@ class MainWindow(QMainWindow):
         self.coa_storage_input = QLineEdit()
         self.coa_shelf_life_input = QLineEdit()
         self.suitability_input = QLineEdit()
-        self.btn_coa_submit = QPushButton()
+        self.btn_coa_submit = QPushButton("Submit")
         self.btn_coa_submit.clicked.connect(self.coa_btn_submit_clicked)
 
         self.po_number_input.setValidator((QIntValidator(0, 2147483647)))
@@ -887,6 +887,12 @@ class MainWindow(QMainWindow):
             msg.setText("❌ Please enter a valid telephone number!")
             msg.setIcon(QMessageBox.Icon.Warning)
             msg.exec()
+
+    # Keep table responsive when resizing the tab
+    def resize_summary_table(self):
+        parent_width = self.coa_data_entry_tab.width()
+        table_width = int(parent_width * 0.7)  # 50% width
+        self.summary_analysis_table.setFixedWidth(table_width)
 
     def open_msds_preview(self, msds_id, filename):
         self.msds_widget = FileMSDS()  # create the widget
