@@ -1,19 +1,18 @@
-from PIL.ImageQt import QPixmap
-from PyQt6.QtCore import Qt
-from PyQt6.QtPdf import QPdfDocument
+import platform
+import io
+from PyQt6.QtCore import QBuffer, QIODevice
+from PyQt6.QtGui import QPainter
+from PyQt6.QtPdf import QPdfDocument, QPdfDocumentRenderOptions
 from PyQt6.QtPdfWidgets import QPdfView
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image, HRFlowable, PageBreak
-from reportlab.lib.pagesizes import A4, letter
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QPushButton, QHBoxLayout, QFileDialog
+from reportlab.lib.enums import TA_CENTER
+from PyQt6.QtPrintSupport import QPrinter, QPrintDialog
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image, PageBreak
+from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from pdf2image import convert_from_path
 from reportlab.lib import colors
-from reportlab.lib.units import mm, inch
-from reportlab.pdfgen import canvas
-from datetime import datetime
-import os
-from pdf2image import convert_from_path
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QScrollArea, QLabel, QPushButton, QHBoxLayout
 
+from alert import window_alert
 from db import db_con
 from print.pdf_header import add_first_page_header
 
@@ -36,6 +35,9 @@ class FileMSDS(QWidget):
         letter_width = int(8.5 * dpi)  # 816 px
         self.pdf_viewer.setFixedWidth(letter_width)
 
+        self.file_name = None
+        self.msds_id = None
+
         btn_download = QPushButton("Download")
         btn_print = QPushButton("Print")
 
@@ -56,12 +58,13 @@ class FileMSDS(QWidget):
         main_layout.addLayout(viewer_container)
 
 
-    def generate_pdf(self, msds_id, filename):
+    def generate_pdf(self, msds_id):
         field_result = db_con.get_single_msds_data(msds_id)
 
         # Create PDF
+        buffer = io.BytesIO()
         doc = SimpleDocTemplate(
-            filename,
+            buffer,
             pagesize=letter,
             rightMargin=50, leftMargin=50, topMargin=90, bottomMargin=50
         )
@@ -259,7 +262,8 @@ class FileMSDS(QWidget):
         content.append(PageBreak())
 
         doc.build(content, onFirstPage=add_first_page_header)
-        return filename
+        buffer.seek(0)
+        return buffer.getvalue()  # returns PDF bytes
 
     def show_pdf_preview(self, filename: str):
         self.pdf_doc.load(filename)
