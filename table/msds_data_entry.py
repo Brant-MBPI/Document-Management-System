@@ -1,11 +1,10 @@
-
 from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QLabel, QWidget, QTabWidget, \
     QTableWidget, QLineEdit, QHeaderView, QTableWidgetItem, QFormLayout
 
+from alert import window_alert
 from db import db_con
 
 current_msds_id = None  # Global variable to store the current MSDS ID
-
 
 def load_msds_details(self, msds_id):
     field_result = db_con.get_single_msds_data(msds_id)
@@ -55,10 +54,16 @@ def load_msds_details(self, msds_id):
     self.other_input.setPlainText(str(field_result[45]))
     self.btn_msds_submit.setText("Update")
 
-
 def create_form(self):
     header = QLabel("Technical Data and Material Safety")
-    header.setStyleSheet("font-size: 18px; font-weight: bold; font-size: 24px;")
+    header.setStyleSheet("""
+        
+        font-size: 28px;
+        font-weight: 700;
+        color: #1a3c6c;
+        margin-bottom: 20px;
+        text-align: center;
+    """)
     section1_header = QLabel("1) Product Identification")
     section1_header.setProperty("class", "sub_title")
 
@@ -66,31 +71,46 @@ def create_form(self):
     form_widget = QWidget()
     form_layout = QFormLayout()
     form_widget.setLayout(form_layout)
-    form_widget.setStyleSheet(""" 
+    form_widget.setStyleSheet("""
+        QWidget {
+            background-color: #f5f6fa;
+        }
         QLabel {
-            margin-left: 60px;
-            font-size: 16px;
+            font-size: 15px;
+            font-weight: 500;
+            color: #333333;
+            margin-left: 0;
+        }
+        QLabel[class="sub_title"] {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1a73e8;
+            margin-top: 16px;
+            margin-bottom: 12px;
         }
         QLineEdit, QTextEdit {
-            font-size: 16px;
-            padding: 4px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+            font-size: 14px;
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            background-color: #ffffff;
+            min-height: 32px;
         }
-        .sub_title {
-            margin-left: 0;
-            font-size: 20px;
-            font-weight: bold;
-            margin-top: 12px;
-            margin-bottom: 8px;
+        QTextEdit {
+            min-height: 80px;
+            max-height: 80px;
         }
-        
+        QLineEdit:focus, QTextEdit:focus {
+            border: 1px solid #4a90e2;
+            background-color: #f8fafc;
+            box-shadow: 0 0 4px rgba(74, 144, 226, 0.3);
+        }
     """)
-    form_layout.setHorizontalSpacing(20)
-    form_layout.setVerticalSpacing(12)
-    form_layout.setContentsMargins(20, 20, 70, 20)
+    form_layout.setHorizontalSpacing(24)
+    form_layout.setVerticalSpacing(18)
+    form_layout.setContentsMargins(40, 40, 90, 40)
 
-    #Section 1
+    # Section 1
     form_layout.addRow(section1_header)
     form_layout.addRow(QLabel("Trade Name:"), self.trade_label_input)
     form_layout.addRow(QLabel("Manufactured By:"), self.manufactured_label_input)
@@ -186,7 +206,7 @@ def create_form(self):
     section11_header = QLabel("11) Toxicological Information")
     section11_header.setProperty("class", "sub_title")
     form_layout.addRow(section11_header)
-    form_layout.addRow(QLabel("Details:"),self.toxicological_input)
+    form_layout.addRow(QLabel("Details:"), self.toxicological_input)
 
     # Section 12-17
     section12_header = QLabel("12) Ecological Information")
@@ -216,77 +236,109 @@ def create_form(self):
     form_layout.addRow(QLabel("Details:"), self.other_input)
     form_layout.addRow(form_btn(self))
 
-    self.msds_form_layout.addWidget(header)
+    # Center the header
+    header_layout = QHBoxLayout()
+    header_layout.addStretch()
+    header_layout.addWidget(header)
+    header_layout.addStretch()
+    self.msds_form_layout.addLayout(header_layout)
     self.msds_form_layout.addWidget(form_widget)
 
-
 def form_btn(self):
-    self.msds_btn_layout.addStretch()
-    self.msds_btn_layout.addWidget(self.btn_msds_submit)
-
+    button_style = """
+        QPushButton {
+            background-color: #4CAF50;
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            min-width: 100px;
+            min-height: 36px;
+        }
+        QPushButton:hover {
+            background-color: #45a049;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        QPushButton:pressed {
+            background-color: #388e3c;
+        }
+        QPushButton:focus {
+            outline: none;
+            border: 2px solid #4a90e2;
+        }
+    """
+    self.btn_msds_submit.setStyleSheet(button_style)
+    submit_button_row = QHBoxLayout()
+    submit_button_row.addStretch()
+    submit_button_row.addStretch()
+    submit_button_row.addWidget(self.btn_msds_submit)
+    return submit_button_row
 
 def clear_msds_form(self):
     """Clear all input fields and the summary table."""
     global current_msds_id
-    current_msds_id = None  # Reset the global MSDS ID
-    # Clear QLineEdit/QTextEdit fields
-    self.trade_label_input.clear()
-    self.manufactured_label_input.clear()
+    try:
+        current_msds_id = None  # Reset the global MSDS ID
+        # Clear QLineEdit/QTextEdit fields
+        self.trade_label_input.clear()
+        self.manufactured_label_input.clear()
 
-    # Stop all typing timers
-    self.tel_label_timer.stop()
-    self.facsimile_label_timer.stop()
-    self.email_label_timer.stop()
+        # Stop all typing timers
+        self.tel_label_timer.stop()
+        self.facsimile_label_timer.stop()
+        self.email_label_timer.stop()
 
-    # Clear fields safely
-    for widget in [
-        self.tel_label_input,
-        self.facsimile_label_input,
-        self.email_label_input,
-        self.trade_label_input,
-        self.manufactured_label_input
-        # add other QLineEdit / QTextEdit widgets
-    ]:
-        widget.blockSignals(True)
-        widget.clear()
-        widget.blockSignals(False)
+        # Clear fields safely
+        for widget in [
+            self.tel_label_input,
+            self.facsimile_label_input,
+            self.email_label_input,
+            self.trade_label_input,
+            self.manufactured_label_input,
+            self.composition_input,
+            self.hazard_preliminaries_input,
+            self.hazard_entry_route_input,
+            self.hazard_symptoms_input,
+            self.hazard_restrictive_condition_input,
+            self.hazard_eyes_input,
+            self.hazard_general_note_input,
+            self.first_aid_inhalation_input,
+            self.first_aid_eyes,
+            self.first_aid_skin_input,
+            self.first_aid_ingestion_input,
+            self.fire_fighting_media_input,
+            self.accidental_release_input,
+            self.handling_input,
+            self.msds_storage_input,
+            self.exposure_control_input,
+            self.respiratory_protection_input,
+            self.hand_protection_input,
+            self.eye_protection_input,
+            self.skin_protection_input,
+            self.appearance_input,
+            self.odor_input,
+            self.heat_stability_input,
+            self.light_fastness_input,
+            self.decomposition_input,
+            self.flash_point_input,
+            self.auto_ignition_input,
+            self.explosion_property_input,
+            self.solubility_input,
+            self.stability_reactivity_input,
+            self.toxicological_input,
+            self.ecological_input,
+            self.disposal_input,
+            self.transport_input,
+            self.regulatory_input,
+            self.msds_shelf_life_input,
+            self.other_input
+        ]:
+            widget.blockSignals(True)
+            widget.clear()
+            widget.blockSignals(False)
 
-    self.email_label_input.clear()
-    self.composition_input.clear()
-    self.hazard_preliminaries_input.clear()
-    self.hazard_entry_route_input.clear()
-    self.hazard_symptoms_input.clear()
-    self.hazard_restrictive_condition_input.clear()
-    self.hazard_eyes_input.clear()
-    self.hazard_general_note_input.clear()
-    self.first_aid_inhalation_input.clear()
-    self.first_aid_eyes.clear()
-    self.first_aid_skin_input.clear()
-    self.first_aid_ingestion_input.clear()
-    self.fire_fighting_media_input.clear()
-    self.accidental_release_input.clear()
-    self.handling_input.clear()
-    self.msds_storage_input.clear()
-    self.exposure_control_input.clear()
-    self.respiratory_protection_input.clear()
-    self.hand_protection_input.clear()
-    self.eye_protection_input.clear()
-    self.skin_protection_input.clear()
-    self.appearance_input.clear()
-    self.odor_input.clear()
-    self.heat_stability_input.clear()
-    self.light_fastness_input.clear()
-    self.decomposition_input.clear()
-    self.flash_point_input.clear()
-    self.auto_ignition_input.clear()
-    self.explosion_property_input.clear()
-    self.solubility_input.clear()
-    self.stability_reactivity_input.clear()
-    self.toxicological_input.clear()
-    self.ecological_input.clear()
-    self.disposal_input.clear()
-    self.transport_input.clear()
-    self.regulatory_input.clear()
-    self.msds_shelf_life_input.clear()
-    self.other_input.clear()
-    self.btn_msds_submit.setText("Submit")
+        self.btn_msds_submit.setText("Submit")
+    except Exception as e:
+        window_alert.show_message(self, "Unexpected Error", f"An error occurred: {str(e)}", icon_type="critical")

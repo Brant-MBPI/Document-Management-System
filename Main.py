@@ -1,4 +1,3 @@
-
 import sys
 import traceback
 
@@ -257,44 +256,55 @@ class MainWindow(QMainWindow):
             QLineEdit {
                 border: 1px solid #ccc;
                 border-radius: 15px;
-                padding: 4px 20px 6px 10px;  
+                padding: 4px 20px 6px 10px;
                 background-color: #f9f9f9;
                 font-size: 12px;
                 margin-bottom: 5px;
             }
             QLineEdit:focus {
-                border: 1px solid #4a90e2;   /* blue highlight */
+                border: 1px solid #4a90e2;
                 background-color: #ffffff;
             }
         """
-        self.setStyleSheet(""" 
+        self.setStyleSheet("""
+            QTableWidget[class="records_table"] {
+                font-size: 15px;  /* Larger cell font */
+                background-color: #ffffff;
+                border: 1px solid #d1d5db;
+                border-radius: 8px;  /* Rounded corners */
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);  /* Subtle shadow */
+            }
             QTableWidget[class="records_table"]::item {
-                border-right: none;
-                border-bottom: 1px solid lightgray;
-                padding-left: 10px;
-                height: 36px;
+                padding: 12px;  /* Increased padding */
+                border-bottom: 1px solid #e0e0e0;
+                background-color: #ffffff;
+            }
+            QTableWidget[class="records_table"]::item:alternate {
+                background-color: #f9fafb;  /* Alternating row color */
+            }
+            QTableWidget[class="records_table"]::item:selected {
+                background-color: #e3f2fd;  /* Match coa_data_entry selection */
+                color: #000000;
+                border: 2px solid #0078d7;
+            }
+            QTableWidget[class="records_table"]::item:hover {
+                background-color: #e9f3ff;  /* Match coa_data_entry hover */
             }
             QTableWidget[class="records_table"] QHeaderView::section {
-                font-size: 14px;
-                border-bottom: 1px solid lightgray;
-                background-color: #f0f0f0;
+                font-size: 16px;  /* Larger header font */
+                font-weight: 600;
+                padding: 12px;
+                background-color: #f0f4f8;  /* Slightly lighter header */
+                border: 1px solid #d1d5db;
+                color: #1a3c6c;
             }
             QTableWidget[class="records_table"] QHeaderView::section:horizontal {
                 border-right: none;
-                background-color: #f0f0f0;
-                border-bottom:3px solid qlineargradient(
-                    x1:0, y1:0, x2:0, y2:1,
-                    stop:0 #fdfdfd, stop:1 #dcdcdc
-                );
+                border-bottom: 3px solid #4a90e2;  /* Blue underline */
             }
             QTableCornerButton::section {
-                background-color: #f0f0f0;
-                border: 1px solid lightgray;
-            }
-            QTableWidget[class="records_table"]::item:selected {
-                background-color: transparent;  
-                border: 2px solid #0078d7;     
-                color: black;                 
+                background-color: #f0f4f8;
+                border: 1px solid #d1d5db;
             }
             QPushButton[class="msds_submit_btn"] {
                 background-color: #4CAF50;
@@ -312,7 +322,7 @@ class MainWindow(QMainWindow):
                 background-color: #3e8e41;
             }
             QWidget#msds_tab, QWidget#coa_tab, QTabWidget {
-                background-color: #f2f2f2; 
+                background-color: #f2f2f2;
                 border: none;
             }
         """)
@@ -321,7 +331,7 @@ class MainWindow(QMainWindow):
                 border: 1px solid #0066cc;
                 border-radius: 6px;
                 background-color: #f0f0f0;
-                top: -1px; 
+                top: -1px;
             }
             QTabBar::tab {
                 background: #f5f5f5;
@@ -329,51 +339,45 @@ class MainWindow(QMainWindow):
                 padding: 8px 12px;
                 font-size: 14px;
                 border: 1px solid #ccc;
-                border-bottom:1px solid #0066cc;   
+                border-bottom: 1px solid #0066cc;
                 border-top-left-radius: 6px;
                 border-top-right-radius: 6px;
                 margin-right: 4px;
-                margin-top: 2px;   
+                margin-top: 2px;
             }
-            
             QTabBar::tab:selected {
                 background: #ffffff;
                 color: #0078d7;
                 font-weight: bold;
                 border: 1px solid #0078d7;
-                border-bottom: none;  
-                margin-top: 0px;     
+                border-bottom: none;
+                margin-top: 0px;
             }
-        
             QTabBar::tab:hover {
-                background: #e9f3ff;      
+                background: #e9f3ff;
                 color: #005a9e;
             }
         """
         main_tab_style = """
             QTabBar::tab {
-                background: #fafafa;            
-                color: #444;                    
-                padding: 7px 16px;              
-                font-size: 14px;                
-                border: 1px solid #bbb;               
-                border-radius: 4px 4px 0 0;     
-                margin-right: 3px;              
+                background: #fafafa;
+                color: #444;
+                padding: 7px 16px;
+                font-size: 14px;
+                border: 1px solid #bbb;
+                border-radius: 4px 4px 0 0;
+                margin-right: 3px;
             }
-
             QTabBar::tab:selected {
-                background: #ffffff;            
-                color: #0066cc;                 
-                font-weight: bold;         
-                border: 1px solid #0066cc;      
+                background: #ffffff;
+                color: #0066cc;
+                font-weight: bold;
+                border: 1px solid #0066cc;
             }
-
             QTabBar::tab:hover {
-                background: #f0f7ff;            
-                color: #004a99;                 
+                background: #f0f7ff;
+                color: #004a99;
             }
-
-            
         """
 
         self.main_tabs.tabBar().setStyleSheet(main_tab_style)
@@ -412,124 +416,127 @@ class MainWindow(QMainWindow):
         msds_data_entry.create_form(self)
 
     def msds_btn_submit_clicked(self):
-        # Collect all required fields
-        required_fields = {
-            "Trade Name": self.trade_label_input.text(),
-            "Manufactured By": self.manufactured_label_input.toPlainText(),
-            "Telephone No.": self.tel_label_input.text(),
-            "Facsimile": self.facsimile_label_input.text(),
-            "Email Adress": self.email_label_input.text(),
-            "Composition/Information on Ingredients": self.composition_input.toPlainText(),
-            "Hazard Preliminaries": self.hazard_preliminaries_input.text(),
-            "Preliminary": self.hazard_entry_route_input.text(),
-            "Symptoms of Exposure": self.hazard_symptoms_input.text(),
-            "Restrictive Condition": self.hazard_restrictive_condition_input.text(),
-            "Hazard Eyes": self.hazard_eyes_input.text(),
-            "Hazard General Note": self.hazard_general_note_input.text(),
-            "First Aid Inhalation": self.first_aid_inhalation_input.text(),
-            "First Aid Eyes": self.first_aid_eyes.text(),
-            "First Aid Skin": self.first_aid_skin_input.text(),
-            "First Aid Ingestion": self.first_aid_ingestion_input.text(),
-            "Extinguishing Media": self.fire_fighting_media_input.toPlainText(),
-            "Accidental Release": self.accidental_release_input.toPlainText(),
-            "Handling": self.handling_input.text(),
-            "Storage": self.msds_storage_input.text(),
-            "Exposure Control": self.exposure_control_input.text(),
-            "Respiratory Protection": self.respiratory_protection_input.text(),
-            "Hand Protection": self.hand_protection_input.text(),
-            "Eye Protection": self.eye_protection_input.text(),
-            "Skin Protection": self.skin_protection_input.text(),
-            "Appearance": self.appearance_input.text(),
-            "Odor": self.odor_input.text(),
-            "Heat Stability": self.heat_stability_input.text(),
-            "Light Fastness": self.light_fastness_input.text(),
-            "Decomposition": self.decomposition_input.text(),
-            "Flash Point": self.flash_point_input.text(),
-            "Auto Ignition": self.auto_ignition_input.text(),
-            "Explosion Property": self.explosion_property_input.text(),
-            "Solubility": self.solubility_input.text(),
-            "Stability & Reactivity": self.stability_reactivity_input.toPlainText(),
-            "Toxicological": self.toxicological_input.toPlainText(),
-            "Ecological": self.ecological_input.toPlainText(),
-            "Disposal": self.disposal_input.toPlainText(),
-            "Transport Information": self.transport_input.toPlainText(),
-            "Regulatory": self.regulatory_input.toPlainText(),
-            "Shelf Life": self.msds_shelf_life_input.toPlainText(),
-            "Other": self.other_input.toPlainText()
-        }
-
-        # Check for empty values
-        for field, value in required_fields.items():
-            if not value.strip():  # empty string
-                window_alert.show_message(self, "Missing Input", f"Please fill in:   {field}", icon_type="warning")
-                return  # stop submission
-        # If all fields are filled, proceed to save
-        msds_data = {
-            "trade_name": self.trade_label_input.text(),
-            "manufacturer_info": self.manufactured_label_input.toPlainText(),
-            "contact_tel": self.tel_label_input.text(),
-            "contact_facsimile": self.facsimile_label_input.text(),
-            "contact_email": self.email_label_input.text(),
-
-            "composition_info": self.composition_input.toPlainText(),
-
-            "hazard_preliminaries": self.hazard_preliminaries_input.text(),
-            "hazard_entry_route": self.hazard_entry_route_input.text(),
-            "hazard_symptoms": self.hazard_symptoms_input.text(),
-            "hazard_restrictive_conditions": self.hazard_restrictive_condition_input.text(),
-            "hazard_eyes": self.hazard_eyes_input.text(),
-            "hazard_general_note": self.hazard_general_note_input.text(),
-
-            "first_aid_inhalation": self.first_aid_inhalation_input.text(),
-            "first_aid_eyes": self.first_aid_eyes.text(),
-            "first_aid_skin": self.first_aid_skin_input.text(),
-            "first_aid_ingestion": self.first_aid_ingestion_input.text(),
-
-            "fire_fighting_media": self.fire_fighting_media_input.toPlainText(),
-            "accidental_release_info": self.accidental_release_input.toPlainText(),
-            "handling_info": self.handling_input.text(),
-            "storage_info": self.msds_storage_input.text(),
-
-            "exposure_control_info": self.exposure_control_input.text(),
-            "respiratory_protection": self.respiratory_protection_input.text(),
-            "hand_protection": self.hand_protection_input.text(),
-            "eye_protection": self.eye_protection_input.text(),
-            "skin_protection": self.skin_protection_input.text(),
-
-            "appearance": self.appearance_input.text(),
-            "odor": self.odor_input.text(),
-            "heat_stability": self.heat_stability_input.text(),
-            "light_fastness": self.light_fastness_input.text(),
-            "decomposition_temp": self.decomposition_input.text(),
-            "flash_point": self.flash_point_input.text(),
-            "auto_ignition_temp": self.auto_ignition_input.text(),
-            "explosion_property": self.explosion_property_input.text(),
-            "solubility_water": self.solubility_input.text(),
-
-            "stability_reactivity": self.stability_reactivity_input.toPlainText(),
-            "toxicological_info": self.toxicological_input.toPlainText(),
-            "ecological_info": self.ecological_input.toPlainText(),
-            "disposal_info": self.disposal_input.toPlainText(),
-            "transport_info": self.transport_input.toPlainText(),
-            "regulatory_info": self.regulatory_input.toPlainText(),
-            "shelf_life_info": self.msds_shelf_life_input.toPlainText(),
-            "other_info": self.other_input.toPlainText()
-        }
-
-        # Save
         try:
-            if msds_data_entry.current_msds_id is not None:  # Update existing MSDS
-                db_con.update_msds_sheet(msds_data_entry.current_msds_id, msds_data)
-                window_alert.show_message(self, "Success", "MSDS updated successfully!", icon_type="info")
-                msds_data_entry.current_msds_id = None
-            else:  # Save new MSDS
-                db_con.save_msds_sheet(msds_data)
-                window_alert.show_message(self, "Success", "MSDS saved successfully!", icon_type="info")
+            # Collect all required fields
+            required_fields = {
+                "Trade Name": self.trade_label_input.text(),
+                "Manufactured By": self.manufactured_label_input.toPlainText(),
+                "Telephone No.": self.tel_label_input.text(),
+                "Facsimile": self.facsimile_label_input.text(),
+                "Email Adress": self.email_label_input.text(),
+                "Composition/Information on Ingredients": self.composition_input.toPlainText(),
+                "Hazard Preliminaries": self.hazard_preliminaries_input.text(),
+                "Preliminary": self.hazard_entry_route_input.text(),
+                "Symptoms of Exposure": self.hazard_symptoms_input.text(),
+                "Restrictive Condition": self.hazard_restrictive_condition_input.text(),
+                "Hazard Eyes": self.hazard_eyes_input.text(),
+                "Hazard General Note": self.hazard_general_note_input.text(),
+                "First Aid Inhalation": self.first_aid_inhalation_input.text(),
+                "First Aid Eyes": self.first_aid_eyes.text(),
+                "First Aid Skin": self.first_aid_skin_input.text(),
+                "First Aid Ingestion": self.first_aid_ingestion_input.text(),
+                "Extinguishing Media": self.fire_fighting_media_input.toPlainText(),
+                "Accidental Release": self.accidental_release_input.toPlainText(),
+                "Handling": self.handling_input.text(),
+                "Storage": self.msds_storage_input.text(),
+                "Exposure Control": self.exposure_control_input.text(),
+                "Respiratory Protection": self.respiratory_protection_input.text(),
+                "Hand Protection": self.hand_protection_input.text(),
+                "Eye Protection": self.eye_protection_input.text(),
+                "Skin Protection": self.skin_protection_input.text(),
+                "Appearance": self.appearance_input.text(),
+                "Odor": self.odor_input.text(),
+                "Heat Stability": self.heat_stability_input.text(),
+                "Light Fastness": self.light_fastness_input.text(),
+                "Decomposition": self.decomposition_input.text(),
+                "Flash Point": self.flash_point_input.text(),
+                "Auto Ignition": self.auto_ignition_input.text(),
+                "Explosion Property": self.explosion_property_input.text(),
+                "Solubility": self.solubility_input.text(),
+                "Stability & Reactivity": self.stability_reactivity_input.toPlainText(),
+                "Toxicological": self.toxicological_input.toPlainText(),
+                "Ecological": self.ecological_input.toPlainText(),
+                "Disposal": self.disposal_input.toPlainText(),
+                "Transport Information": self.transport_input.toPlainText(),
+                "Regulatory": self.regulatory_input.toPlainText(),
+                "Shelf Life": self.msds_shelf_life_input.toPlainText(),
+                "Other": self.other_input.toPlainText()
+            }
+
+            # Check for empty values
+            for field, value in required_fields.items():
+                if not value.strip():  # empty string
+                    window_alert.show_message(self, "Missing Input", f"Please fill in:   {field}", icon_type="warning")
+                    return  # stop submission
+            # If all fields are filled, proceed to save
+            msds_data = {
+                "trade_name": self.trade_label_input.text(),
+                "manufacturer_info": self.manufactured_label_input.toPlainText(),
+                "contact_tel": self.tel_label_input.text(),
+                "contact_facsimile": self.facsimile_label_input.text(),
+                "contact_email": self.email_label_input.text(),
+
+                "composition_info": self.composition_input.toPlainText(),
+
+                "hazard_preliminaries": self.hazard_preliminaries_input.text(),
+                "hazard_entry_route": self.hazard_entry_route_input.text(),
+                "hazard_symptoms": self.hazard_symptoms_input.text(),
+                "hazard_restrictive_conditions": self.hazard_restrictive_condition_input.text(),
+                "hazard_eyes": self.hazard_eyes_input.text(),
+                "hazard_general_note": self.hazard_general_note_input.text(),
+
+                "first_aid_inhalation": self.first_aid_inhalation_input.text(),
+                "first_aid_eyes": self.first_aid_eyes.text(),
+                "first_aid_skin": self.first_aid_skin_input.text(),
+                "first_aid_ingestion": self.first_aid_ingestion_input.text(),
+
+                "fire_fighting_media": self.fire_fighting_media_input.toPlainText(),
+                "accidental_release_info": self.accidental_release_input.toPlainText(),
+                "handling_info": self.handling_input.text(),
+                "storage_info": self.msds_storage_input.text(),
+
+                "exposure_control_info": self.exposure_control_input.text(),
+                "respiratory_protection": self.respiratory_protection_input.text(),
+                "hand_protection": self.hand_protection_input.text(),
+                "eye_protection": self.eye_protection_input.text(),
+                "skin_protection": self.skin_protection_input.text(),
+
+                "appearance": self.appearance_input.text(),
+                "odor": self.odor_input.text(),
+                "heat_stability": self.heat_stability_input.text(),
+                "light_fastness": self.light_fastness_input.text(),
+                "decomposition_temp": self.decomposition_input.text(),
+                "flash_point": self.flash_point_input.text(),
+                "auto_ignition_temp": self.auto_ignition_input.text(),
+                "explosion_property": self.explosion_property_input.text(),
+                "solubility_water": self.solubility_input.text(),
+
+                "stability_reactivity": self.stability_reactivity_input.toPlainText(),
+                "toxicological_info": self.toxicological_input.toPlainText(),
+                "ecological_info": self.ecological_input.toPlainText(),
+                "disposal_info": self.disposal_input.toPlainText(),
+                "transport_info": self.transport_input.toPlainText(),
+                "regulatory_info": self.regulatory_input.toPlainText(),
+                "shelf_life_info": self.msds_shelf_life_input.toPlainText(),
+                "other_info": self.other_input.toPlainText()
+            }
+
+            # Save
+            try:
+                if msds_data_entry.current_msds_id is not None:  # Update existing MSDS
+                    db_con.update_msds_sheet(msds_data_entry.current_msds_id, msds_data)
+                    window_alert.show_message(self, "Success", "MSDS updated successfully!", icon_type="info")
+                    msds_data_entry.current_msds_id = None
+                else:  # Save new MSDS
+                    db_con.save_msds_sheet(msds_data)
+                    window_alert.show_message(self, "Success", "MSDS saved successfully!", icon_type="info")
+            except Exception as e:
+                window_alert.show_message(self, "Database Error", str(e), icon_type="critical")
+            finally:
+                msds_data_entry.clear_msds_form(self)
+                table.load_msds_table(self)
         except Exception as e:
-            window_alert.show_message(self, "Database Error", str(e), icon_type="critical")
-        finally:
-            msds_data_entry.clear_msds_form(self)
-            table.load_msds_table(self)
+            window_alert.show_message(self, "Unexpected Error", f"An error occurred: {str(e)}", icon_type="critical")
 
     def coa_btn_submit_clicked(self):
         customer_name = self.coa_customer_input.text()
@@ -695,26 +702,26 @@ class MainWindow(QMainWindow):
         self.msds_records_table.setColumnCount(4)
         self.msds_records_table.setHorizontalHeaderLabels(["Name", "", "", ""])
         self.msds_records_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Fixed)
-
+        self.msds_records_table.horizontalHeader().setMinimumSectionSize(40)  # Minimum width for icon columns
         # Override resize event
         self.msds_records_table.resizeEvent = lambda event: table.resize_columns(self, self.msds_records_table, event)
-        self.msds_records_table.verticalHeader().setDefaultSectionSize(40)
+        self.msds_records_table.verticalHeader().setDefaultSectionSize(44)  # Increased row height
         self.msds_records_table.verticalHeader().setFixedWidth(40)
         self.msds_records_table.verticalHeader().setDefaultAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.msds_records_table.horizontalHeader().setFixedHeight(40)
+        self.msds_records_table.horizontalHeader().setFixedHeight(44)  # Match row height
         self.msds_records_table.setShowGrid(False)
 
     def coa_table_records_init(self):
         self.coa_records_table.setColumnCount(4)
         self.coa_records_table.setHorizontalHeaderLabels(["Name", "", "", ""])
         self.coa_records_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Fixed)
-
+        self.coa_records_table.horizontalHeader().setMinimumSectionSize(40)  # Minimum width for icon columns
         # Override resize event
         self.coa_records_table.resizeEvent = lambda event: table.resize_columns(self, self.coa_records_table, event)
-        self.coa_records_table.verticalHeader().setDefaultSectionSize(40)
+        self.coa_records_table.verticalHeader().setDefaultSectionSize(44)  # Increased row height
         self.coa_records_table.verticalHeader().setFixedWidth(40)
         self.coa_records_table.verticalHeader().setDefaultAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.coa_records_table.horizontalHeader().setFixedHeight(40)
+        self.coa_records_table.horizontalHeader().setFixedHeight(44)  # Match row height
         self.coa_records_table.setShowGrid(False)
 
     def on_cell_hover(self, row, column):
@@ -722,7 +729,8 @@ class MainWindow(QMainWindow):
 
         # Restore last hovered cell
         if hasattr(self, "last_hovered") and self.last_hovered:
-            last_row, last_col, last_item = self.last_hovered
+            last_row, last_col = self.last_hovered
+            last_item = table.item(last_row, last_col)  # get fresh reference
             if last_item:
                 if last_col == 1:
                     last_item.setIcon(QIcon("img/view_icon.png"))  # normal view icon
@@ -730,8 +738,6 @@ class MainWindow(QMainWindow):
                     last_item.setIcon(QIcon("img/edit_icon.png"))  # normal edit icon
                 elif last_col == 3:
                     last_item.setIcon(QIcon("img/delete_icon.png"))  # normal delete icon
-                elif last_col == 4:
-                    last_item.setIcon(QIcon("img/print_icon.png"))  # normal print icon
             self.last_hovered = None
 
         # Apply highlight to the current cell
@@ -739,18 +745,13 @@ class MainWindow(QMainWindow):
         if item:
             if column == 1:
                 item.setIcon(QIcon("img/hover_view_icon.png"))
-                self.last_hovered = (row, column, item)
+                self.last_hovered = (row, column)
             elif column == 2:
                 item.setIcon(QIcon("img/hover_edit_icon.png"))
-                self.last_hovered = (row, column, item)
+                self.last_hovered = (row, column)
             elif column == 3:
                 item.setIcon(QIcon("img/hover_delete_icon.png"))
-                self.last_hovered = (row, column, item)
-            elif column == 4:
-                item.setIcon(QIcon("img/hover_print_icon.png"))
-                self.last_hovered = (row, column, item)
-
-
+                self.last_hovered = (row, column)
     def msds_cell_clicked(self, row, column):
         msds_id = self.msds_records_table.item(row, 0).data(Qt.ItemDataRole.UserRole)
         if column == 1:  # view column
@@ -781,7 +782,6 @@ class MainWindow(QMainWindow):
             self.open_coa_preview(coa_id, display_text)
         if column == 2:  # edit column
             coa_data_entry.current_coa_id = coa_id  # Store the selected COA ID
-
             coa_data_entry.load_coa_details(self, coa_id)
             # Switch to the COA tab
             self.coa_sub_tabs.setCurrentWidget(self.coa_data_entry_tab)
@@ -799,18 +799,24 @@ class MainWindow(QMainWindow):
                     table.load_coa_table(self)
 
     def toggle_msds_search_bar(self, index):
-        if index == 0:  # Records tab
-            self.msds_search_bar.show()
-            msds_data_entry.clear_msds_form(self)
-        else:  # Other tabs
-            self.msds_search_bar.hide()
+        try:
+            if index == 0:  # Records tab
+                self.msds_search_bar.show()
+                msds_data_entry.clear_msds_form(self)
+            else:  # Other tabs
+                self.msds_search_bar.hide()
+        except Exception as e:
+            window_alert.show_message(self, "Unexpected Error", f"An error occurred: {str(e)}", icon_type="critical")
 
     def toggle_coa_search_bar(self, index):
-        if index == 0:  # Records tab
-            self.coa_search_bar.show()
-            coa_data_entry.clear_coa_form(self)
-        else:
-            self.coa_search_bar.hide()
+        try:
+            if index == 0:  # Records tab
+                self.coa_search_bar.show()
+                coa_data_entry.clear_coa_form(self)
+            else:
+                self.coa_search_bar.hide()
+        except Exception as e:
+            window_alert.show_message(self, "Unexpected Error", f"An error occurred: {str(e)}", icon_type="critical")
 
     def setup_finished_typing(self, line_edit, callback, delay=800):
         timer = QTimer()
@@ -845,7 +851,6 @@ class MainWindow(QMainWindow):
             msg.setIcon(QMessageBox.Icon.Warning)
             msg.exec()
 
-    # Keep table responsive when resizing the tab
     def resize_summary_table(self):
         parent_width = self.coa_data_entry_tab.width()
         table_width = int(parent_width * 0.7)  # 50% width
