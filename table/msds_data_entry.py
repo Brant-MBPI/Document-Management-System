@@ -1,6 +1,7 @@
 from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QLabel, QWidget, QTabWidget, \
     QTableWidget, QLineEdit, QHeaderView, QTableWidgetItem, QFormLayout
 
+from alert import window_alert
 from db import db_con
 
 current_msds_id = None  # Global variable to store the current MSDS ID
@@ -278,63 +279,66 @@ def form_btn(self):
 def clear_msds_form(self):
     """Clear all input fields and the summary table."""
     global current_msds_id
-    current_msds_id = None  # Reset the global MSDS ID
-    # Clear QLineEdit/QTextEdit fields
-    self.trade_label_input.clear()
-    self.manufactured_label_input.clear()
+    try:
+        current_msds_id = None  # Reset the global MSDS ID
+        # Clear QLineEdit/QTextEdit fields
+        self.trade_label_input.clear()
+        self.manufactured_label_input.clear()
 
-    # Stop all typing timers
-    self.tel_label_timer.stop()
-    self.facsimile_label_timer.stop()
-    self.email_label_timer.stop()
+        # Stop all typing timers
+        self.tel_label_timer.stop()
+        self.facsimile_label_timer.stop()
+        self.email_label_timer.stop()
 
-    # Clear fields safely
-    for widget in [
-        self.tel_label_input,
-        self.facsimile_label_input,
-        self.email_label_input,
-        self.trade_label_input,
-        self.manufactured_label_input,
-        self.composition_input,
-        self.hazard_preliminaries_input,
-        self.hazard_entry_route_input,
-        self.hazard_symptoms_input,
-        self.hazard_restrictive_condition_input,
-        self.hazard_eyes_input,
-        self.hazard_general_note_input,
-        self.first_aid_inhalation_input,
-        self.first_aid_eyes,
-        self.first_aid_skin_input,
-        self.first_aid_ingestion_input,
-        self.fire_fighting_media_input,
-        self.accidental_release_input,
-        self.handling_input,
-        self.msds_storage_input,
-        self.exposure_control_input,
-        self.respiratory_protection_input,
-        self.hand_protection_input,
-        self.eye_protection_input,
-        self.skin_protection_input,
-        self.appearance_input,
-        self.odor_input,
-        self.heat_stability_input,
-        self.light_fastness_input,
-        self.decomposition_input,
-        self.flash_point_input,
-        self.auto_ignition_input,
-        self.explosion_property_input,
-        self.solubility_input,
-        self.stability_reactivity_input,
-        self.toxicological_input,
-        self.ecological_input,
-        self.disposal_input,
-        self.transport_input,
-        self.regulatory_input,
-        self.msds_shelf_life_input,
-        self.other_input
-    ]:
-        widget.blockSignals(True)
-        widget.clear()
-        widget.blockSignals(False)
+        # Clear fields safely
+        for widget in [
+            self.tel_label_input,
+            self.facsimile_label_input,
+            self.email_label_input,
+            self.trade_label_input,
+            self.manufactured_label_input,
+            self.composition_input,
+            self.hazard_preliminaries_input,
+            self.hazard_entry_route_input,
+            self.hazard_symptoms_input,
+            self.hazard_restrictive_condition_input,
+            self.hazard_eyes_input,
+            self.hazard_general_note_input,
+            self.first_aid_inhalation_input,
+            self.first_aid_eyes,
+            self.first_aid_skin_input,
+            self.first_aid_ingestion_input,
+            self.fire_fighting_media_input,
+            self.accidental_release_input,
+            self.handling_input,
+            self.msds_storage_input,
+            self.exposure_control_input,
+            self.respiratory_protection_input,
+            self.hand_protection_input,
+            self.eye_protection_input,
+            self.skin_protection_input,
+            self.appearance_input,
+            self.odor_input,
+            self.heat_stability_input,
+            self.light_fastness_input,
+            self.decomposition_input,
+            self.flash_point_input,
+            self.auto_ignition_input,
+            self.explosion_property_input,
+            self.solubility_input,
+            self.stability_reactivity_input,
+            self.toxicological_input,
+            self.ecological_input,
+            self.disposal_input,
+            self.transport_input,
+            self.regulatory_input,
+            self.msds_shelf_life_input,
+            self.other_input
+        ]:
+            widget.blockSignals(True)
+            widget.clear()
+            widget.blockSignals(False)
 
-    self.btn_msds_submit.setText("Submit")
+        self.btn_msds_submit.setText("Submit")
+    except Exception as e:
+        window_alert.show_message(self, "Unexpected Error", f"An error occurred: {str(e)}", icon_type="critical")

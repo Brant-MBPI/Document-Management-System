@@ -415,124 +415,127 @@ class MainWindow(QMainWindow):
         msds_data_entry.create_form(self)
 
     def msds_btn_submit_clicked(self):
-        # Collect all required fields
-        required_fields = {
-            "Trade Name": self.trade_label_input.text(),
-            "Manufactured By": self.manufactured_label_input.toPlainText(),
-            "Telephone No.": self.tel_label_input.text(),
-            "Facsimile": self.facsimile_label_input.text(),
-            "Email Adress": self.email_label_input.text(),
-            "Composition/Information on Ingredients": self.composition_input.toPlainText(),
-            "Hazard Preliminaries": self.hazard_preliminaries_input.text(),
-            "Preliminary": self.hazard_entry_route_input.text(),
-            "Symptoms of Exposure": self.hazard_symptoms_input.text(),
-            "Restrictive Condition": self.hazard_restrictive_condition_input.text(),
-            "Hazard Eyes": self.hazard_eyes_input.text(),
-            "Hazard General Note": self.hazard_general_note_input.text(),
-            "First Aid Inhalation": self.first_aid_inhalation_input.text(),
-            "First Aid Eyes": self.first_aid_eyes.text(),
-            "First Aid Skin": self.first_aid_skin_input.text(),
-            "First Aid Ingestion": self.first_aid_ingestion_input.text(),
-            "Extinguishing Media": self.fire_fighting_media_input.toPlainText(),
-            "Accidental Release": self.accidental_release_input.toPlainText(),
-            "Handling": self.handling_input.text(),
-            "Storage": self.msds_storage_input.text(),
-            "Exposure Control": self.exposure_control_input.text(),
-            "Respiratory Protection": self.respiratory_protection_input.text(),
-            "Hand Protection": self.hand_protection_input.text(),
-            "Eye Protection": self.eye_protection_input.text(),
-            "Skin Protection": self.skin_protection_input.text(),
-            "Appearance": self.appearance_input.text(),
-            "Odor": self.odor_input.text(),
-            "Heat Stability": self.heat_stability_input.text(),
-            "Light Fastness": self.light_fastness_input.text(),
-            "Decomposition": self.decomposition_input.text(),
-            "Flash Point": self.flash_point_input.text(),
-            "Auto Ignition": self.auto_ignition_input.text(),
-            "Explosion Property": self.explosion_property_input.text(),
-            "Solubility": self.solubility_input.text(),
-            "Stability & Reactivity": self.stability_reactivity_input.toPlainText(),
-            "Toxicological": self.toxicological_input.toPlainText(),
-            "Ecological": self.ecological_input.toPlainText(),
-            "Disposal": self.disposal_input.toPlainText(),
-            "Transport Information": self.transport_input.toPlainText(),
-            "Regulatory": self.regulatory_input.toPlainText(),
-            "Shelf Life": self.msds_shelf_life_input.toPlainText(),
-            "Other": self.other_input.toPlainText()
-        }
-
-        # Check for empty values
-        for field, value in required_fields.items():
-            if not value.strip():  # empty string
-                window_alert.show_message(self, "Missing Input", f"Please fill in:   {field}", icon_type="warning")
-                return  # stop submission
-        # If all fields are filled, proceed to save
-        msds_data = {
-            "trade_name": self.trade_label_input.text(),
-            "manufacturer_info": self.manufactured_label_input.toPlainText(),
-            "contact_tel": self.tel_label_input.text(),
-            "contact_facsimile": self.facsimile_label_input.text(),
-            "contact_email": self.email_label_input.text(),
-
-            "composition_info": self.composition_input.toPlainText(),
-
-            "hazard_preliminaries": self.hazard_preliminaries_input.text(),
-            "hazard_entry_route": self.hazard_entry_route_input.text(),
-            "hazard_symptoms": self.hazard_symptoms_input.text(),
-            "hazard_restrictive_conditions": self.hazard_restrictive_condition_input.text(),
-            "hazard_eyes": self.hazard_eyes_input.text(),
-            "hazard_general_note": self.hazard_general_note_input.text(),
-
-            "first_aid_inhalation": self.first_aid_inhalation_input.text(),
-            "first_aid_eyes": self.first_aid_eyes.text(),
-            "first_aid_skin": self.first_aid_skin_input.text(),
-            "first_aid_ingestion": self.first_aid_ingestion_input.text(),
-
-            "fire_fighting_media": self.fire_fighting_media_input.toPlainText(),
-            "accidental_release_info": self.accidental_release_input.toPlainText(),
-            "handling_info": self.handling_input.text(),
-            "storage_info": self.msds_storage_input.text(),
-
-            "exposure_control_info": self.exposure_control_input.text(),
-            "respiratory_protection": self.respiratory_protection_input.text(),
-            "hand_protection": self.hand_protection_input.text(),
-            "eye_protection": self.eye_protection_input.text(),
-            "skin_protection": self.skin_protection_input.text(),
-
-            "appearance": self.appearance_input.text(),
-            "odor": self.odor_input.text(),
-            "heat_stability": self.heat_stability_input.text(),
-            "light_fastness": self.light_fastness_input.text(),
-            "decomposition_temp": self.decomposition_input.text(),
-            "flash_point": self.flash_point_input.text(),
-            "auto_ignition_temp": self.auto_ignition_input.text(),
-            "explosion_property": self.explosion_property_input.text(),
-            "solubility_water": self.solubility_input.text(),
-
-            "stability_reactivity": self.stability_reactivity_input.toPlainText(),
-            "toxicological_info": self.toxicological_input.toPlainText(),
-            "ecological_info": self.ecological_input.toPlainText(),
-            "disposal_info": self.disposal_input.toPlainText(),
-            "transport_info": self.transport_input.toPlainText(),
-            "regulatory_info": self.regulatory_input.toPlainText(),
-            "shelf_life_info": self.msds_shelf_life_input.toPlainText(),
-            "other_info": self.other_input.toPlainText()
-        }
-
-        # Save
         try:
-            if msds_data_entry.current_msds_id is not None:  # Update existing MSDS
-                db_con.update_msds_sheet(msds_data_entry.current_msds_id, msds_data)
-                window_alert.show_message(self, "Success", "MSDS updated successfully!", icon_type="info")
-                msds_data_entry.current_msds_id = None
-            else:  # Save new MSDS
-                db_con.save_msds_sheet(msds_data)
-                window_alert.show_message(self, "Success", "MSDS saved successfully!", icon_type="info")
+            # Collect all required fields
+            required_fields = {
+                "Trade Name": self.trade_label_input.text(),
+                "Manufactured By": self.manufactured_label_input.toPlainText(),
+                "Telephone No.": self.tel_label_input.text(),
+                "Facsimile": self.facsimile_label_input.text(),
+                "Email Adress": self.email_label_input.text(),
+                "Composition/Information on Ingredients": self.composition_input.toPlainText(),
+                "Hazard Preliminaries": self.hazard_preliminaries_input.text(),
+                "Preliminary": self.hazard_entry_route_input.text(),
+                "Symptoms of Exposure": self.hazard_symptoms_input.text(),
+                "Restrictive Condition": self.hazard_restrictive_condition_input.text(),
+                "Hazard Eyes": self.hazard_eyes_input.text(),
+                "Hazard General Note": self.hazard_general_note_input.text(),
+                "First Aid Inhalation": self.first_aid_inhalation_input.text(),
+                "First Aid Eyes": self.first_aid_eyes.text(),
+                "First Aid Skin": self.first_aid_skin_input.text(),
+                "First Aid Ingestion": self.first_aid_ingestion_input.text(),
+                "Extinguishing Media": self.fire_fighting_media_input.toPlainText(),
+                "Accidental Release": self.accidental_release_input.toPlainText(),
+                "Handling": self.handling_input.text(),
+                "Storage": self.msds_storage_input.text(),
+                "Exposure Control": self.exposure_control_input.text(),
+                "Respiratory Protection": self.respiratory_protection_input.text(),
+                "Hand Protection": self.hand_protection_input.text(),
+                "Eye Protection": self.eye_protection_input.text(),
+                "Skin Protection": self.skin_protection_input.text(),
+                "Appearance": self.appearance_input.text(),
+                "Odor": self.odor_input.text(),
+                "Heat Stability": self.heat_stability_input.text(),
+                "Light Fastness": self.light_fastness_input.text(),
+                "Decomposition": self.decomposition_input.text(),
+                "Flash Point": self.flash_point_input.text(),
+                "Auto Ignition": self.auto_ignition_input.text(),
+                "Explosion Property": self.explosion_property_input.text(),
+                "Solubility": self.solubility_input.text(),
+                "Stability & Reactivity": self.stability_reactivity_input.toPlainText(),
+                "Toxicological": self.toxicological_input.toPlainText(),
+                "Ecological": self.ecological_input.toPlainText(),
+                "Disposal": self.disposal_input.toPlainText(),
+                "Transport Information": self.transport_input.toPlainText(),
+                "Regulatory": self.regulatory_input.toPlainText(),
+                "Shelf Life": self.msds_shelf_life_input.toPlainText(),
+                "Other": self.other_input.toPlainText()
+            }
+
+            # Check for empty values
+            for field, value in required_fields.items():
+                if not value.strip():  # empty string
+                    window_alert.show_message(self, "Missing Input", f"Please fill in:   {field}", icon_type="warning")
+                    return  # stop submission
+            # If all fields are filled, proceed to save
+            msds_data = {
+                "trade_name": self.trade_label_input.text(),
+                "manufacturer_info": self.manufactured_label_input.toPlainText(),
+                "contact_tel": self.tel_label_input.text(),
+                "contact_facsimile": self.facsimile_label_input.text(),
+                "contact_email": self.email_label_input.text(),
+
+                "composition_info": self.composition_input.toPlainText(),
+
+                "hazard_preliminaries": self.hazard_preliminaries_input.text(),
+                "hazard_entry_route": self.hazard_entry_route_input.text(),
+                "hazard_symptoms": self.hazard_symptoms_input.text(),
+                "hazard_restrictive_conditions": self.hazard_restrictive_condition_input.text(),
+                "hazard_eyes": self.hazard_eyes_input.text(),
+                "hazard_general_note": self.hazard_general_note_input.text(),
+
+                "first_aid_inhalation": self.first_aid_inhalation_input.text(),
+                "first_aid_eyes": self.first_aid_eyes.text(),
+                "first_aid_skin": self.first_aid_skin_input.text(),
+                "first_aid_ingestion": self.first_aid_ingestion_input.text(),
+
+                "fire_fighting_media": self.fire_fighting_media_input.toPlainText(),
+                "accidental_release_info": self.accidental_release_input.toPlainText(),
+                "handling_info": self.handling_input.text(),
+                "storage_info": self.msds_storage_input.text(),
+
+                "exposure_control_info": self.exposure_control_input.text(),
+                "respiratory_protection": self.respiratory_protection_input.text(),
+                "hand_protection": self.hand_protection_input.text(),
+                "eye_protection": self.eye_protection_input.text(),
+                "skin_protection": self.skin_protection_input.text(),
+
+                "appearance": self.appearance_input.text(),
+                "odor": self.odor_input.text(),
+                "heat_stability": self.heat_stability_input.text(),
+                "light_fastness": self.light_fastness_input.text(),
+                "decomposition_temp": self.decomposition_input.text(),
+                "flash_point": self.flash_point_input.text(),
+                "auto_ignition_temp": self.auto_ignition_input.text(),
+                "explosion_property": self.explosion_property_input.text(),
+                "solubility_water": self.solubility_input.text(),
+
+                "stability_reactivity": self.stability_reactivity_input.toPlainText(),
+                "toxicological_info": self.toxicological_input.toPlainText(),
+                "ecological_info": self.ecological_input.toPlainText(),
+                "disposal_info": self.disposal_input.toPlainText(),
+                "transport_info": self.transport_input.toPlainText(),
+                "regulatory_info": self.regulatory_input.toPlainText(),
+                "shelf_life_info": self.msds_shelf_life_input.toPlainText(),
+                "other_info": self.other_input.toPlainText()
+            }
+
+            # Save
+            try:
+                if msds_data_entry.current_msds_id is not None:  # Update existing MSDS
+                    db_con.update_msds_sheet(msds_data_entry.current_msds_id, msds_data)
+                    window_alert.show_message(self, "Success", "MSDS updated successfully!", icon_type="info")
+                    msds_data_entry.current_msds_id = None
+                else:  # Save new MSDS
+                    db_con.save_msds_sheet(msds_data)
+                    window_alert.show_message(self, "Success", "MSDS saved successfully!", icon_type="info")
+            except Exception as e:
+                window_alert.show_message(self, "Database Error", str(e), icon_type="critical")
+            finally:
+                msds_data_entry.clear_msds_form(self)
+                table.load_msds_table(self)
         except Exception as e:
-            window_alert.show_message(self, "Database Error", str(e), icon_type="critical")
-        finally:
-            msds_data_entry.clear_msds_form(self)
-            table.load_msds_table(self)
+            window_alert.show_message(self, "Unexpected Error", f"An error occurred: {str(e)}", icon_type="critical")
 
     def coa_btn_submit_clicked(self):
         customer_name = self.coa_customer_input.text()
@@ -795,18 +798,24 @@ class MainWindow(QMainWindow):
                     table.load_coa_table(self)
 
     def toggle_msds_search_bar(self, index):
-        if index == 0:  # Records tab
-            self.msds_search_bar.show()
-            msds_data_entry.clear_msds_form(self)
-        else:  # Other tabs
-            self.msds_search_bar.hide()
+        try:
+            if index == 0:  # Records tab
+                self.msds_search_bar.show()
+                msds_data_entry.clear_msds_form(self)
+            else:  # Other tabs
+                self.msds_search_bar.hide()
+        except Exception as e:
+            window_alert.show_message(self, "Unexpected Error", f"An error occurred: {str(e)}", icon_type="critical")
 
     def toggle_coa_search_bar(self, index):
-        if index == 0:  # Records tab
-            self.coa_search_bar.show()
-            coa_data_entry.clear_coa_form(self)
-        else:
-            self.coa_search_bar.hide()
+        try:
+            if index == 0:  # Records tab
+                self.coa_search_bar.show()
+                coa_data_entry.clear_coa_form(self)
+            else:
+                self.coa_search_bar.hide()
+        except Exception as e:
+            window_alert.show_message(self, "Unexpected Error", f"An error occurred: {str(e)}", icon_type="critical")
 
     def setup_finished_typing(self, line_edit, callback, delay=800):
         timer = QTimer()
@@ -858,6 +867,7 @@ class MainWindow(QMainWindow):
         self.coa_widget.resize(900, 800)
         self.coa_widget.show()
 
+
 def main():
     app = QApplication(sys.argv)
     window = MainWindow()
@@ -865,6 +875,7 @@ def main():
     window.resize(1000, 800)
     window.showMaximized()
     sys.exit(app.exec())
+
 
 if __name__ == '__main__':
     main()
