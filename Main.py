@@ -12,6 +12,7 @@ from table import msds_data_entry, coa_data_entry, table
 from print.print_msds import FileMSDS
 from print.print_coa import FileCOA
 
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -728,7 +729,8 @@ class MainWindow(QMainWindow):
 
         # Restore last hovered cell
         if hasattr(self, "last_hovered") and self.last_hovered:
-            last_row, last_col, last_item = self.last_hovered
+            last_row, last_col = self.last_hovered
+            last_item = table.item(last_row, last_col)  # get fresh reference
             if last_item:
                 if last_col == 1:
                     last_item.setIcon(QIcon("img/view_icon.png"))  # normal view icon
@@ -743,14 +745,13 @@ class MainWindow(QMainWindow):
         if item:
             if column == 1:
                 item.setIcon(QIcon("img/hover_view_icon.png"))
-                self.last_hovered = (row, column, item)
+                self.last_hovered = (row, column)
             elif column == 2:
                 item.setIcon(QIcon("img/hover_edit_icon.png"))
-                self.last_hovered = (row, column, item)
+                self.last_hovered = (row, column)
             elif column == 3:
                 item.setIcon(QIcon("img/hover_delete_icon.png"))
-                self.last_hovered = (row, column, item)
-
+                self.last_hovered = (row, column)
     def msds_cell_clicked(self, row, column):
         msds_id = self.msds_records_table.item(row, 0).data(Qt.ItemDataRole.UserRole)
         if column == 1:  # view column
