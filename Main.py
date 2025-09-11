@@ -1,5 +1,6 @@
 
 import sys
+import traceback
 
 from PyQt6.QtCore import Qt, QDate, QRegularExpression, QTimer, QEvent, QObject
 from PyQt6.QtGui import QIcon, QIntValidator, QRegularExpressionValidator, QFont, QAction
@@ -459,7 +460,7 @@ class MainWindow(QMainWindow):
         # Check for empty values
         for field, value in required_fields.items():
             if not value.strip():  # empty string
-                window_alert.show_message("Missing Input", f"Please fill in:   {field}", icon_type="warning")
+                window_alert.show_message(self, "Missing Input", f"Please fill in:   {field}", icon_type="warning")
                 return  # stop submission
         # If all fields are filled, proceed to save
         msds_data = {
@@ -518,19 +519,18 @@ class MainWindow(QMainWindow):
         try:
             if msds_data_entry.current_msds_id is not None:  # Update existing MSDS
                 db_con.update_msds_sheet(msds_data_entry.current_msds_id, msds_data)
-                window_alert.show_message("Success", "MSDS updated successfully!", icon_type="info")
+                window_alert.show_message(self, "Success", "MSDS updated successfully!", icon_type="info")
                 msds_data_entry.current_msds_id = None
             else:  # Save new MSDS
                 db_con.save_msds_sheet(msds_data)
-                window_alert.show_message("Success", "MSDS saved successfully!", icon_type="info")
+                window_alert.show_message(self, "Success", "MSDS saved successfully!", icon_type="info")
         except Exception as e:
-            window_alert.show_message("Database Error", str(e), icon_type="critical")
+            window_alert.show_message(self, "Database Error", str(e), icon_type="critical")
         finally:
             msds_data_entry.clear_msds_form(self)
             table.load_msds_table(self)
 
     def coa_btn_submit_clicked(self):
-
         customer_name = self.coa_customer_input.text()
         color_code = self.color_code_input.text()
         quantity_delivered = self.quantity_delivered_input.text()
@@ -562,12 +562,12 @@ class MainWindow(QMainWindow):
         # Check if any required field is empty
         for field, value in required_fields.items():
             if not value:  # empty string
-                window_alert.show_message("Missing Input", f"Please fill in:  {field}", icon_type="warning")
+                window_alert.show_message(self, "Missing Input", f"Please fill in:  {field}", icon_type="warning")
                 return  # stop processing
 
         # Check summary of analysis if no empty row
         if not any(any(cell for cell in row) for row in summary_of_analysis.values()):
-            window_alert.show_message("Missing Input", "Please fill in the Summary of Analysis table.", icon_type="warning")
+            window_alert.show_message(self, "Missing Input", "Please fill in the Summary of Analysis table.", icon_type="warning")
             return
 
         # Build coa_data for saving
@@ -591,17 +591,18 @@ class MainWindow(QMainWindow):
         try:
             if coa_data_entry.current_coa_id is not None:  # Update existing COA
                 db_con.update_certificate_of_analysis(coa_data_entry.current_coa_id, coa_data, summary_of_analysis)
-                window_alert.show_message("Success", f"Certificate of Analysis updated successfully!", icon_type="info")
+                window_alert.show_message(self, "Success", f"Certificate of Analysis updated successfully!", icon_type="info")
                 coa_data_entry.current_coa_id = None
 
             else:  # Save new COA
                 db_con.save_certificate_of_analysis(coa_data, summary_of_analysis)
-                window_alert.show_message("Success", f"Certificate of Analysis saved successfully!", icon_type="info")
+                window_alert.show_message(self,"Success", f"Certificate of Analysis saved successfully!", icon_type="info")
         except Exception as e:
-            window_alert.show_message("Database Error", str(e), icon_type="critical")
+            window_alert.show_message(self, "Database Error", str(e), icon_type="critical")
         finally:
             coa_data_entry.clear_coa_form(self)
             table.load_coa_table(self)
+            coa_data_entry.adjust_table_height(self)
 
     def get_coa_summary_analysis_table_data(self):
         data = {}
@@ -760,15 +761,15 @@ class MainWindow(QMainWindow):
             # Switch to the MSDS tab
             self.msds_sub_tabs.setCurrentWidget(self.msds_data_entry_tab)
         if column == 3:  # delete column
-            confirm = window_alert.show_message("Confirm Deletion",
+            confirm = window_alert.show_message(self, "Confirm Deletion",
                                         "Are you sure you want to delete this MSDS record?",
                                         icon_type="question", is_confirmation=True)
             if confirm:
                 try:
                     db_con.delete_msds_sheet(msds_id)
-                    window_alert.show_message("Deleted", "MSDS record deleted successfully.", icon_type="info")
+                    window_alert.show_message(self, "Deleted", "MSDS record deleted successfully.", icon_type="info")
                 except Exception as e:
-                    window_alert.show_message("Error", str(e), icon_type="critical")
+                    window_alert.show_message(self, "Error", str(e), icon_type="critical")
                 finally:
                     table.load_msds_table(self)
 
@@ -784,15 +785,15 @@ class MainWindow(QMainWindow):
             # Switch to the COA tab
             self.coa_sub_tabs.setCurrentWidget(self.coa_data_entry_tab)
         if column == 3:  # delete column
-            confirm = window_alert.show_message("Confirm Deletion",
+            confirm = window_alert.show_message(self, "Confirm Deletion",
                                         "Are you sure you want to delete this Certificate of Analysis record?",
                                         icon_type="question", is_confirmation=True)
             if confirm:
                 try:
                     db_con.delete_certificate_of_analysis(coa_id)
-                    window_alert.show_message("Deleted", "Certificate of Analysis record deleted successfully.", icon_type="info")
+                    window_alert.show_message(self, "Deleted", "Certificate of Analysis record deleted successfully.", icon_type="info")
                 except Exception as e:
-                    window_alert.show_message("Error", str(e), icon_type="critical")
+                    window_alert.show_message(self, "Error", str(e), icon_type="critical")
                 finally:
                     table.load_coa_table(self)
 
