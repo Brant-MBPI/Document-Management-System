@@ -83,7 +83,7 @@ def resize_columns(self, table: QTableWidget, event):
     total_width = table.viewport().width()
 
     # Fixed size for icon columns (icon size + padding)
-    icon_size = 24  # adjust this to your actual icon size
+    icon_size = 30  # adjust this to your actual icon size
     padding = 10  # extra space so it's not cramped
     icon_col_width = icon_size + padding
 

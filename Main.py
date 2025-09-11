@@ -1,4 +1,3 @@
-
 import sys
 import traceback
 
@@ -12,7 +11,6 @@ from alert import window_alert
 from table import msds_data_entry, coa_data_entry, table
 from print.print_msds import FileMSDS
 from print.print_coa import FileCOA
-
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -257,44 +255,55 @@ class MainWindow(QMainWindow):
             QLineEdit {
                 border: 1px solid #ccc;
                 border-radius: 15px;
-                padding: 4px 20px 6px 10px;  
+                padding: 4px 20px 6px 10px;
                 background-color: #f9f9f9;
                 font-size: 12px;
                 margin-bottom: 5px;
             }
             QLineEdit:focus {
-                border: 1px solid #4a90e2;   /* blue highlight */
+                border: 1px solid #4a90e2;
                 background-color: #ffffff;
             }
         """
-        self.setStyleSheet(""" 
+        self.setStyleSheet("""
+            QTableWidget[class="records_table"] {
+                font-size: 15px;  /* Larger cell font */
+                background-color: #ffffff;
+                border: 1px solid #d1d5db;
+                border-radius: 8px;  /* Rounded corners */
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);  /* Subtle shadow */
+            }
             QTableWidget[class="records_table"]::item {
-                border-right: none;
-                border-bottom: 1px solid lightgray;
-                padding-left: 10px;
-                height: 36px;
+                padding: 12px;  /* Increased padding */
+                border-bottom: 1px solid #e0e0e0;
+                background-color: #ffffff;
+            }
+            QTableWidget[class="records_table"]::item:alternate {
+                background-color: #f9fafb;  /* Alternating row color */
+            }
+            QTableWidget[class="records_table"]::item:selected {
+                background-color: #e3f2fd;  /* Match coa_data_entry selection */
+                color: #000000;
+                border: 2px solid #0078d7;
+            }
+            QTableWidget[class="records_table"]::item:hover {
+                background-color: #e9f3ff;  /* Match coa_data_entry hover */
             }
             QTableWidget[class="records_table"] QHeaderView::section {
-                font-size: 14px;
-                border-bottom: 1px solid lightgray;
-                background-color: #f0f0f0;
+                font-size: 16px;  /* Larger header font */
+                font-weight: 600;
+                padding: 12px;
+                background-color: #f0f4f8;  /* Slightly lighter header */
+                border: 1px solid #d1d5db;
+                color: #1a3c6c;
             }
             QTableWidget[class="records_table"] QHeaderView::section:horizontal {
                 border-right: none;
-                background-color: #f0f0f0;
-                border-bottom:3px solid qlineargradient(
-                    x1:0, y1:0, x2:0, y2:1,
-                    stop:0 #fdfdfd, stop:1 #dcdcdc
-                );
+                border-bottom: 3px solid #4a90e2;  /* Blue underline */
             }
             QTableCornerButton::section {
-                background-color: #f0f0f0;
-                border: 1px solid lightgray;
-            }
-            QTableWidget[class="records_table"]::item:selected {
-                background-color: transparent;  
-                border: 2px solid #0078d7;     
-                color: black;                 
+                background-color: #f0f4f8;
+                border: 1px solid #d1d5db;
             }
             QPushButton[class="msds_submit_btn"] {
                 background-color: #4CAF50;
@@ -312,7 +321,7 @@ class MainWindow(QMainWindow):
                 background-color: #3e8e41;
             }
             QWidget#msds_tab, QWidget#coa_tab, QTabWidget {
-                background-color: #f2f2f2; 
+                background-color: #f2f2f2;
                 border: none;
             }
         """)
@@ -321,7 +330,7 @@ class MainWindow(QMainWindow):
                 border: 1px solid #0066cc;
                 border-radius: 6px;
                 background-color: #f0f0f0;
-                top: -1px; 
+                top: -1px;
             }
             QTabBar::tab {
                 background: #f5f5f5;
@@ -329,51 +338,45 @@ class MainWindow(QMainWindow):
                 padding: 8px 12px;
                 font-size: 14px;
                 border: 1px solid #ccc;
-                border-bottom:1px solid #0066cc;   
+                border-bottom: 1px solid #0066cc;
                 border-top-left-radius: 6px;
                 border-top-right-radius: 6px;
                 margin-right: 4px;
-                margin-top: 2px;   
+                margin-top: 2px;
             }
-            
             QTabBar::tab:selected {
                 background: #ffffff;
                 color: #0078d7;
                 font-weight: bold;
                 border: 1px solid #0078d7;
-                border-bottom: none;  
-                margin-top: 0px;     
+                border-bottom: none;
+                margin-top: 0px;
             }
-        
             QTabBar::tab:hover {
-                background: #e9f3ff;      
+                background: #e9f3ff;
                 color: #005a9e;
             }
         """
         main_tab_style = """
             QTabBar::tab {
-                background: #fafafa;            
-                color: #444;                    
-                padding: 7px 16px;              
-                font-size: 14px;                
-                border: 1px solid #bbb;               
-                border-radius: 4px 4px 0 0;     
-                margin-right: 3px;              
+                background: #fafafa;
+                color: #444;
+                padding: 7px 16px;
+                font-size: 14px;
+                border: 1px solid #bbb;
+                border-radius: 4px 4px 0 0;
+                margin-right: 3px;
             }
-
             QTabBar::tab:selected {
-                background: #ffffff;            
-                color: #0066cc;                 
-                font-weight: bold;         
-                border: 1px solid #0066cc;      
+                background: #ffffff;
+                color: #0066cc;
+                font-weight: bold;
+                border: 1px solid #0066cc;
             }
-
             QTabBar::tab:hover {
-                background: #f0f7ff;            
-                color: #004a99;                 
+                background: #f0f7ff;
+                color: #004a99;
             }
-
-            
         """
 
         self.main_tabs.tabBar().setStyleSheet(main_tab_style)
@@ -695,26 +698,26 @@ class MainWindow(QMainWindow):
         self.msds_records_table.setColumnCount(4)
         self.msds_records_table.setHorizontalHeaderLabels(["Name", "", "", ""])
         self.msds_records_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Fixed)
-
+        self.msds_records_table.horizontalHeader().setMinimumSectionSize(40)  # Minimum width for icon columns
         # Override resize event
         self.msds_records_table.resizeEvent = lambda event: table.resize_columns(self, self.msds_records_table, event)
-        self.msds_records_table.verticalHeader().setDefaultSectionSize(40)
+        self.msds_records_table.verticalHeader().setDefaultSectionSize(44)  # Increased row height
         self.msds_records_table.verticalHeader().setFixedWidth(40)
         self.msds_records_table.verticalHeader().setDefaultAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.msds_records_table.horizontalHeader().setFixedHeight(40)
+        self.msds_records_table.horizontalHeader().setFixedHeight(44)  # Match row height
         self.msds_records_table.setShowGrid(False)
 
     def coa_table_records_init(self):
         self.coa_records_table.setColumnCount(4)
         self.coa_records_table.setHorizontalHeaderLabels(["Name", "", "", ""])
         self.coa_records_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Fixed)
-
+        self.coa_records_table.horizontalHeader().setMinimumSectionSize(40)  # Minimum width for icon columns
         # Override resize event
         self.coa_records_table.resizeEvent = lambda event: table.resize_columns(self, self.coa_records_table, event)
-        self.coa_records_table.verticalHeader().setDefaultSectionSize(40)
+        self.coa_records_table.verticalHeader().setDefaultSectionSize(44)  # Increased row height
         self.coa_records_table.verticalHeader().setFixedWidth(40)
         self.coa_records_table.verticalHeader().setDefaultAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.coa_records_table.horizontalHeader().setFixedHeight(40)
+        self.coa_records_table.horizontalHeader().setFixedHeight(44)  # Match row height
         self.coa_records_table.setShowGrid(False)
 
     def on_cell_hover(self, row, column):
@@ -730,8 +733,6 @@ class MainWindow(QMainWindow):
                     last_item.setIcon(QIcon("img/edit_icon.png"))  # normal edit icon
                 elif last_col == 3:
                     last_item.setIcon(QIcon("img/delete_icon.png"))  # normal delete icon
-                elif last_col == 4:
-                    last_item.setIcon(QIcon("img/print_icon.png"))  # normal print icon
             self.last_hovered = None
 
         # Apply highlight to the current cell
@@ -746,10 +747,6 @@ class MainWindow(QMainWindow):
             elif column == 3:
                 item.setIcon(QIcon("img/hover_delete_icon.png"))
                 self.last_hovered = (row, column, item)
-            elif column == 4:
-                item.setIcon(QIcon("img/hover_print_icon.png"))
-                self.last_hovered = (row, column, item)
-
 
     def msds_cell_clicked(self, row, column):
         msds_id = self.msds_records_table.item(row, 0).data(Qt.ItemDataRole.UserRole)
@@ -781,7 +778,6 @@ class MainWindow(QMainWindow):
             self.open_coa_preview(coa_id, display_text)
         if column == 2:  # edit column
             coa_data_entry.current_coa_id = coa_id  # Store the selected COA ID
-
             coa_data_entry.load_coa_details(self, coa_id)
             # Switch to the COA tab
             self.coa_sub_tabs.setCurrentWidget(self.coa_data_entry_tab)
@@ -845,7 +841,6 @@ class MainWindow(QMainWindow):
             msg.setIcon(QMessageBox.Icon.Warning)
             msg.exec()
 
-    # Keep table responsive when resizing the tab
     def resize_summary_table(self):
         parent_width = self.coa_data_entry_tab.width()
         table_width = int(parent_width * 0.7)  # 50% width
@@ -863,7 +858,6 @@ class MainWindow(QMainWindow):
         self.coa_widget.resize(900, 800)
         self.coa_widget.show()
 
-
 def main():
     app = QApplication(sys.argv)
     window = MainWindow()
@@ -871,7 +865,6 @@ def main():
     window.resize(1000, 800)
     window.showMaximized()
     sys.exit(app.exec())
-
 
 if __name__ == '__main__':
     main()
