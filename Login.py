@@ -216,7 +216,7 @@ class AuthWindow(QMainWindow):
                 return
 
             hashed_password = self.hash_password(password)
-            # user = db_con.authenticate_user(username, hashed_password)
+            user = db_con.authenticate_user(self, username, hashed_password)
 
             if user:
                 window_alert.show_message(self, "Success", "Login successful!", icon_type="info")

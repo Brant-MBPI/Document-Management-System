@@ -504,3 +504,34 @@ def delete_certificate_of_analysis(coa_id):
         if conn:
             conn.rollback()
         raise e
+
+
+def authenticate_user(self, username, hashed_password):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT id FROM tbl_user WHERE username = ? AND password = ?",
+        (username, hashed_password)
+    )
+    cur.close()
+    conn.close()
+    return cur.fetchone()
+
+def register_user(self, username, hashed_password):
+    conn = get_connection()
+    try:
+        cur = conn.cursor()
+        cur.execute("SELECT id FROM users WHERE username = ?", (username,))
+        if cur.fetchone():
+            raise ValueError("Username already exists.")
+        cur.execute(
+            "INSERT INTO users (username, password) VALUES (?, ?)",
+            (username, hashed_password)
+        )
+        conn.commit()
+        cur.close()
+        conn.close()
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        raise e
