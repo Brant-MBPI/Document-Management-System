@@ -260,6 +260,7 @@ class MainWindow(QMainWindow):
                 padding: 4px 20px 6px 10px;  
                 background-color: #f9f9f9;
                 font-size: 12px;
+                margin-bottom: 5px;
             }
             QLineEdit:focus {
                 border: 1px solid #4a90e2;   /* blue highlight */
@@ -325,7 +326,7 @@ class MainWindow(QMainWindow):
             QTabBar::tab {
                 background: #f5f5f5;
                 color: #333;
-                padding: 6px 12px;
+                padding: 8px 12px;
                 font-size: 14px;
                 border: 1px solid #ccc;
                 border-bottom:1px solid #0066cc;   
