@@ -20,8 +20,9 @@ def create_tables():
     cur.execute("""
         CREATE TABLE IF NOT EXISTS msds_sheets(
             id SERIAL PRIMARY KEY,
+            customer_name VARCHAR(100),
             trade_name VARCHAR(255) NOT NULL,
-            product_code VARCHAR(100) UNIQUE,
+            product_code VARCHAR(100),
             creation_date TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
             last_modified_date TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
             
@@ -42,7 +43,7 @@ def create_tables():
             first_aid_inhalation TEXT,
             first_aid_eyes TEXT,
             first_aid_skin TEXT,
-            first_aid_ingestion TEXT,   #20
+            first_aid_ingestion TEXT,
             
             fire_fighting_media TEXT,
             
@@ -57,7 +58,7 @@ def create_tables():
             eye_protection TEXT,
             skin_protection TEXT,
             
-            appearance VARCHAR(100),   #30
+            appearance VARCHAR(100),
             odor VARCHAR(100),
             packaging VARCHAR(100),
             carrier_material VARCHAR(100),
@@ -136,7 +137,9 @@ def save_msds_sheet(data):
 
         cur.execute("""
             INSERT INTO msds_sheets (
+                customer_name,
                 trade_name,
+                product_code,
                 manufacturer_info,
                 contact_tel,
                 contact_facsimile,
@@ -168,7 +171,7 @@ def save_msds_sheet(data):
                 resin_suitability,
                 light_fastness,
                 heat_stability,
-                non_toxicity_temp,
+                non_toxicity,
                 flash_point,
                 auto_ignition_temp,
                 explosion_property,
@@ -187,12 +190,12 @@ def save_msds_sheet(data):
                 %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
                 %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
                 %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                %s, %s, %s, %s, %s
+                %s, %s, %s, %s, %s, %s, %s
             )
             RETURNING id;
         """, (
-            data["trade_name"], data["manufacturer_info"], data["contact_tel"],
-            data["contact_facsimile"], data["contact_email"], data["composition_info"],
+            data["customer_name"], data["trade_name"], data["product_code"], data["manufacturer_info"],
+            data["contact_tel"], data["contact_facsimile"], data["contact_email"], data["composition_info"],
             data["hazard_preliminaries"], data["hazard_entry_route"], data["hazard_symptoms"],
             data["hazard_restrictive_conditions"], data["hazard_eyes"], data["hazard_general_note"],
             data["first_aid_inhalation"], data["first_aid_eyes"], data["first_aid_skin"],
@@ -282,7 +285,9 @@ def update_msds_sheet(msds_id, data):
         cur.execute("""
             UPDATE msds_sheets
             SET 
+                customer_name = %s,
                 trade_name = %s,
+                product_code = %s,
                 manufacturer_info = %s,
                 contact_tel = %s,
                 contact_facsimile = %s,
@@ -309,9 +314,12 @@ def update_msds_sheet(msds_id, data):
                 skin_protection = %s,
                 appearance = %s,
                 odor = %s,
-                heat_stability = %s,
+                packaging = %s,
+                carrier_material = %s,
+                resin_suitability = %s,
                 light_fastness = %s,
-                decomposition_temp = %s,
+                heat_stability = %s,
+                non_toxicity = %s,
                 flash_point = %s,
                 auto_ignition_temp = %s,
                 explosion_property = %s,
@@ -327,8 +335,8 @@ def update_msds_sheet(msds_id, data):
                 last_modified_date = NOW()
             WHERE id = %s;
         """, (
-            data["trade_name"], data["manufacturer_info"], data["contact_tel"],
-            data["contact_facsimile"], data["contact_email"], data["composition_info"],
+            data["customer_name"], data["trade_name"], data["product_code"], data["manufacturer_info"],
+            data["contact_tel"], data["contact_facsimile"], data["contact_email"], data["composition_info"],
             data["hazard_preliminaries"], data["hazard_entry_route"], data["hazard_symptoms"],
             data["hazard_restrictive_conditions"], data["hazard_eyes"], data["hazard_general_note"],
             data["first_aid_inhalation"], data["first_aid_eyes"], data["first_aid_skin"],
@@ -336,7 +344,8 @@ def update_msds_sheet(msds_id, data):
             data["handling_info"], data["storage_info"], data["exposure_control_info"],
             data["respiratory_protection"], data["hand_protection"], data["eye_protection"],
             data["skin_protection"], data["appearance"], data["odor"],
-            data["heat_stability"], data["light_fastness"], data["decomposition_temp"],
+            data["packaging"], data["carrier_material"], data["resin_suitability"],
+            data["light_fastness"], data["heat_stability"], data["non_toxicity"],
             data["flash_point"], data["auto_ignition_temp"], data["explosion_property"],
             data["solubility_water"], data["stability_reactivity"], data["toxicological_info"],
             data["ecological_info"], data["disposal_info"], data["transport_info"],

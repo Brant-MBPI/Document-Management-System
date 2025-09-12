@@ -10,10 +10,12 @@ def load_msds_table(self):
     records = db_con.get_all_msds_data()
     for row_idx, record in enumerate(records):
         msds_id = record[0]
-        creation_date = record[3]
+        customer_name = record[1]
+        product_code = record[3]
+        creation_date = record[4]
         revision_date_str = creation_date.strftime("%m-%d-%Y")
 
-        display_text = f"MSDS {revision_date_str}".upper()
+        display_text = f"{customer_name} {product_code} MSDS {revision_date_str}".upper()
 
         self.msds_records_table.insertRow(row_idx)
         self.msds_records_table.setItem(row_idx, 0, self.create_readonly_item(display_text, column_idx=0))

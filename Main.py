@@ -16,6 +16,7 @@ from print.print_coa import FileCOA
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+        db_con.create_tables()
         self.main_layout = QVBoxLayout()
         self.main_tabs = QTabWidget()
 
@@ -26,6 +27,7 @@ class MainWindow(QMainWindow):
 
         # MSDS FORM init
             #Section 1
+        self.customer_name_input = QLineEdit()
         self.trade_label_input = QLineEdit()
         self.manufactured_label_input = QTextEdit()
         self.manufactured_label_input.setTabChangesFocus(True)
@@ -422,6 +424,7 @@ class MainWindow(QMainWindow):
         try:
             # Collect all required fields
             required_fields = {
+                "Customer Name": self.customer_name_input.text(),
                 "Trade Name": self.trade_label_input.text(),
                 "Manufactured By": self.manufactured_label_input.toPlainText(),
                 "Telephone No.": self.tel_label_input.text(),
@@ -449,9 +452,12 @@ class MainWindow(QMainWindow):
                 "Skin Protection": self.skin_protection_input.text(),
                 "Appearance": self.appearance_input.text(),
                 "Odor": self.odor_input.text(),
-                "Heat Stability": self.heat_stability_input.text(),
+                "packaging": self.packaging_input.text(),
+                "carrier_material": self.carrier_material_input.text(),
+                "resin_suitability": self.resin_suitability_input.text(),
                 "Light Fastness": self.light_fastness_input.text(),
-                "Decomposition": self.decomposition_input.text(),
+                "Heat Stability": self.heat_stability_input.text(),
+                "Non Toxicity": self.non_toxicity_input.text(),
                 "Flash Point": self.flash_point_input.text(),
                 "Auto Ignition": self.auto_ignition_input.text(),
                 "Explosion Property": self.explosion_property_input.text(),
@@ -472,8 +478,14 @@ class MainWindow(QMainWindow):
                     window_alert.show_message(self, "Missing Input", f"Please fill in:   {field}", icon_type="warning")
                     return  # stop submission
             # If all fields are filled, proceed to save
+
+            trade_name_text = self.trade_label_input.text().strip()
+            product_code = trade_name_text.split()[-1] if trade_name_text else ""
+
             msds_data = {
-                "trade_name": self.trade_label_input.text(),
+                "customer_name": self.customer_name_input.text(),
+                "trade_name": trade_name_text,
+                "product_code": product_code,
                 "manufacturer_info": self.manufactured_label_input.toPlainText(),
                 "contact_tel": self.tel_label_input.text(),
                 "contact_facsimile": self.facsimile_label_input.text(),
