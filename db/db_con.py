@@ -521,6 +521,35 @@ def delete_certificate_of_analysis(coa_id):
         raise e
 
 
+def populate_coa_field(dr_no):
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute(
+        """SELECT a.dr_no, a.product_code, b.customer_name, b.delivery_date, b.po_no
+                    FROM product_delivery_items a, product_delivery_primary b
+                    WHERE a.dr_no = b.dr_no AND a.dr_no=%s""",
+        (dr_no,)
+    )
+    record = cur.fetchone()  # only one row expected
+
+    cur.close()
+    conn.close()
+    return record
+
+
+def get_all_dr_no():
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("SELECT dr_no FROM product_delivery_items;")
+    record = cur.fetchall()  # only one row expected
+
+    cur.close()
+    conn.close()
+    return record
+
+
 def authenticate_user(self, username, hashed_password):
     conn = get_connection()
     cur = conn.cursor()
