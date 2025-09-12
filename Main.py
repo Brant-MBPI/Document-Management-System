@@ -553,6 +553,7 @@ class MainWindow(QMainWindow):
             finally:
                 msds_data_entry.clear_msds_form(self)
                 table.load_msds_table(self)
+                self.msds_sub_tabs.setCurrentIndex(0)
         except Exception as e:
             window_alert.show_message(self, "Unexpected Error", f"An error occurred: {str(e)}", icon_type="critical")
 
@@ -629,6 +630,8 @@ class MainWindow(QMainWindow):
             coa_data_entry.clear_coa_form(self)
             table.load_coa_table(self)
             coa_data_entry.adjust_table_height(self)
+
+            self.coa_sub_tabs.setCurrentIndex(0)
 
     def get_coa_summary_analysis_table_data(self):
         data = {}

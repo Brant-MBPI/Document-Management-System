@@ -13,7 +13,6 @@ def load_msds_details(self, msds_id):
     self.customer_name_input.setText(str(field_result[1]))
     self.trade_label_input.setText(str(field_result[2]))
     self.manufactured_label_input.setPlainText(str(field_result[6]))
-    self.manufactured_label_input.selectAllOnFocus()
     self.tel_label_input.setText(str(field_result[7]))
     self.facsimile_label_input.setText(str(field_result[8]))
     self.email_label_input.setText(str(field_result[9]))
@@ -59,7 +58,9 @@ def load_msds_details(self, msds_id):
     self.other_input.setPlainText(str(field_result[49]))
     self.btn_msds_submit.setText("Update")
 
+
 def create_form(self):
+    clear_msds_form(self)
     header = QLabel("Technical Data and Material Safety")
     header.setStyleSheet("""
         
@@ -300,15 +301,13 @@ def clear_msds_form(self):
     try:
         current_msds_id = None  # Reset the global MSDS ID
         # Set Pre-defined text
-        self.manufactured_label_input.setPlainText("""Masterbatch Philippines, Inc.
-                        24 Diamond Road, Caloocan Industrial Subdivision,
-                        Bo. Kaybiga, Caloocan City, Philippines""")
 
         # Stop all typing timers
         self.tel_label_timer.stop()
         self.facsimile_label_timer.stop()
         self.email_label_timer.stop()
 
+        self.manufactured_label_input.setPlainText("Masterbatch Philippines, Inc. 24 Diamond Road, Caloocan Industrial Subdivision, Bo. Kaybiga, Caloocan City, Philippines")
         self.tel_label_input.setText("(632) 87088681")
         self.facsimile_label_input.setText("(632) 83747085")
         self.email_label_input.setText("sales@polycolor.biz")
@@ -318,27 +317,16 @@ def clear_msds_form(self):
         self.hazard_symptoms_input.setText("Coughing, sneezing or irritation of the mucous membrane.")
         self.hazard_restrictive_condition_input.setText("Breathing or respiratory tract disorder/disease")
         self.hazard_eyes_input.setText("Inert foreign body hazard.")
-        self.hazard_general_note_input.setText("""No adverse health effects during the course of normal industrial handling. If large
-                                        quantities ingested, seek medical attention.""")
-
+        self.hazard_general_note_input.setText("No adverse health effects during the course of normal industrial handling. If large quantities ingested, seek medical attention.")
         self.first_aid_inhalation_input.setText("Remove to fresh air.")
         self.first_aid_eyes.setText("Flush with large amount of water. If irritation persists, seek medical attention.")
         self.first_aid_skin_input.setText("Wash with mild soap")
-        self.first_aid_ingestion_input.setText("""No adverse health effects during the course
-                                                of normal industrial handling. If large
-                                                quantities ingested, seek medical attention.""")
+        self.first_aid_ingestion_input.setText("No adverse health effects during the course of normal industrial handling. If large quantities ingested, seek medical attention.")
         self.fire_fighting_media_input.setPlainText("Water spray, dry powder, foam, carbon dioxide")
         self.accidental_release_input.setPlainText("Use any mechanical means to remove pellet. Prevent entry to natural waterways.")
-        self.handling_input.setText("""Use suitable ventilation to prevent excessive
-                                            inhalation and skin contact. Avoid static
-                                            discharge during powder handling operation.""")
-        self.msds_storage_input.setText("""Store in dry area, wet material may become
-                                            very slippery. Close bag after use to prevent
-                                            moisture intake & soiling.""")
-        self.exposure_control_input.setText("""Generally handle in areas of good ventilation.
-                                                If airborne dust is over or thought to approach
-                                                the occupational exposure standard, local
-                                                exhaust may be necessary.""")
+        self.handling_input.setText("Use suitable ventilation to prevent excessive inhalation and skin contact. Avoid static discharge during powder handling operation.")
+        self.msds_storage_input.setText("Store in dry area, wet material may become very slippery. Close bag after use to prevent moisture intake & soiling.")
+        self.exposure_control_input.setText("Generally handle in areas of good ventilation. If airborne dust is over or thought to approach the occupational exposure standard, local exhaust may be necessary.")
         self.respiratory_protection_input.setText("Use approved dust respirator if occupational exposure standard is likely to be exceeded.")
         self.hand_protection_input.setText("Use gloves for prolonged/repeated contact.")
         self.eye_protection_input.setText("Use safety glasses/ goggles.")
@@ -353,23 +341,22 @@ def clear_msds_form(self):
         self.auto_ignition_input.setText("N/A")
         self.explosion_property_input.setText("N/A")
         self.solubility_input.setText("Insoluble")
+        self.stability_reactivity_input.setPlainText("This product is chemically stable and non-reactive.")
+        self.toxicological_input.setPlainText("This product is non-toxic and physiologically harmless.")
+        self.ecological_input.setPlainText("No known harmful effects to human lives or to the environment.")
+        self.disposal_input.setPlainText("If recycling is not practicable, dispose in compliance with local regulation.")
+        self.transport_input.setPlainText("This material is not classified as a dangerous good by International Transport regulation.")
+        self.regulatory_input.setPlainText("This product is not classified in the list of controlled substances implemented by the government.")
+        self.msds_shelf_life_input.setPlainText("Twelve months from date of production when the product is stored in unbroken packaging.")
+        self.other_input.setPlainText("None")
 
 
         # Clear QLineEdit/QTextEdit fields
         for widget in [
-
+            self.customer_name_input,
             self.trade_label_input,
-            self.manufactured_label_input,
             self.heat_stability_input,
-            self.light_fastness_input,
-            self.stability_reactivity_input,
-            self.toxicological_input,
-            self.ecological_input,
-            self.disposal_input,
-            self.transport_input,
-            self.regulatory_input,
-            self.msds_shelf_life_input,
-            self.other_input
+            self.light_fastness_input
         ]:
             widget.blockSignals(True)
             widget.clear()

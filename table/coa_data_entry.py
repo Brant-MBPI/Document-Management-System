@@ -295,5 +295,6 @@ def clear_coa_form(self):
             "Color", "Light Fastness (1-8)", "Heat Stability (1-5)"
         ])
         self.btn_coa_submit.setText("Submit")
+
     except Exception as e:
         print(str(e))
