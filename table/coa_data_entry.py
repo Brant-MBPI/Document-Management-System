@@ -86,13 +86,17 @@ def coa_data_entry_form(self):
         # === Header ===
         header = QLabel("Certificate of Analysis")
         header.setStyleSheet("""
-            font-size: 26px;
+            font-size: 28px;
             font-weight: 700;
             color: #1a3c6c;
             margin-bottom: 20px;
             text-align: center;
         """)
-        self.coa_form_layout.addWidget(header)
+        header_layout = QHBoxLayout()
+        header_layout.addStretch()
+        header_layout.addWidget(header)
+        header_layout.addStretch()
+        self.coa_form_layout.addLayout(header_layout)
 
         # === Section 1: General Info ===
         form_layout.addRow(QLabel("Customer:"), self.coa_customer_input)

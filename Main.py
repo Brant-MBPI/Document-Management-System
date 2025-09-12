@@ -210,8 +210,8 @@ class MainWindow(QMainWindow):
         self.msds_records_layout = QVBoxLayout(self.msds_records_tab)  # inside MSDS sub-tab Records
         self.msds_records_layout.addWidget(self.msds_records_table)
 
-        msds_scroll_area = QScrollArea(self.msds_data_entry_tab)
-        msds_scroll_area.setWidgetResizable(True)
+        self.msds_scroll_area = QScrollArea(self.msds_data_entry_tab)
+        self.msds_scroll_area.setWidgetResizable(True)
 
         # Form container inside the scroll area
         msds_form_container = QWidget()
@@ -220,15 +220,15 @@ class MainWindow(QMainWindow):
         msds_form_layout.addLayout(self.msds_form_layout)
         msds_form_layout.addLayout(self.msds_btn_layout)
 
-        msds_scroll_area.setWidget(msds_form_container)
+        self.msds_scroll_area.setWidget(msds_form_container)
 
         # Final layout for the tab
         self.msds_data_entry_layout = QVBoxLayout(self.msds_data_entry_tab)
-        self.msds_data_entry_layout.addWidget(msds_scroll_area)
+        self.msds_data_entry_layout.addWidget(self.msds_scroll_area)
 
         # === COA Scroll Area ===
-        coa_scroll_area = QScrollArea(self.coa_data_entry_tab)
-        coa_scroll_area.setWidgetResizable(True)
+        self.coa_scroll_area = QScrollArea(self.coa_data_entry_tab)
+        self.coa_scroll_area.setWidgetResizable(True)
 
         # Form container inside the scroll area
         coa_form_container = QWidget()
@@ -237,10 +237,10 @@ class MainWindow(QMainWindow):
         coa_form_layout.addLayout(self.coa_form_layout)
         coa_form_layout.addLayout(self.coa_btn_layout)
 
-        coa_scroll_area.setWidget(coa_form_container)
+        self.coa_scroll_area.setWidget(coa_form_container)
 
         self.coa_data_entry_layout = QVBoxLayout(self.coa_data_entry_tab)
-        self.coa_data_entry_layout.addWidget(coa_scroll_area)
+        self.coa_data_entry_layout.addWidget(self.coa_scroll_area)
 
         #Inside COA Records Tab
         self.coa_records_table = QTableWidget()
@@ -553,6 +553,7 @@ class MainWindow(QMainWindow):
             finally:
                 msds_data_entry.clear_msds_form(self)
                 table.load_msds_table(self)
+                self.msds_scroll_area.verticalScrollBar().setValue(0)
                 self.msds_sub_tabs.setCurrentIndex(0)
         except Exception as e:
             window_alert.show_message(self, "Unexpected Error", f"An error occurred: {str(e)}", icon_type="critical")
@@ -630,7 +631,7 @@ class MainWindow(QMainWindow):
             coa_data_entry.clear_coa_form(self)
             table.load_coa_table(self)
             coa_data_entry.adjust_table_height(self)
-
+            self.coa_scroll_area.verticalScrollBar().setValue(0)
             self.coa_sub_tabs.setCurrentIndex(0)
 
     def get_coa_summary_analysis_table_data(self):
