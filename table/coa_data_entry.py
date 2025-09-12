@@ -42,6 +42,7 @@ def load_coa_details(self, coa_id):
     adjust_table_height(self)
 
 def coa_data_entry_form(self):
+
     try:
         form_widget = QWidget()
         form_layout = QFormLayout()
