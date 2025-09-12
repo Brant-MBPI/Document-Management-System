@@ -4,19 +4,19 @@ import traceback
 from PyQt6.QtCore import QObject, pyqtSignal
 from sqlalchemy import create_engine, text
 
-# Assume these are defined globally or passed in another way
-# For the purpose of making the provided code runnable, I'll define them here.
-# In a real application, these would likely be part of your application's configuration.
-DB_CONFIG = {"host": "192.168.1.13", "port": 5432, "dbname": "dbfg", "user": "postgres", "password": "mbpi"}
-DBF_BASE_PATH = r'\\system-server\SYSTEM-NEW-OLD' # This path is for Windows network shares
+# --- CONFIGURATION ---
+DB_CONFIG = {"host": "localhost", "port": 5433, "dbname":
+    "postgres", "user": "postgres", "password": "password"}
+DBF_BASE_PATH = r'\\system-server\SYSTEM-NEW-OLD'
 DELIVERY_DBF_PATH = os.path.join(DBF_BASE_PATH, 'tbl_del01.dbf')
 DELIVERY_ITEMS_DBF_PATH = os.path.join(DBF_BASE_PATH, 'tbl_del02.dbf')
 
-# Setup SQLAlchemy engine
-DATABASE_URL = f"postgresql://{DB_CONFIG['user']}:{DB_CONFIG['password']}@{DB_CONFIG['host']}:{DB_CONFIG['port']}/{DB_CONFIG['dbname']}"
+# ✅ Create the engine here
+DATABASE_URL = f"postgresql+psycopg2://{DB_CONFIG['user']}:{DB_CONFIG['password']}@{DB_CONFIG['host']}:{DB_CONFIG['port']}/{DB_CONFIG['dbname']}"
 engine = create_engine(DATABASE_URL)
 
 class SyncDeliveryWorker(QObject):
+    # ... (This class is unchanged) ...
     finished = pyqtSignal(bool, str)
 
     def _get_safe_dr_num(self, dr_num_raw):
@@ -107,3 +107,19 @@ class SyncDeliveryWorker(QObject):
             print(f"DELIVERY SYNC CRITICAL ERROR: {e}\n{trace_info}")
             self.finished.emit(False,
                                f"An unexpected error occurred during delivery sync:\n{e}\n\nCheck console/logs for technical details.")
+# --- STANDALONE EXECUTION ---
+if __name__ == "__main__":
+    print("Initializing standalone delivery sync...")
+    worker = SyncDeliveryWorker()
+
+    def sync_complete_handler(success, message):
+        if success:
+            print("\nSYNC SUCCESS:")
+            print(message)
+        else:
+            print("\nSYNC FAILED:")
+            print(message)
+
+    worker.finished.connect(sync_complete_handler)
+    worker.run()
+    print("Sync process initiated. Check output for status.")
