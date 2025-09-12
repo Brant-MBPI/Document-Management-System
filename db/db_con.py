@@ -42,7 +42,7 @@ def create_tables():
             first_aid_inhalation TEXT,
             first_aid_eyes TEXT,
             first_aid_skin TEXT,
-            first_aid_ingestion TEXT,
+            first_aid_ingestion TEXT,   #20
             
             fire_fighting_media TEXT,
             
@@ -54,15 +54,17 @@ def create_tables():
             exposure_control_info TEXT,
             respiratory_protection TEXT,
             hand_protection TEXT,
-            
             eye_protection TEXT,
             skin_protection TEXT,
             
-            appearance VARCHAR(100),
+            appearance VARCHAR(100),   #30
             odor VARCHAR(100),
-            heat_stability VARCHAR(50),
+            packaging VARCHAR(100),
+            carrier_material VARCHAR(100),
+            resin_suitability VARCHAR(100),
             light_fastness VARCHAR(50),
-            decomposition_temp VARCHAR(50),
+            heat_stability VARCHAR(50),
+            non_toxicity VARCHAR(100),
             flash_point VARCHAR(50),
             auto_ignition_temp VARCHAR(50),
             explosion_property VARCHAR(50),
@@ -161,9 +163,12 @@ def save_msds_sheet(data):
                 skin_protection,
                 appearance,
                 odor,
-                heat_stability,
+                packaging,
+                carrier_material,
+                resin_suitability,
                 light_fastness,
-                decomposition_temp,
+                heat_stability,
+                non_toxicity_temp,
                 flash_point,
                 auto_ignition_temp,
                 explosion_property,
@@ -182,7 +187,7 @@ def save_msds_sheet(data):
                 %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
                 %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
                 %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                %s, %s
+                %s, %s, %s, %s, %s
             )
             RETURNING id;
         """, (
@@ -195,7 +200,7 @@ def save_msds_sheet(data):
             data["handling_info"], data["storage_info"], data["exposure_control_info"],
             data["respiratory_protection"], data["hand_protection"], data["eye_protection"],
             data["skin_protection"], data["appearance"], data["odor"],
-            data["heat_stability"], data["light_fastness"], data["decomposition_temp"],
+            data["light_fastness"], data["heat_stability"], data["decomposition_temp"],
             data["flash_point"], data["auto_ignition_temp"], data["explosion_property"],
             data["solubility_water"], data["stability_reactivity"], data["toxicological_info"],
             data["ecological_info"], data["disposal_info"], data["transport_info"],

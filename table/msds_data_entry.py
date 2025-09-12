@@ -37,21 +37,26 @@ def load_msds_details(self, msds_id):
     self.skin_protection_input.setText(str(field_result[28]))
     self.appearance_input.setText(str(field_result[29]))
     self.odor_input.setText(str(field_result[30]))
-    self.heat_stability_input.setText(str(field_result[31]))
-    self.light_fastness_input.setText(str(field_result[32]))
-    self.decomposition_input.setText(str(field_result[33]))
-    self.flash_point_input.setText(str(field_result[34]))
-    self.auto_ignition_input.setText(str(field_result[35]))
-    self.explosion_property_input.setText(str(field_result[36]))
-    self.solubility_input.setText(str(field_result[37]))
-    self.stability_reactivity_input.setPlainText(str(field_result[38]))
-    self.toxicological_input.setPlainText(str(field_result[39]))
-    self.ecological_input.setPlainText(str(field_result[40]))
-    self.disposal_input.setPlainText(str(field_result[41]))
-    self.transport_input.setPlainText(str(field_result[42]))
-    self.regulatory_input.setPlainText(str(field_result[43]))
-    self.msds_shelf_life_input.setText(str(field_result[44]))
-    self.other_input.setPlainText(str(field_result[45]))
+    self.packaging_input.setText(str(field_result[31]))
+    self.carrier_material_input.setText(str(field_result[32]))
+    self.resin_suitability_input.setText(str(field_result[33]))
+    self.light_fastness_input.setText(str(field_result[34]))
+
+
+    self.heat_stability_input.setText(str(field_result[35]))
+    self.decomposition_input.setText(str(field_result[36]))
+    self.flash_point_input.setText(str(field_result[37]))
+    self.auto_ignition_input.setText(str(field_result[38]))
+    self.explosion_property_input.setText(str(field_result[39]))
+    self.solubility_input.setText(str(field_result[40]))
+    self.stability_reactivity_input.setPlainText(str(field_result[41]))
+    self.toxicological_input.setPlainText(str(field_result[42]))
+    self.ecological_input.setPlainText(str(field_result[43]))
+    self.disposal_input.setPlainText(str(field_result[44]))
+    self.transport_input.setPlainText(str(field_result[45]))
+    self.regulatory_input.setPlainText(str(field_result[46]))
+    self.msds_shelf_life_input.setText(str(field_result[47]))
+    self.other_input.setPlainText(str(field_result[48]))
     self.btn_msds_submit.setText("Update")
 
 def create_form(self):
@@ -187,11 +192,14 @@ def create_form(self):
     form_layout.addRow(section9_header)
     form_layout.addRow(QLabel("Appearance:"), self.appearance_input)
     form_layout.addRow(QLabel("Odor:"), self.odor_input)
-    form_layout.addRow(QLabel("Heat Stability (1-5):"), self.heat_stability_input)
+    form_layout.addRow(QLabel("Packaging:"), self.packaging_input)
+    form_layout.addRow(QLabel("Carrier Material:"), self.carrier_material_input)
+    form_layout.addRow(QLabel("Resin Suitability:"), self.resin_suitability_input)
     form_layout.addRow(QLabel("Light fastness (1-8):"), self.light_fastness_input)
-    form_layout.addRow(QLabel("Decomposition (°C):"), self.decomposition_input)
-    form_layout.addRow(QLabel("Flash Point (°C):"), self.flash_point_input)
-    form_layout.addRow(QLabel("Auto Ignition (°C):"), self.auto_ignition_input)
+    form_layout.addRow(QLabel("Heat Stability (1-5):"), self.heat_stability_input)
+    form_layout.addRow(QLabel("Decomposition:"), self.non_toxicity_input)
+    form_layout.addRow(QLabel("Flash Point:"), self.flash_point_input)
+    form_layout.addRow(QLabel("Auto Ignition:"), self.auto_ignition_input)
     form_layout.addRow(QLabel("Explosion Property:"), self.explosion_property_input)
     form_layout.addRow(QLabel("Solubility (Water):"), self.solubility_input)
 
@@ -319,9 +327,12 @@ def clear_msds_form(self):
             self.skin_protection_input,
             self.appearance_input,
             self.odor_input,
+            self.packaging_input,
+            self.carrier_material_input,
+            self.resin_suitability_input,
             self.heat_stability_input,
             self.light_fastness_input,
-            self.decomposition_input,
+            self.non_toxicity_input,
             self.flash_point_input,
             self.auto_ignition_input,
             self.explosion_property_input,

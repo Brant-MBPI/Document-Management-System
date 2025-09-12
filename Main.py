@@ -83,6 +83,9 @@ class MainWindow(QMainWindow):
             #Section9
         self.appearance_input = QLineEdit()
         self.odor_input = QLineEdit()
+        self.packaging_input = QLineEdit()
+        self.carrier_material_input = QLineEdit()
+        self.resin_suitability_input = QLineEdit()
         heat_regex = QRegularExpression(r'^[1-5](-[1-5])?$')
         heat_validator = QRegularExpressionValidator(heat_regex)
         self.heat_stability_input = QLineEdit()
@@ -91,7 +94,7 @@ class MainWindow(QMainWindow):
         light_validator = QRegularExpressionValidator(light_regex)
         self.light_fastness_input = QLineEdit()
         self.light_fastness_input.setValidator(light_validator)
-        self.decomposition_input = QLineEdit()
+        self.non_toxicity_input = QLineEdit()
         self.flash_point_input = QLineEdit()
         self.auto_ignition_input = QLineEdit()
         self.explosion_property_input = QLineEdit()
@@ -503,6 +506,8 @@ class MainWindow(QMainWindow):
 
                 "appearance": self.appearance_input.text(),
                 "odor": self.odor_input.text(),
+                "packaging": self.packaging_input.text(),
+                "carrier_material": self.odor_input.text(),
                 "heat_stability": self.heat_stability_input.text(),
                 "light_fastness": self.light_fastness_input.text(),
                 "decomposition_temp": self.decomposition_input.text(),
