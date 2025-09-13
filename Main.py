@@ -1,8 +1,7 @@
 import os
 import subprocess
 import sys
-import traceback
-
+import dbfread
 from PyQt6.QtCore import Qt, QDate, QRegularExpression, QTimer, QEvent, QObject
 from PyQt6.QtGui import QIcon, QIntValidator, QRegularExpressionValidator, QFont, QAction
 from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QTabWidget, \
@@ -932,9 +931,10 @@ class MainWindow(QMainWindow):
         self.coa_widget.show()
 
     def run_sync_script(self):
+        print("clickef")
         # Launch the sync script in the background
         script_path = os.path.join(os.path.dirname(__file__), "db", "db_dr.py")
-        subprocess.Popen(["python", script_path])
+        subprocess.Popen([sys.executable, script_path])
 
 def main():
     app = QApplication(sys.argv)

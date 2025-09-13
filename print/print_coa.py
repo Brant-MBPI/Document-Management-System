@@ -193,7 +193,9 @@ class FileCOA(QWidget):
         content.append(Paragraph("<b>Storage</b>", styles["NormalText"]))
         content.append(Paragraph(str(field_result[11]), IndentedText))
         content.append(Paragraph("<b>Shelf Life: </b>", styles["NormalText"]))
-        content.append(Paragraph(str(field_result[11]), IndentedText))
+        content.append(Paragraph(str(field_result[12]), IndentedText))
+        content.append(Paragraph("<b>Suitability </b>", styles["NormalText"]))
+        content.append(Paragraph(str(field_result[13]), IndentedText))
 
         doc.build(content, onFirstPage=add_first_page_header)
         buffer.seek(0)

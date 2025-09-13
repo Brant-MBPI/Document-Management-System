@@ -480,7 +480,8 @@ def populate_coa_fields(self, dr_no):
 
 def populate_coa_summary(self):
     color_code = self.color_code_input.text()
-    result = db_con.get_summary_from_msds(color_code)
+    dr_no = self.delivery_receipt_input.text()
+    result = db_con.get_summary_from_msds(color_code, dr_no)
 
     # Clear and reset table
     self.summary_analysis_table.clearContents()
@@ -497,10 +498,13 @@ def populate_coa_summary(self):
     if not result:
         return
 
-    light_fastness, heat_stability = result
+    light_fastness, heat_stability, color = result
+    self.summary_analysis_table.setItem(0, 0, QTableWidgetItem(str(color)))
+    self.summary_analysis_table.setItem(0, 1, QTableWidgetItem(str(color)))
     self.summary_analysis_table.setItem(1, 0, QTableWidgetItem(str(light_fastness)))
     self.summary_analysis_table.setItem(1, 1, QTableWidgetItem(str(light_fastness)))
     self.summary_analysis_table.setItem(2, 0, QTableWidgetItem(str(heat_stability)))
     self.summary_analysis_table.setItem(2, 1, QTableWidgetItem(str(heat_stability)))
 
     adjust_table_height(self)
+

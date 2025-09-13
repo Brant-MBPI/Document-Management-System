@@ -540,13 +540,25 @@ def get_dr_details(dr_no):
     return record
 
 
-def get_summary_from_msds(code):
+def get_summary_from_msds(code, dr_no):
     conn = get_connection()
     cur = conn.cursor()
 
     cur.execute(
-        "SELECT light_fastness, heat_stability FROM msds_sheets WHERE product_code = %s;",
-        (code,)
+        """SELECT 
+                    a.light_fastness,
+                    a.heat_stability,
+                    i.product_color
+                FROM msds_sheets a
+                JOIN product_delivery_items i 
+                    ON a.product_code = i.product_code
+                JOIN product_delivery_primary p 
+                    ON i.dr_no = p.dr_no
+                WHERE a.product_code = %s
+                  AND i.dr_no = %s
+                ORDER BY a.id DESC;
+            """,
+        (code, dr_no,)
     )
     record = cur.fetchone()  # only one row expected
 
