@@ -170,6 +170,7 @@ class MainWindow(QMainWindow):
         """)
         self.delivery_receipt_input.setCompleter(completer)
         self.sync_button = QPushButton("Sync")
+
         self.sync_button.setFixedSize(60, 25)
         self.po_number_input = QLineEdit()
         self.certified_by_input = QLineEdit()
