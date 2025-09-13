@@ -13,6 +13,7 @@ current_coa_id = None  # Global variable to store the current COA ID
 
 def load_coa_details(self, coa_id):
     self.color_code_input.blockSignals(True)
+    self.delivery_receipt_input.blockSignals(True)
     field_result = db_con.get_single_coa_data(coa_id)
     analysis_table_result = db_con.get_coa_analysis_results(coa_id)
 
@@ -22,7 +23,7 @@ def load_coa_details(self, coa_id):
     self.lot_number_input.setText(str(field_result[3]))
     self.po_number_input.setText(str(field_result[4]))
     self.delivery_receipt_input.setText(str(field_result[5]))
-    self.quantity_delivered_input.setText(str(field_result[6]))
+    self.quantity_delivered_input.setText(str(int(field_result[6])))
 
     # Handle potential None for dates
     if field_result[7]:
@@ -52,6 +53,9 @@ def load_coa_details(self, coa_id):
     adjust_table_height(self)
 
     self.color_code_input.blockSignals(False)
+    self.delivery_receipt_input.blockSignals(False)
+
+
 def coa_data_entry_form(self):
     try:
         form_widget = QWidget()
@@ -454,7 +458,7 @@ def clear_coa_form(self):
 
 def populate_coa_fields(self, dr_no):
     fields = db_con.get_dr_details(dr_no)
-
+    self.quantity_delivered_input.clear()
     if not fields:  # None or empty tuple
         # Clear fields or just exit
         self.coa_customer_input.clear()

@@ -422,7 +422,7 @@ def get_all_msds_data():
     conn = get_connection()
     cur = conn.cursor()
 
-    cur.execute("SELECT * FROM msds_sheets ORDER BY id;")
+    cur.execute("SELECT * FROM msds_sheets ORDER BY id DESC;")
     records = cur.fetchall()
 
     cur.close()
@@ -434,7 +434,7 @@ def get_all_coa_data():
     conn = get_connection()
     cur = conn.cursor()
 
-    cur.execute("SELECT * FROM certificates_of_analysis ORDER BY id;")
+    cur.execute("SELECT * FROM certificates_of_analysis ORDER BY id DESC;")
     records = cur.fetchall()
 
     cur.close()
@@ -591,6 +591,7 @@ def authenticate_user(self, username, hashed_password):
     cur.close()
     conn.close()
     return cur.fetchone()
+
 
 def register_user(self, username, hashed_password):
     conn = get_connection()

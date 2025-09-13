@@ -6,7 +6,7 @@ from PyQt6.QtCore import Qt, QDate, QRegularExpression, QTimer, QEvent, QObject
 from PyQt6.QtGui import QIcon, QIntValidator, QRegularExpressionValidator, QFont, QAction
 from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QTabWidget, \
     QTableWidget, QLineEdit, QHeaderView, QTableWidgetItem, QScrollArea, QTextEdit, QPushButton, QDateEdit, \
-    QInputDialog, QMessageBox, QAbstractItemView, QCompleter
+    QInputDialog, QMessageBox, QAbstractItemView, QCompleter, QDialog, QLabel, QProgressBar
 from db import db_con
 from alert import window_alert
 from table import msds_data_entry, coa_data_entry, table
@@ -931,10 +931,42 @@ class MainWindow(QMainWindow):
         self.coa_widget.show()
 
     def run_sync_script(self):
-        print("clickef")
-        # Launch the sync script in the background
+        # Show loading dialog
+        self.loading = LoadingDialog(self)
+        self.loading.show()
+
+        # Launch the sync script
         script_path = os.path.join(os.path.dirname(__file__), "db", "db_dr.py")
-        subprocess.Popen([sys.executable, script_path])
+        self.process = subprocess.Popen([sys.executable, script_path])
+
+        # Use QTimer to check if process finished
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.check_process)
+        self.timer.start(500)  # check every 0.5 sec
+
+    def check_process(self):
+        if self.process.poll() is not None:  # finished
+            self.timer.stop()
+            self.loading.accept()  # close dialog
+
+
+class LoadingDialog(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Syncing...")
+        self.setModal(True)  # blocks interaction with main window
+        self.setWindowFlag(Qt.WindowType.WindowCloseButtonHint, False)  # disable close button
+        self.setFixedSize(200, 100)
+
+        layout = QVBoxLayout(self)
+        self.label = QLabel("Please wait, syncing...")
+        self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.label)
+
+        self.progress = QProgressBar()
+        self.progress.setRange(0, 0)  # Indeterminate (infinite loading)
+        self.progress.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.progress)
 
 def main():
     app = QApplication(sys.argv)
