@@ -5,7 +5,7 @@ from PyQt6.QtCore import Qt, QDate, QRegularExpression, QTimer, QEvent, QObject
 from PyQt6.QtGui import QIcon, QIntValidator, QRegularExpressionValidator, QFont, QAction
 from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QTabWidget, \
     QTableWidget, QLineEdit, QHeaderView, QTableWidgetItem, QScrollArea, QTextEdit, QPushButton, QDateEdit, \
-    QInputDialog, QMessageBox, QAbstractItemView
+    QInputDialog, QMessageBox, QAbstractItemView, QCompleter
 from db import db_con
 from alert import window_alert
 from table import msds_data_entry, coa_data_entry, table
@@ -144,7 +144,33 @@ class MainWindow(QMainWindow):
         self.production_date_input = QDateEdit()
         self.production_date_input.setCalendarPopup(True)
         self.production_date_input.setDate(QDate(QDate.currentDate().year(), QDate.currentDate().month(), 1))
+
+        self.dr_no_list = db_con.get_all_dr_no()
+        # Create QCompleter with the list
+        completer = QCompleter(self.dr_no_list)
+        completer.setFilterMode(Qt.MatchFlag.MatchStartsWith)  # Suggest if text is contained anywhere
         self.delivery_receipt_input = QLineEdit()
+        completer.popup().setStyleSheet("""
+            QListView {
+                background-color: white;
+                border: 1px solid gray;
+                font-size: 12px;
+                padding: 4px;
+            }
+            QListView::item {
+                padding: 6px;
+            }
+            QListView::item:hover{
+                background-color: lightgrey;
+            }
+            QListView::item:selected {
+                background-color: #0078d7;  /* Windows blue */
+                color: white;
+            }
+        """)
+        self.delivery_receipt_input.setCompleter(completer)
+        self.sync_button = QPushButton("Sync")
+        self.sync_button.setFixedSize(60, 25)
         self.po_number_input = QLineEdit()
         self.certified_by_input = QLineEdit()
         self.creation_date_input = QDateEdit()

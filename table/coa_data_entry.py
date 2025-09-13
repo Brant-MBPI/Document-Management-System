@@ -1,8 +1,8 @@
 from datetime import datetime
-from PyQt6.QtCore import QDate
+from PyQt6.QtCore import QDate, Qt
 from PyQt6.QtGui import QIntValidator
-from PyQt6.QtWidgets import QLabel, QHBoxLayout, QSizePolicy, QHeaderView, QPushButton, QInputDialog, QTableWidgetItem, \
-    QFormLayout, QTableWidget, QLineEdit, QAbstractItemView, QWidget
+from PyQt6.QtWidgets import QLabel, QHBoxLayout, QHeaderView, QPushButton, QTableWidgetItem, \
+    QFormLayout, QAbstractItemView, QWidget
 from alert import window_alert
 from db import db_con
 
@@ -115,6 +115,7 @@ def coa_data_entry_form(self):
 
         receipt_row = QHBoxLayout()
         receipt_row.addWidget(self.delivery_receipt_input)
+        receipt_row.addWidget(self.sync_button)
         receipt_row.addSpacing(10)  # Add 10px spacing before P.O Number
         receipt_row.addWidget(QLabel("P.O Number:"))
         receipt_row.addWidget(self.po_number_input)

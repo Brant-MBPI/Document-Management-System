@@ -543,11 +543,11 @@ def get_all_dr_no():
     cur = conn.cursor()
 
     cur.execute("SELECT dr_no FROM product_delivery_items;")
-    record = cur.fetchall()  # only one row expected
+    records = cur.fetchall()  # only one row expected
 
     cur.close()
     conn.close()
-    return record
+    return [row[0] for row in records]
 
 
 def authenticate_user(self, username, hashed_password):
