@@ -134,7 +134,7 @@ def coa_data_entry_form(self):
         """)
 
         # === Header ===
-        header = QLabel("Certificate of Analysis Entry")
+        header = QLabel("Certificate of Analysis")
         header.setStyleSheet("""
             font-size: 32px;
             font-weight: 700;
@@ -448,3 +448,42 @@ def clear_coa_form(self):
 
     except Exception as e:
         print(str(e))
+
+
+def populate_coa_fields(self, dr_no):
+    fields = db_con.get_dr_details(dr_no)
+
+    if not fields:  # None or empty tuple
+        # Clear fields or just exit
+        self.coa_customer_input.clear()
+        self.color_code_input.clear()
+        self.po_number_input.clear()
+        self.delivery_date_input.clear()  # if it's a QDateEdit
+        return
+
+    # === Populate inputs ===
+    self.coa_customer_input.setText(str(fields[2]))
+    self.color_code_input.setText(str(fields[1]))
+    self.po_number_input.setText(str(fields[4]))
+
+    if fields[3]:
+        self.delivery_date_input.setDate(QDate(fields[3].year, fields[3].month, fields[3].day))
+
+
+def populate_coa_summary(self):
+    color_code = self.color_code_input.text()
+    result = db_con.get_summary_from_msds(color_code)
+
+    # === Populate table ===
+    self.summary_analysis_table.clearContents()
+    self.summary_analysis_table.setRowCount(len(result))
+    self.summary_analysis_table.setColumnCount(2)
+    self.summary_analysis_table.setHorizontalHeaderLabels(["Standard Value", "Delivery Value"])
+
+    self.summary_analysis_table.setHorizontalHeaderLabels(["Light Fastness", "Heat Stability"])
+
+    for row_idx, (standard_value, delivery_value) in enumerate(result):
+        self.summary_analysis_table.setItem(row_idx, 0, QTableWidgetItem(str(standard_value) if standard_value else ""))
+        self.summary_analysis_table.setItem(row_idx, 1, QTableWidgetItem(str(delivery_value) if delivery_value else ""))
+
+    adjust_table_height(self)

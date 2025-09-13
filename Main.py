@@ -169,8 +169,12 @@ class MainWindow(QMainWindow):
             }
         """)
         self.delivery_receipt_input.setCompleter(completer)
+        self.delivery_receipt_timer = self.setup_finished_typing(
+            self.delivery_receipt_input,
+            lambda: coa_data_entry.populate_coa_fields(self, self.delivery_receipt_input.text()),
+            delay=1200
+        )
         self.sync_button = QPushButton("Sync")
-
         self.sync_button.setFixedSize(60, 25)
         self.po_number_input = QLineEdit()
         self.certified_by_input = QLineEdit()
@@ -751,6 +755,7 @@ class MainWindow(QMainWindow):
         self.msds_records_table.setColumnCount(4)
         self.msds_records_table.setHorizontalHeaderLabels(["Name", "", "", ""])
         self.msds_records_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Fixed)
+        self.msds_records_table.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.msds_records_table.horizontalHeader().setMinimumSectionSize(40)  # Minimum width for icon columns
         # Override resize event
         self.msds_records_table.resizeEvent = lambda event: table.resize_columns(self, self.msds_records_table, event)
@@ -764,6 +769,7 @@ class MainWindow(QMainWindow):
         self.coa_records_table.setColumnCount(4)
         self.coa_records_table.setHorizontalHeaderLabels(["Name", "", "", ""])
         self.coa_records_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Fixed)
+        self.coa_records_table.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.coa_records_table.horizontalHeader().setMinimumSectionSize(40)  # Minimum width for icon columns
         # Override resize event
         self.coa_records_table.resizeEvent = lambda event: table.resize_columns(self, self.coa_records_table, event)

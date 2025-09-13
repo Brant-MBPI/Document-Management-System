@@ -521,7 +521,7 @@ def delete_certificate_of_analysis(coa_id):
         raise e
 
 
-def populate_coa_field(dr_no):
+def get_dr_details(dr_no):
     conn = get_connection()
     cur = conn.cursor()
 
@@ -535,6 +535,25 @@ def populate_coa_field(dr_no):
 
     cur.close()
     conn.close()
+    if record is None:
+        return ()  # or return None, depending on how you want to handle it
+    return record
+
+
+def get_summary_from_msds(code):
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute(
+        "SELECT light_fastness, heat_stability FROM msds_sheets WHERE product_code = %s;",
+        (code,)
+    )
+    record = cur.fetchone()  # only one row expected
+
+    cur.close()
+    conn.close()
+    if record is None:
+        return ()  # or return None, depending on how you want to handle it
     return record
 
 
