@@ -1,3 +1,5 @@
+import os
+import subprocess
 import sys
 import traceback
 
@@ -136,6 +138,11 @@ class MainWindow(QMainWindow):
             #inputs variable
         self.coa_customer_input = QLineEdit()
         self.color_code_input = QLineEdit()
+        self.color_code_timer = self.setup_finished_typing(
+            self.color_code_input,
+            lambda: coa_data_entry.populate_coa_summary(self),
+            delay=1200
+        )
         self.quantity_delivered_input = QLineEdit()
         self.delivery_date_input = QDateEdit()
         self.delivery_date_input.setCalendarPopup(True)
@@ -176,6 +183,7 @@ class MainWindow(QMainWindow):
         )
         self.sync_button = QPushButton("Sync")
         self.sync_button.setFixedSize(60, 25)
+        self.sync_button.clicked.connect(self.run_sync_script)
         self.po_number_input = QLineEdit()
         self.certified_by_input = QLineEdit()
         self.creation_date_input = QDateEdit()
@@ -923,6 +931,10 @@ class MainWindow(QMainWindow):
         self.coa_widget.resize(900, 800)
         self.coa_widget.show()
 
+    def run_sync_script(self):
+        # Launch the sync script in the background
+        script_path = os.path.join(os.path.dirname(__file__), "db", "db_dr.py")
+        subprocess.Popen(["python", script_path])
 
 def main():
     app = QApplication(sys.argv)

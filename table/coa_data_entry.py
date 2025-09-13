@@ -12,6 +12,7 @@ current_coa_id = None  # Global variable to store the current COA ID
 
 
 def load_coa_details(self, coa_id):
+    self.color_code_input.blockSignals(True)
     field_result = db_con.get_single_coa_data(coa_id)
     analysis_table_result = db_con.get_coa_analysis_results(coa_id)
 
@@ -50,7 +51,7 @@ def load_coa_details(self, coa_id):
 
     adjust_table_height(self)
 
-
+    self.color_code_input.blockSignals(False)
 def coa_data_entry_form(self):
     try:
         form_widget = QWidget()
@@ -378,12 +379,12 @@ def coa_data_entry_form(self):
         # Storage and Shelf Life
         certification_layout.addWidget(QLabel("Storage:"), 1, 0, Qt.AlignmentFlag.AlignRight)
         certification_layout.addWidget(self.coa_storage_input, 1, 1)
-        certification_layout.addWidget(QLabel("Shelf Life:"), 1, 2, Qt.AlignmentFlag.AlignRight)
-        certification_layout.addWidget(self.coa_shelf_life_input, 1, 3)
+        certification_layout.addWidget(QLabel("Suitability:"), 1, 2, Qt.AlignmentFlag.AlignRight)
+        certification_layout.addWidget(self.suitability_input, 1, 3)
 
         # Suitability
-        certification_layout.addWidget(QLabel("Suitability:"), 2, 0, Qt.AlignmentFlag.AlignRight)
-        certification_layout.addWidget(self.suitability_input, 2, 1, 1, 3)  # Span across remaining columns
+        certification_layout.addWidget(QLabel("Shelf Life:"), 2, 0, Qt.AlignmentFlag.AlignRight)
+        certification_layout.addWidget(self.coa_shelf_life_input, 2, 1, 1, 3)  # Span across remaining columns
 
         main_v_layout.addWidget(certification_group)
 
@@ -397,6 +398,7 @@ def coa_data_entry_form(self):
         main_v_layout.addStretch(1)
 
         self.coa_form_layout.addWidget(form_widget)
+        clear_coa_form(self)
     except Exception as e:
         print(f"Error loading COA form: {e}")
 
@@ -428,9 +430,9 @@ def clear_coa_form(self):
         self.delivery_receipt_input.clear()
         self.quantity_delivered_input.clear()
         self.certified_by_input.clear()
-        self.coa_storage_input.clear()
-        self.coa_shelf_life_input.clear()
-        self.suitability_input.clear()
+        self.coa_storage_input.setText("Should be stored cool and dry in unbroken pachaging.")
+        self.coa_shelf_life_input.setText("12 Months: Shelf life is stated as a maximum from the date of production when the prodrict is stored in unbroken packaging.")
+        self.suitability_input.setText("highly suitable for automotive oil container.")
 
         self.delivery_date_input.setDate(QDate.currentDate())
         self.production_date_input.setDate(QDate.currentDate())
@@ -462,9 +464,15 @@ def populate_coa_fields(self, dr_no):
         return
 
     # === Populate inputs ===
+    lot_no = fields[5] if fields and len(fields) > 5 else ""
+    if lot_no and lot_no.startswith("LOT #"):
+        lot_no = lot_no.replace("LOT #", "").strip()
+    else:
+        lot_no = ""
     self.coa_customer_input.setText(str(fields[2]))
     self.color_code_input.setText(str(fields[1]))
     self.po_number_input.setText(str(fields[4]))
+    self.lot_number_input.setText(lot_no)
 
     if fields[3]:
         self.delivery_date_input.setDate(QDate(fields[3].year, fields[3].month, fields[3].day))
@@ -474,16 +482,25 @@ def populate_coa_summary(self):
     color_code = self.color_code_input.text()
     result = db_con.get_summary_from_msds(color_code)
 
-    # === Populate table ===
+    # Clear and reset table
     self.summary_analysis_table.clearContents()
-    self.summary_analysis_table.setRowCount(len(result))
     self.summary_analysis_table.setColumnCount(2)
-    self.summary_analysis_table.setHorizontalHeaderLabels(["Standard Value", "Delivery Value"])
+    self.summary_analysis_table.setRowCount(3)
 
-    self.summary_analysis_table.setHorizontalHeaderLabels(["Light Fastness", "Heat Stability"])
+    # Always keep the same headers
+    self.summary_analysis_table.setHorizontalHeaderLabels(["Standard", "Delivery"])
+    self.summary_analysis_table.setVerticalHeaderLabels([
+        "Color", "Light Fastness (1-8)", "Heat Stability (1-5)"
+    ])
 
-    for row_idx, (standard_value, delivery_value) in enumerate(result):
-        self.summary_analysis_table.setItem(row_idx, 0, QTableWidgetItem(str(standard_value) if standard_value else ""))
-        self.summary_analysis_table.setItem(row_idx, 1, QTableWidgetItem(str(delivery_value) if delivery_value else ""))
+    # If nothing found → just return (empty table with headers)
+    if not result:
+        return
+
+    light_fastness, heat_stability = result
+    self.summary_analysis_table.setItem(1, 0, QTableWidgetItem(str(light_fastness)))
+    self.summary_analysis_table.setItem(1, 1, QTableWidgetItem(str(light_fastness)))
+    self.summary_analysis_table.setItem(2, 0, QTableWidgetItem(str(heat_stability)))
+    self.summary_analysis_table.setItem(2, 1, QTableWidgetItem(str(heat_stability)))
 
     adjust_table_height(self)

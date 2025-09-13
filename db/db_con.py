@@ -526,7 +526,7 @@ def get_dr_details(dr_no):
     cur = conn.cursor()
 
     cur.execute(
-        """SELECT a.dr_no, a.product_code, b.customer_name, b.delivery_date, b.po_no
+        """SELECT a.dr_no, a.product_code, b.customer_name, b.delivery_date, b.po_no, a.attachments
                     FROM product_delivery_items a, product_delivery_primary b
                     WHERE a.dr_no = b.dr_no AND a.dr_no=%s""",
         (dr_no,)
