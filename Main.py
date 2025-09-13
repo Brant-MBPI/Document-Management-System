@@ -1,25 +1,25 @@
 import os
 import subprocess
 import sys
-import dbfread
 from PyQt6.QtCore import Qt, QDate, QRegularExpression, QTimer, QEvent, QObject
 from PyQt6.QtGui import QIcon, QIntValidator, QRegularExpressionValidator, QFont, QAction
 from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QTabWidget, \
-    QTableWidget, QLineEdit, QHeaderView, QTableWidgetItem, QScrollArea, QTextEdit, QPushButton, QDateEdit, \
-    QInputDialog, QMessageBox, QAbstractItemView, QCompleter, QDialog, QLabel, QProgressBar
+    QTableWidget, QLineEdit, QHeaderView, QTableWidgetItem, QScrollArea, QTextEdit, QPushButton, QDateEdit, QMessageBox, QAbstractItemView, QCompleter, QDialog, QLabel, QProgressBar
 from db import db_con
 from alert import window_alert
 from table import msds_data_entry, coa_data_entry, table
 from print.print_msds import FileMSDS
 from print.print_coa import FileCOA
-
+import Login
 
 class MainWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, username=None):
         super().__init__()
         db_con.create_tables()
         self.main_layout = QVBoxLayout()
         self.main_tabs = QTabWidget()
+
+        self.username = username  # Store the username
 
         self.msds_form_layout = QVBoxLayout()
         self.msds_btn_layout = QHBoxLayout()
@@ -949,6 +949,13 @@ class MainWindow(QMainWindow):
             self.timer.stop()
             self.loading.accept()  # close dialog
 
+    def logout(self):
+        self.username = None
+        self.close()
+        # You might want to re-open the AuthWindow here
+        # For example:
+        self.auth_window = Login.AuthWindow()
+        self.auth_window.show()
 
 class LoadingDialog(QDialog):
     def __init__(self, parent=None):

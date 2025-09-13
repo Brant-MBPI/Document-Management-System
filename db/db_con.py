@@ -581,27 +581,22 @@ def get_all_dr_no():
     return [row[0] for row in records]
 
 
-def authenticate_user(self, username, hashed_password):
+def authenticate_user(username, hashed_password):
     conn = get_connection()
     cur = conn.cursor()
     cur.execute(
-        "SELECT id FROM tbl_user WHERE username = ? AND password = ?",
+        "SELECT id FROM tbl_user WHERE username = %s AND password = %s",
         (username, hashed_password)
     )
-    cur.close()
-    conn.close()
     return cur.fetchone()
 
 
-def register_user(self, username, hashed_password):
+def register_user(username, hashed_password):
     conn = get_connection()
     try:
         cur = conn.cursor()
-        cur.execute("SELECT id FROM users WHERE username = ?", (username,))
-        if cur.fetchone():
-            raise ValueError("Username already exists.")
         cur.execute(
-            "INSERT INTO users (username, password) VALUES (?, ?)",
+            "INSERT INTO tbl_user (username, password) VALUES (%s, %s)",
             (username, hashed_password)
         )
         conn.commit()

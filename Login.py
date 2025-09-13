@@ -7,7 +7,7 @@ from PyQt6.QtGui import QIcon, QFont
 from qt_material import apply_stylesheet
 from db import db_con
 from alert import window_alert
-from Main import MainWindow
+import Main
 
 class AuthWindow(QMainWindow):
     def __init__(self):
@@ -216,12 +216,13 @@ class AuthWindow(QMainWindow):
                 return
 
             hashed_password = self.hash_password(password)
-            user = db_con.authenticate_user(self, username, hashed_password)
+            user = db_con.authenticate_user(username, hashed_password)
 
             if user:
                 window_alert.show_message(self, "Success", "Login successful!", icon_type="info")
                 self.close()
-                self.main_window = MainWindow()
+                self.main_window = Main.MainWindow()
+                self.main_window = Main.MainWindow(username=username)
                 self.main_window.showMaximized()
             else:
                 window_alert.show_message(self, "Error", "Invalid username or password.", icon_type="critical")
@@ -258,11 +259,13 @@ class AuthWindow(QMainWindow):
         except Exception as e:
             window_alert.show_message(self, "Unexpected Error", f"An error occurred: {str(e)}", icon_type="critical")
 
+
 def main():
     app = QApplication(sys.argv)
     window = AuthWindow()
     window.show()
     sys.exit(app.exec())
+
 
 if __name__ == '__main__':
     main()
