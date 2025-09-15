@@ -347,26 +347,34 @@ class FileMSDS(QWidget):
             return  # nothing to print
 
         printer = QPrinter(QPrinter.PrinterMode.HighResolution)
-
         dialog = QPrintDialog(printer, self)
-        dialog.setWindowTitle("Print Certificate of Analysis")
+        dialog.setWindowTitle("Print Material Safety Data Sheet") # Changed title for clarity
 
         if dialog.exec():
-            painter = QPainter(printer)
-            render_opts = QPdfDocumentRenderOptions()
+            # Use a 'with' statement for QPainter to ensure proper resource management
+            # This ensures painter.end() is called even if an error occurs.
+            painter = QPainter()
+            try:
+                if not painter.begin(printer):
+                    print("Error: Could not begin painting on the printer.")
+                    return
 
-            for page_number in range(self.pdf_doc.pageCount()):
-                if page_number > 0:
-                    printer.newPage()
+                render_opts = QPdfDocumentRenderOptions()
 
-                target_rect = printer.pageRect(QPrinter.Unit.Point).toRectF()
+                for page_number in range(self.pdf_doc.pageCount()):
+                    if page_number > 0:
+                        printer.newPage()
 
-                # Scale the page to fit the printer page
-                self.pdf_doc.renderPage(
-                    painter,
-                    page_number,
-                    target_rect,
-                    render_opts
-                )
+                    target_rect = printer.pageRect(QPrinter.Unit.Point).toRectF()
 
-            painter.end()
+                    # Scale the page to fit the printer page
+                    # The QPdfDocumentRenderOptions can be used to control scaling
+                    self.pdf_doc.renderPage(
+                        painter,
+                        page_number,
+                        target_rect,
+                        render_opts
+                    )
+            finally:
+                if painter.isActive(): # Check if painter is active before ending
+                    painter.end()

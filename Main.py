@@ -988,7 +988,7 @@ class UserWidget(QWidget):
         font.setBold(True)
         self.username_label.setFont(font)
         self.username_label.setStyleSheet("color: #333;")
-        layout.addWidget(self.username_label)
+        layout.addWidget(self.username_label, alignment=Qt.AlignmentFlag.AlignVCenter)
 
         # Logout Button
         self.logout_button = QPushButton("Logout")
@@ -1013,8 +1013,8 @@ class UserWidget(QWidget):
             }
         """)
         self.logout_button.clicked.connect(self.logout_requested.emit)
-        layout.addWidget(self.logout_button)
-        layout.addStretch() # Pushes content to the left (or right if widget is set to the right)
+        layout.addWidget(self.logout_button, alignment=Qt.AlignmentFlag.AlignVCenter)
+        layout.addStretch()  # Pushes content to the left (or right if widget is set to the right)
 
 
 class LoadingDialog(QDialog):

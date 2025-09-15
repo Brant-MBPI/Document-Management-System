@@ -239,26 +239,9 @@ class FileCOA(QWidget):
             return  # nothing to print
 
         printer = QPrinter(QPrinter.PrinterMode.HighResolution)
-
         dialog = QPrintDialog(printer, self)
         dialog.setWindowTitle("Print Certificate of Analysis")
 
         if dialog.exec():
-            painter = QPainter(printer)
-            render_opts = QPdfDocumentRenderOptions()
-
-            for page_number in range(self.pdf_doc.pageCount()):
-                if page_number > 0:
-                    printer.newPage()
-
-                target_rect = printer.pageRect(QPrinter.Unit.Point).toRectF()
-
-                # Scale the page to fit the printer page
-                self.pdf_doc.renderPage(
-                    painter,
-                    page_number,
-                    target_rect,
-                    render_opts
-                )
-
-            painter.end()
+            # Use QPdfView's print capability
+            self.pdf_viewer.print(printer)
