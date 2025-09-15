@@ -6,7 +6,7 @@ from PyQt6.QtGui import QIcon, QIntValidator, QRegularExpressionValidator, QFont
 from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QTabWidget, \
     QTableWidget, QLineEdit, QHeaderView, QTableWidgetItem, QScrollArea, QTextEdit, QPushButton, QDateEdit, QMessageBox, QAbstractItemView, QCompleter, QDialog, QLabel, QProgressBar
 
-from db import db_con
+from db import db_con, db_dr
 from alert import window_alert
 from table import msds_data_entry, coa_data_entry, table
 from print.print_msds import FileMSDS
@@ -944,19 +944,19 @@ class MainWindow(QMainWindow):
         self.loading = LoadingDialog(self)
         self.loading.show()
 
-        # Launch the sync script
-        script_path = os.path.join(os.path.dirname(__file__), "db", "db_dr.py")
-        self.process = subprocess.Popen([sys.executable, script_path])
+        # Run in a worker thread instead of subprocess
+        from PyQt6.QtCore import QThread, pyqtSignal
 
-        # Use QTimer to check if process finished
-        self.timer = QTimer(self)
-        self.timer.timeout.connect(self.check_process)
-        self.timer.start(500)  # check every 0.5 sec
+        class Worker(QThread):
+            finished = pyqtSignal()
 
-    def check_process(self):
-        if self.process.poll() is not None:  # finished
-            self.timer.stop()
-            self.loading.accept()  # close dialog
+            def run(self):
+                db_dr.SyncDeliveryWorker().run()  # or whatever function starts sync
+                self.finished.emit()
+
+        self.worker = Worker()
+        self.worker.finished.connect(self.loading.accept)
+        self.worker.start()
 
     def logout(self):
         confirm = window_alert.show_message(self, "Logout Confirmation",
