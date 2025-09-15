@@ -1,7 +1,7 @@
 import os
 import subprocess
 import sys
-from PyQt6.QtCore import Qt, QDate, QRegularExpression, QTimer, QEvent, QObject
+from PyQt6.QtCore import Qt, QDate, QRegularExpression, QTimer, QEvent, QObject, pyqtSignal
 from PyQt6.QtGui import QIcon, QIntValidator, QRegularExpressionValidator, QFont, QAction
 from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QTabWidget, \
     QTableWidget, QLineEdit, QHeaderView, QTableWidgetItem, QScrollArea, QTextEdit, QPushButton, QDateEdit, QMessageBox, QAbstractItemView, QCompleter, QDialog, QLabel, QProgressBar
@@ -227,6 +227,10 @@ class MainWindow(QMainWindow):
         self.msds_tab.setObjectName("msds_tab")
         self.coa_tab.setObjectName("coa_tab")
 
+        self.user_widget = UserWidget(self.username)
+        self.main_tabs.setCornerWidget(self.user_widget, Qt.Corner.TopRightCorner)
+        self.user_widget.logout_requested.connect(self.logout)
+
         self.msds_search_bar = QLineEdit()
         self.msds_search_bar.setPlaceholderText("Search...")
         search_icon_msds = QAction(QIcon("img/search_icon.png"), "Search", self.msds_search_bar)
@@ -238,6 +242,7 @@ class MainWindow(QMainWindow):
 
         self.msds_sub_tabs.setCornerWidget(self.msds_search_bar)
         self.coa_sub_tabs.setCornerWidget(self.coa_search_bar)
+
 
         self.msds_sub_tabs.currentChanged.connect(self.toggle_msds_search_bar)
         self.coa_sub_tabs.currentChanged.connect(self.toggle_coa_search_bar)
@@ -953,12 +958,64 @@ class MainWindow(QMainWindow):
             self.loading.accept()  # close dialog
 
     def logout(self):
-        self.username = None
-        self.close()
-        # You might want to re-open the AuthWindow here
-        # For example:
-        self.auth_window = Login.AuthWindow()
-        self.auth_window.show()
+        confirm = window_alert.show_message(self, "Logout Confirmation",
+                                            "Are you sure you want to log out?",
+                                            icon_type="question", is_confirmation=True)
+        if confirm:
+            self.username = None
+            self.close()
+            # Re-open the AuthWindow (assuming Login.AuthWindow is your login screen)
+            self.auth_window = Login.AuthWindow()
+            self.auth_window.show()
+
+
+class UserWidget(QWidget):
+    logout_requested = pyqtSignal()
+
+    def __init__(self, username, parent=None):
+        super().__init__(parent)
+        self.username = username
+        self.init_ui()
+
+    def init_ui(self):
+        layout = QHBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0) # Remove margins to fit snugly
+
+        # Username Label
+        self.username_label = QLabel(f"Hello,  {self.username}!")
+        font = QFont()
+        font.setPointSize(14)
+        font.setBold(True)
+        self.username_label.setFont(font)
+        self.username_label.setStyleSheet("color: #333;")
+        layout.addWidget(self.username_label)
+
+        # Logout Button
+        self.logout_button = QPushButton("Logout")
+        self.logout_button.setIcon(QIcon("img/logout_icon.png"))  # Assuming you have a logout icon
+        self.logout_button.setStyleSheet("""
+            QPushButton {
+                background-color: none; /* Red */
+                color: #F44336;
+                border: none;
+                padding: 5px 10px;
+                font-size: 16px;
+                margin-left: 10px; /* Space from username */
+                margin-right: 20px;
+            }
+            QPushButton:hover {
+                color:white;
+                background-color: #d32f2f;
+            }
+            QPushButton:pressed {
+                color:white;
+                background-color: #c62828;
+            }
+        """)
+        self.logout_button.clicked.connect(self.logout_requested.emit)
+        layout.addWidget(self.logout_button)
+        layout.addStretch() # Pushes content to the left (or right if widget is set to the right)
+
 
 class LoadingDialog(QDialog):
     def __init__(self, parent=None):
