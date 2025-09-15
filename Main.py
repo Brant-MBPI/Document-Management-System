@@ -867,6 +867,7 @@ class MainWindow(QMainWindow):
                 msds_data_entry.clear_msds_form(self)
             else:  # Other tabs
                 self.msds_search_bar.hide()
+                self.msds_scroll_area.verticalScrollBar().setValue(0)
         except Exception as e:
             window_alert.show_message(self, "Unexpected Error", f"An error occurred: {str(e)}", icon_type="critical")
 
@@ -877,6 +878,8 @@ class MainWindow(QMainWindow):
                 coa_data_entry.clear_coa_form(self)
             else:
                 self.coa_search_bar.hide()
+                self.coa_search_bar.hide()
+                self.coa_scroll_area.verticalScrollBar().setValue(0)
         except Exception as e:
             window_alert.show_message(self, "Unexpected Error", f"An error occurred: {str(e)}", icon_type="critical")
 

@@ -54,6 +54,10 @@ class AuthWindow(QMainWindow):
         self.login_form_layout.addRow(QLabel("Username:"), self.login_username_input)
         self.login_form_layout.addRow(QLabel("Password:"), self.login_password_input)
 
+        # Connect returnPressed signal to handle_login for both inputs
+        self.login_username_input.returnPressed.connect(self.handle_login)
+        self.login_password_input.returnPressed.connect(self.handle_login)
+
         self.login_btn = QPushButton("Login")
         self.login_btn.setProperty("class", "auth_btn")
         self.login_btn.clicked.connect(self.handle_login)
@@ -97,6 +101,11 @@ class AuthWindow(QMainWindow):
         self.signup_form_layout.addRow(QLabel("Username:"), self.signup_username_input)
         self.signup_form_layout.addRow(QLabel("Password:"), self.signup_password_input)
         self.signup_form_layout.addRow(QLabel("Confirm Password:"), self.signup_confirm_password_input)
+
+        # Connect returnPressed signal to handle_signup for all signup inputs
+        self.signup_username_input.returnPressed.connect(self.handle_signup)
+        self.signup_password_input.returnPressed.connect(self.handle_signup)
+        self.signup_confirm_password_input.returnPressed.connect(self.handle_signup)
 
         self.signup_btn = QPushButton("Sign Up")
         self.signup_btn.setProperty("class", "auth_btn")
