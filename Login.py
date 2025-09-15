@@ -14,7 +14,7 @@ class AuthWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("Document Management System - Login")
         self.resize(600, 450)
-
+        db_con.create_tables()
         # Main layout
         self.main_layout = QVBoxLayout()
         self.main_layout.setSpacing(20)
@@ -231,6 +231,8 @@ class AuthWindow(QMainWindow):
                 window_alert.show_message(self, "Success", "Login successful!", icon_type="info")
                 self.close()
                 self.main_window = Main.MainWindow()
+                self.main_window.setWindowTitle("Document Management System")
+                self.main_window.resize(1000, 800)
                 self.main_window = Main.MainWindow(username=username)
                 self.main_window.showMaximized()
             else:

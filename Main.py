@@ -16,7 +16,7 @@ import Login
 class MainWindow(QMainWindow):
     def __init__(self, username=None):
         super().__init__()
-        db_con.create_tables()
+
         self.main_layout = QVBoxLayout()
         self.main_tabs = QTabWidget()
 
@@ -1035,15 +1035,14 @@ class LoadingDialog(QDialog):
         self.progress.setRange(0, 0)  # Indeterminate (infinite loading)
         self.progress.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.progress)
-
-def main():
-    app = QApplication(sys.argv)
-    window = MainWindow()
-    window.setWindowTitle("Document Management System")
-    window.resize(1000, 800)
-    window.showMaximized()
-    sys.exit(app.exec())
-
-
-if __name__ == '__main__':
-    main()
+# def main():
+#     app = QApplication(sys.argv)
+#     window = MainWindow()
+#     window.setWindowTitle("Document Management System")
+#     window.resize(1000, 800)
+#     window.showMaximized()
+#     sys.exit(app.exec())
+#
+#
+# if __name__ == '__main__':
+#     main()

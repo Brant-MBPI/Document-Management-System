@@ -1,14 +1,16 @@
 
 import psycopg2
 
+from db import db_dr
+
 
 def get_connection():
     return psycopg2.connect(
-        host="localhost",
-        dbname="postgres",
+        host="192.168.1.13",
+        dbname="db_msds",
         user="postgres",
-        password="password",
-        port="5433"
+        password="mbpi",
+        port="5432"
     )
 
 
@@ -122,6 +124,7 @@ def create_tables():
             password VARCHAR(255)
         );
     """)
+    db_dr.create_delivery_legacy_tables()
 
     conn.commit()
     cur.close()

@@ -8,11 +8,11 @@ from PyQt6.QtCore import QObject, pyqtSignal, QCoreApplication
 # --- CONFIGURATION ---
 # --- IMPORTANT: Update these details to match your environment ---
 DB_CONFIG = {
-    "host": "localhost",
-    "port": 5433,
-    "dbname": "postgres",
+    "host": "192.168.1.13",
+    "port": 5432,
+    "dbname": "db_msds",
     "user": "postgres",
-    "password": "password"
+    "password": "mbpi"
 }
 # --- Path to the shared folder containing the legacy DBF files ---
 DBF_BASE_PATH = r'\\system-server\SYSTEM-NEW-OLD'
