@@ -12,6 +12,8 @@ from table import msds_data_entry, coa_data_entry, table
 from print.print_msds import FileMSDS
 from print.print_coa import FileCOA
 import Login
+from utils import abs_path
+
 
 class MainWindow(QMainWindow):
     def __init__(self, username=None):
@@ -234,16 +236,15 @@ class MainWindow(QMainWindow):
 
         self.msds_search_bar = QLineEdit()
         self.msds_search_bar.setPlaceholderText("Search...")
-        search_icon_msds = QAction(QIcon("img/search_icon.png"), "Search", self.msds_search_bar)
+        search_icon_msds = QAction(QIcon(abs_path.resource("img/search_icon.png")), "Search", self.msds_search_bar)
         self.msds_search_bar.addAction(search_icon_msds, QLineEdit.ActionPosition.TrailingPosition)
         self.coa_search_bar = QLineEdit()
         self.coa_search_bar.setPlaceholderText("Search...")
-        search_icon_coa = QAction(QIcon("img/search_icon.png"), "Search", self.coa_search_bar)
+        search_icon_coa = QAction(QIcon(abs_path.resource("img/search_icon.png")), "Search", self.coa_search_bar)
         self.coa_search_bar.addAction(search_icon_coa, QLineEdit.ActionPosition.TrailingPosition)
 
         self.msds_sub_tabs.setCornerWidget(self.msds_search_bar)
         self.coa_sub_tabs.setCornerWidget(self.coa_search_bar)
-
 
         self.msds_sub_tabs.currentChanged.connect(self.toggle_msds_search_bar)
         self.coa_sub_tabs.currentChanged.connect(self.toggle_coa_search_bar)
@@ -801,24 +802,24 @@ class MainWindow(QMainWindow):
             last_item = table.item(last_row, last_col)  # get fresh reference
             if last_item:
                 if last_col == 1:
-                    last_item.setIcon(QIcon("img/view_icon.png"))  # normal view icon
+                    last_item.setIcon(QIcon(abs_path.resource("img/view_icon.png")))  # normal view icon
                 elif last_col == 2:
-                    last_item.setIcon(QIcon("img/edit_icon.png"))  # normal edit icon
+                    last_item.setIcon(QIcon(abs_path.resource("img/edit_icon.png")))  # normal edit icon
                 elif last_col == 3:
-                    last_item.setIcon(QIcon("img/delete_icon.png"))  # normal delete icon
+                    last_item.setIcon(QIcon(abs_path.resource("img/delete_icon.png")))  # normal delete icon
             self.last_hovered = None
 
         # Apply highlight to the current cell
         item = table.item(row, column)
         if item:
             if column == 1:
-                item.setIcon(QIcon("img/hover_view_icon.png"))
+                item.setIcon(QIcon(abs_path.resource("img/hover_view_icon.png")))
                 self.last_hovered = (row, column)
             elif column == 2:
-                item.setIcon(QIcon("img/hover_edit_icon.png"))
+                item.setIcon(QIcon(abs_path.resource("img/hover_edit_icon.png")))
                 self.last_hovered = (row, column)
             elif column == 3:
-                item.setIcon(QIcon("img/hover_delete_icon.png"))
+                item.setIcon(QIcon(abs_path.resource("img/hover_delete_icon.png")))
                 self.last_hovered = (row, column)
     def msds_cell_clicked(self, row, column):
         msds_id = self.msds_records_table.item(row, 0).data(Qt.ItemDataRole.UserRole)
@@ -993,7 +994,7 @@ class UserWidget(QWidget):
 
         # Logout Button
         self.logout_button = QPushButton("Logout")
-        self.logout_button.setIcon(QIcon("img/logout_icon.png"))  # Assuming you have a logout icon
+        self.logout_button.setIcon(QIcon(abs_path.resource("img/logout_icon.png")))  # Assuming you have a logout icon
         self.logout_button.setStyleSheet("""
             QPushButton {
                 background-color: none; /* Red */

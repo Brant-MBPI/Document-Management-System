@@ -8,6 +8,8 @@ from qt_material import apply_stylesheet
 from db import db_con
 from alert import window_alert
 import Main
+from utils import abs_path
+
 
 class AuthWindow(QMainWindow):
     def __init__(self):
@@ -22,7 +24,7 @@ class AuthWindow(QMainWindow):
 
         # Logo
         self.logo_label = QLabel()
-        self.logo_label.setPixmap(QIcon("img/logo.png").pixmap(100, 100))
+        self.logo_label.setPixmap(QIcon(abs_path.resource("img/logo.png")).pixmap(100, 100))
         self.logo_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.main_layout.addWidget(self.logo_label)
 

@@ -7,6 +7,7 @@ from PyQt6.QtWidgets import (
 )
 from alert import window_alert
 from db import db_con
+from utils import abs_path
 
 current_coa_id = None  # Global variable to store the current COA ID
 
@@ -61,7 +62,12 @@ def coa_data_entry_form(self):
         form_widget = QWidget()
         main_v_layout = QVBoxLayout(form_widget)  # Use QVBoxLayout for overall structure
         main_v_layout.setContentsMargins(30, 20, 30, 30)  # Add overall padding
-
+        calendar_icon_path = abs_path.resource("img/calendar_icon.png")
+        form_widget.setStyleSheet(f"""QDateEdit::down-arrow {{
+                image: url("{calendar_icon_path}"); /* Ensure this path is correct */
+                width: 26px;
+                height: 26px;
+            }}""")
         form_widget.setStyleSheet("""
             QWidget {
                 background-color: #f8f9fa; /* Very light background for the whole form */
@@ -108,11 +114,7 @@ def coa_data_entry_form(self):
             QDateEdit::drop-down:hover {
                 background-color: #dee2e6; /* Slightly darker on hover */
             }
-            QDateEdit::down-arrow {
-                image: url(img/calendar_icon.png); /* Ensure this path is correct */
-                width: 26px;
-                height: 26px;
-            }
+            
             QDateEdit::down-arrow:on {
                 top: 1px;
                 left: 1px;

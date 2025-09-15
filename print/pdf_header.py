@@ -1,3 +1,6 @@
+from utils import abs_path
+
+
 def add_first_page_header(canvas, doc):
     canvas.saveState()
     # Convert cm to points (1 cm ≈ 28.35 pt)
@@ -8,7 +11,7 @@ def add_first_page_header(canvas, doc):
     # Page size
     page_width, page_height = doc.pagesize
 
-    logo_path = "img/MBPI_Logo.jpg"
+    logo_path = abs_path.resource("img/MBPI_Logo.jpg")
 
     # Center horizontally
     x = (page_width - logo_width) / 2
