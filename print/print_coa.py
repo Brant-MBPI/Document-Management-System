@@ -1,14 +1,14 @@
 
 import platform
 import io
-from PyQt6.QtCore import QBuffer, QIODevice
-from PyQt6.QtGui import QPainter
+from PyQt6.QtCore import QBuffer, QIODevice, QSize, Qt, QPointF
+from PyQt6.QtGui import QPainter, QPageSize, QPageLayout
 from PyQt6.QtPdf import QPdfDocument, QPdfDocumentRenderOptions
 from PyQt6.QtPdfWidgets import QPdfView
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QPushButton, QHBoxLayout, QFileDialog
 from reportlab.lib.enums import TA_CENTER
 from PyQt6.QtPrintSupport import QPrinter, QPrintDialog
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
@@ -128,7 +128,7 @@ class FileCOA(QWidget):
         date_format = "%-d" if platform.system() != "Windows" else "%#d"
         content = []
         page_width = letter[0] - 50 - 50
-        col_widths = [0.23 * page_width, 0.25 * page_width, 0.28 * page_width, 0.16 * page_width, 0.08 * page_width]
+        col_widths = [0.22 * page_width, 0.24 * page_width, 0.24 * page_width, 0.12 * page_width, 0.20 * page_width]
         content.append(Paragraph("Certificate of Analysis", styles['TitleSans']))
         content.append(Spacer(1, 12))
 
@@ -235,13 +235,59 @@ class FileCOA(QWidget):
         window_alert.show_message(self, "Success", "File downloaded!", icon_type="info")
 
     def print_pdf(self):
-        if not self.pdf_doc or self.pdf_doc.pageCount() == 0:
-            return  # nothing to print
+        try:
+            if not self.pdf_doc or self.pdf_doc.pageCount() == 0:
+                return  # nothing to print
 
-        printer = QPrinter(QPrinter.PrinterMode.HighResolution)
-        dialog = QPrintDialog(printer, self)
-        dialog.setWindowTitle("Print Certificate of Analysis")
+            printer = QPrinter(QPrinter.PrinterMode.HighResolution)
 
-        if dialog.exec():
-            # Use QPdfView's print capability
-            self.pdf_viewer.print(printer)
+            # Set printer page size using QPageLayout
+            page_layout = QPageLayout()
+            page_layout.setPageSize(QPageSize(QPageSize.PageSizeId.Letter))
+            printer.setPageLayout(page_layout)
+
+            dialog = QPrintDialog(printer, self)
+            dialog.setWindowTitle("Print Certificate of Analysis")
+
+            if dialog.exec():
+                painter = QPainter(printer)
+                render_options = QPdfDocumentRenderOptions()
+
+                # Choose a sufficiently high DPI for rendering the PDF to an image
+                # 600 DPI is a good balance for print quality
+                render_dpi = 600
+
+                for i in range(self.pdf_doc.pageCount()):
+                    if i > 0:
+                        printer.newPage()
+
+                    pdf_page_size_points = self.pdf_doc.pagePointSize(i)
+
+                    render_dpi = 300
+                    image_render_width_pixels = int(pdf_page_size_points.width() / 72.0 * render_dpi)
+                    image_render_height_pixels = int(pdf_page_size_points.height() / 72.0 * render_dpi)
+
+                    pdf_image = self.pdf_doc.render(
+                        i,
+                        QSize(image_render_width_pixels, image_render_height_pixels),
+                        render_options
+                    )
+
+                    if not pdf_image.isNull():
+                        # Use the full page, not the printable area
+                        full_page_pixels = printer.paperRect(QPrinter.Unit.DevicePixel)
+
+                        scaled_image = pdf_image.scaled(
+                            full_page_pixels.size().toSize(),
+                            Qt.AspectRatioMode.KeepAspectRatio,
+                            Qt.TransformationMode.SmoothTransformation
+                        )
+
+                        # Align to the top (no margin)
+                        x = full_page_pixels.x() + (full_page_pixels.width() - scaled_image.width()) / 2
+                        y = full_page_pixels.y()  # start at the very top
+
+                        painter.drawImage(QPointF(x, y), scaled_image)
+                painter.end()
+        except Exception as e:
+            print(f"An error occurred during printing: {e}")

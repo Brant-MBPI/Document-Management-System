@@ -5,6 +5,7 @@ from PyQt6.QtCore import Qt, QDate, QRegularExpression, QTimer, QEvent, QObject,
 from PyQt6.QtGui import QIcon, QIntValidator, QRegularExpressionValidator, QFont, QAction
 from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QTabWidget, \
     QTableWidget, QLineEdit, QHeaderView, QTableWidgetItem, QScrollArea, QTextEdit, QPushButton, QDateEdit, QMessageBox, QAbstractItemView, QCompleter, QDialog, QLabel, QProgressBar
+
 from db import db_con
 from alert import window_alert
 from table import msds_data_entry, coa_data_entry, table
