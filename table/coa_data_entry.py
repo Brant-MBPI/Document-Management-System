@@ -62,7 +62,7 @@ def coa_data_entry_form(self):
         form_widget = QWidget()
         main_v_layout = QVBoxLayout(form_widget)  # Use QVBoxLayout for overall structure
         main_v_layout.setContentsMargins(30, 20, 30, 30)  # Add overall padding
-        calendar_icon_path = abs_path.resource("img/calendar_icon.png")
+        calendar_icon_path = abs_path.resource("img/calendar_icon.png").replace("\\", "/")
         form_widget.setStyleSheet(f"""QDateEdit::down-arrow {{
                 image: url("{calendar_icon_path}"); /* Ensure this path is correct */
                 width: 26px;
