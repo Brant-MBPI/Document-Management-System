@@ -63,25 +63,21 @@ def coa_data_entry_form(self):
         main_v_layout = QVBoxLayout(form_widget)  # Use QVBoxLayout for overall structure
         main_v_layout.setContentsMargins(30, 20, 30, 30)  # Add overall padding
         calendar_icon_path = abs_path.resource("img/calendar_icon.png").replace("\\", "/")
-        form_widget.setStyleSheet(f"""QDateEdit::down-arrow {{
-                image: url("{calendar_icon_path}"); /* Ensure this path is correct */
-                width: 26px;
-                height: 26px;
-            }}""")
-        form_widget.setStyleSheet("""
-            QWidget {
+
+        form_widget.setStyleSheet(f"""
+            QWidget {{
                 background-color: #f8f9fa; /* Very light background for the whole form */
                 font-family: 'Inter', 'Segoe UI', sans-serif; /* Modern font */
                 color: #343a40; /* Dark gray for general text */
-            }
-            QLabel {
+            }}
+            QLabel {{
                 font-size: 14px;
                 font-weight: 500;
                 color: #495057; /* Slightly darker gray for labels */
                 padding-bottom: 2px; /* Small padding below labels */
                 background-color: transparent;
-            }
-            QLabel[class="section_title"] { /* New class for section titles - now handled by QGroupBox */
+            }}
+            QLabel[class="section_title"] {{ /* New class for section titles - now handled by QGroupBox */
                 font-size: 18px;
                 font-weight: 600;
                 color: #212529; /* Very dark for section titles */
@@ -89,8 +85,8 @@ def coa_data_entry_form(self):
                 margin-bottom: 16px;
                 padding-bottom: 5px;
                 text-align: center; 
-            }
-            QLineEdit, QDateEdit {
+            }}
+            QLineEdit, QDateEdit {{
                 font-size: 14px;
                 padding: 10px 12px;
                 border: 1px solid #ced4da; /* Lighter, more neutral border */
@@ -98,28 +94,33 @@ def coa_data_entry_form(self):
                 background-color: #ffffff;
                 min-height: 38px; /* Consistent height */
                 selection-background-color: #aed6f1;
-            }
-            QLineEdit:focus, QDateEdit:focus {
+            }}
+            QLineEdit:focus, QDateEdit:focus {{
                 border: 1px solid #007bff; /* Primary blue on focus */
                 background-color: #e9f5ff; /* Very light blue background on focus */
                 box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25); /* Subtle focus ring */
-            }
-            QDateEdit::drop-down {
+            }}
+            QDateEdit::drop-down {{
                 border: 0px;
                 width: 40px; /* Slightly wider dropdown button */
                 background-color: #e9ecef; /* Light gray background for dropdown */
                 border-top-right-radius: 6px;
                 border-bottom-right-radius: 6px;
-            }
-            QDateEdit::drop-down:hover {
+            }}
+            QDateEdit::down-arrow {{
+                background-image: url("{calendar_icon_path}"); /* Ensure this path is correct */
+                width: 26px;
+                height: 26px;
+            }}
+            QDateEdit::drop-down:hover {{
                 background-color: #dee2e6; /* Slightly darker on hover */
-            }
+            }}
             
-            QDateEdit::down-arrow:on {
+            QDateEdit::down-arrow:on {{
                 top: 1px;
                 left: 1px;
-            }
-            QGroupBox {
+            }}
+            QGroupBox {{
                 font-size: 16px;
                 font-weight: 600;
                 color: #212529;
@@ -128,8 +129,8 @@ def coa_data_entry_form(self):
                 margin-top: 2.0ex; /* Space for title */
                 background-color: #ffffff;
                 padding: 15px; /* Inner padding for group box content */
-            }
-            QGroupBox::title {
+            }}
+            QGroupBox::title {{
                 subcontrol-origin: margin;
                 subcontrol-position: top left;
                 padding: 0 10px; /* Wider padding for title text */
@@ -137,7 +138,7 @@ def coa_data_entry_form(self):
                 margin-left: 0px; /* No margin here, padding takes over */
                 color: #34495e;
                 background-color: #f8f9fa; /* Match widget background for cutout effect */
-            }
+            }}
         """)
 
         # === Header ===
