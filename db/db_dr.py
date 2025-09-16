@@ -6,7 +6,6 @@ from sqlalchemy import create_engine, text
 from PyQt6.QtCore import QObject, pyqtSignal, QCoreApplication
 
 # --- CONFIGURATION ---
-# --- IMPORTANT: Update these details to match your environment ---
 DB_CONFIG = {
     "host": "192.168.1.13",
     "port": 5432,
@@ -14,7 +13,6 @@ DB_CONFIG = {
     "user": "postgres",
     "password": "mbpi"
 }
-# --- Path to the shared folder containing the legacy DBF files ---
 DBF_BASE_PATH = r'\\system-server\SYSTEM-NEW-OLD'
 DELIVERY_DBF_PATH = os.path.join(DBF_BASE_PATH, 'tbl_del01.dbf')
 DELIVERY_ITEMS_DBF_PATH = os.path.join(DBF_BASE_PATH, 'tbl_del02.dbf')
@@ -32,10 +30,7 @@ except Exception as e:
 
 
 def create_delivery_legacy_tables():
-    """
-    Creates the necessary PostgreSQL tables for storing the legacy delivery data.
-    This function is idempotent and can be run safely multiple times.
-    """
+    """Creates the necessary PostgreSQL tables for storing the legacy delivery data."""
     print("Initializing database tables for legacy delivery data...")
     try:
         with engine.connect() as connection:
@@ -62,12 +57,10 @@ def create_delivery_legacy_tables():
                         is_printed BOOLEAN NOT NULL DEFAULT FALSE
                     );
                 """))
-                print(" -> Table 'product_delivery_primary' checked/created.")
 
                 # Items table for delivery details.
                 connection.execute(text("""
-                    DROP TABLE IF EXISTS product_delivery_items;
-                    CREATE TABLE product_delivery_items (
+                    CREATE TABLE IF NOT EXISTS product_delivery_items (
                         id SERIAL PRIMARY KEY,
                         dr_no TEXT NOT NULL,
                         quantity NUMERIC(15, 6),
@@ -88,30 +81,28 @@ def create_delivery_legacy_tables():
                         FOREIGN KEY (dr_no) REFERENCES product_delivery_primary (dr_no) ON DELETE CASCADE
                     );
                 """))
-                print(" -> Table 'product_delivery_items' (re)created.")
 
-        print("\nDatabase tables for delivery initialized successfully.")
+        print("Database tables for delivery initialized successfully.")
     except Exception as e:
-        print(f"\nFATAL: Could not initialize delivery database tables: {e}")
+        print(f"FATAL: Could not initialize delivery database tables: {e}")
         raise
 
 
 class SyncDeliveryWorker(QObject):
-    """
-    A worker that syncs delivery data from legacy DBF files to PostgreSQL.
-    Now includes print statements to show progress.
-    """
+    """Syncs delivery data from legacy DBF files to PostgreSQL (incremental sync)."""
     finished = pyqtSignal(bool, str)
 
     def _get_safe_dr_num(self, dr_num_raw):
-        if dr_num_raw is None: return None
+        if dr_num_raw is None:
+            return None
         try:
             return str(int(float(dr_num_raw)))
         except (ValueError, TypeError):
             return None
 
     def _to_float(self, value, default=0.0):
-        if value is None: return default
+        if value is None:
+            return default
         try:
             return float(value)
         except (ValueError, TypeError):
@@ -121,59 +112,39 @@ class SyncDeliveryWorker(QObject):
                 return default
 
     def run(self):
-        """Main execution method for the sync process with loading indicators."""
+        """Main execution method for the sync process (incremental)."""
         print("\n--- Starting Legacy Delivery Sync ---")
         try:
-            # --- Step 1: Process Delivery Items (tbl_del02.dbf) ---
-            items_by_dr = {}
-            print(f"Step 1: Reading items from '{os.path.basename(DELIVERY_ITEMS_DBF_PATH)}'")
-            print("Processing item records: ", end='')
-            item_count = 0
-            with dbfread.DBF(DELIVERY_ITEMS_DBF_PATH, load=True, encoding='latin1') as dbf_items:
-                for item_rec in dbf_items:
-                    item_count += 1
-                    # Add a dot for every 200 records to show progress without flooding the console
-                    if item_count % 200 == 0:
-                        print(".", end='', flush=True)
+            # --- Step 0: Get last synced ID ---
+            with engine.connect() as conn:
+                last_id = conn.execute(text("SELECT COALESCE(MAX(id), 0) FROM product_delivery_primary")).scalar()
+            print(f"Last synced ID in PostgreSQL: {last_id}")
 
-                    dr_num = self._get_safe_dr_num(item_rec.get('T_DRNUM'))
-                    if not dr_num: continue
-                    if dr_num not in items_by_dr: items_by_dr[dr_num] = []
-
-                    attachments = "\n".join(
-                        filter(None, [str(item_rec.get(f'T_DESC{i}', '')).strip() for i in range(1, 5)]))
-
-                    items_by_dr[dr_num].append({
-                        "dr_no": dr_num, "quantity": self._to_float(item_rec.get('T_TOTALWT')),
-                        "unit": str(item_rec.get('T_TOTALWTU', '')).strip(),
-                        "product_code": str(item_rec.get('T_PRODCODE', '')).strip(),
-                        "product_color": str(item_rec.get('T_PRODCOLO', '')).strip(),
-                        "no_of_packing": self._to_float(item_rec.get('T_NUMPACKI')),
-                        "weight_per_pack": self._to_float(item_rec.get('T_WTPERPAC')), "lot_numbers": "",
-                        "attachments": attachments
-                    })
-            print(f"\n-> Finished. Processed {item_count} total item records.")
-
-            # --- Step 2: Process Primary Delivery Headers (tbl_del01.dbf) ---
+            # --- Step 1: Process Primary Delivery Headers (tbl_del01.dbf) ---
             primary_recs = []
-            print(f"\nStep 2: Reading headers from '{os.path.basename(DELIVERY_DBF_PATH)}'")
-            print("Processing primary records: ", end='')
+            print(f"Step 1: Reading headers from '{os.path.basename(DELIVERY_DBF_PATH)}'")
             primary_count = 0
+
             with dbfread.DBF(DELIVERY_DBF_PATH, load=True, encoding='latin1') as dbf_primary:
                 for r in dbf_primary:
                     primary_count += 1
-                    if primary_count % 200 == 0:
-                        print(".", end='', flush=True)
-
                     dr_num = self._get_safe_dr_num(r.get('T_DRNUM'))
-                    if not dr_num: continue
+                    if not dr_num:
+                        continue
 
-                    address = (str(r.get('T_ADD1', '')).strip() + ' ' + str(r.get('T_ADD2', '')).strip()).strip()
+                    # ✅ Only sync records newer than last synced ID
+                    if primary_count <= last_id:
+                        continue
+
+                    address = (str(r.get('T_ADD1', '')).strip() + ' ' +
+                               str(r.get('T_ADD2', '')).strip()).strip()
 
                     primary_recs.append({
-                        "dr_no": dr_num, "delivery_date": r.get('T_DRDATE'),
+                        "dr_no": dr_num,
+                        "delivery_date": r.get('T_DRDATE'),
                         "customer_name": str(r.get('T_CUSTOMER', '')).strip(),
-                        "deliver_to": str(r.get('T_DELTO', '')).strip(), "address": address,
+                        "deliver_to": str(r.get('T_DELTO', '')).strip(),
+                        "address": address,
                         "po_no": str(r.get('T_CPONUM', '')).strip(),
                         "order_form_no": str(r.get('T_ORDERNUM', '')).strip(),
                         "terms": str(r.get('T_REMARKS', '')).strip(),
@@ -181,23 +152,50 @@ class SyncDeliveryWorker(QObject):
                         "encoded_on": r.get('T_DENCODED'),
                         "is_deleted": bool(r.get('T_DELETED', False))
                     })
-            print(f"\n-> Finished. Processed {primary_count} total primary records.")
+
+            print(f"-> Found {len(primary_recs)} new primary records to sync.")
 
             if not primary_recs:
-                self.finished.emit(True, "Sync Info: No new delivery records found to sync.")
+                self.finished.emit(True, "Sync Info: No new delivery records found.")
                 return
 
-            # --- Step 3: Execute Database Transactions ---
-            print("\nStep 3: Writing data to PostgreSQL database...")
+            # --- Step 2: Process Delivery Items (tbl_del02.dbf) ---
+            new_dr_numbers = {rec['dr_no'] for rec in primary_recs}
+            items_by_dr = {}
+            item_count = 0
+            print(f"Step 2: Reading items from '{os.path.basename(DELIVERY_ITEMS_DBF_PATH)}'")
+
+            with dbfread.DBF(DELIVERY_ITEMS_DBF_PATH, load=True, encoding='latin1') as dbf_items:
+                for item_rec in dbf_items:
+                    dr_num = self._get_safe_dr_num(item_rec.get('T_DRNUM'))
+                    if dr_num not in new_dr_numbers:
+                        continue
+
+                    item_count += 1
+                    attachments = "\n".join(
+                        filter(None, [str(item_rec.get(f'T_DESC{i}', '')).strip() for i in range(1, 5)]))
+
+                    if dr_num not in items_by_dr:
+                        items_by_dr[dr_num] = []
+                    items_by_dr[dr_num].append({
+                        "dr_no": dr_num,
+                        "quantity": self._to_float(item_rec.get('T_TOTALWT')),
+                        "unit": str(item_rec.get('T_TOTALWTU', '')).strip(),
+                        "product_code": str(item_rec.get('T_PRODCODE', '')).strip(),
+                        "product_color": str(item_rec.get('T_PRODCOLO', '')).strip(),
+                        "no_of_packing": self._to_float(item_rec.get('T_NUMPACKI')),
+                        "weight_per_pack": self._to_float(item_rec.get('T_WTPERPAC')),
+                        "lot_numbers": "",
+                        "attachments": attachments
+                    })
+
+            print(f"-> Found {item_count} new item records to sync.")
+
+            # --- Step 3: Insert New Records ---
+            print("Step 3: Writing new data to PostgreSQL...")
             with engine.connect() as conn:
                 with conn.begin():
-                    dr_numbers_to_sync = [rec['dr_no'] for rec in primary_recs]
-
-                    print(" -> Deleting existing items for DRs to be synced...")
-                    conn.execute(text("DELETE FROM product_delivery_items WHERE dr_no = ANY(:dr_nos)"),
-                                 {"dr_nos": dr_numbers_to_sync})
-
-                    print(" -> Inserting/Updating primary delivery records...")
+                    # Insert/Update headers
                     conn.execute(text("""
                         INSERT INTO product_delivery_primary (
                             dr_no, delivery_date, customer_name, deliver_to, address, po_no,
@@ -208,19 +206,25 @@ class SyncDeliveryWorker(QObject):
                             :order_form_no, :terms, :prepared_by, :encoded_on, :is_deleted,
                             'DBF_SYNC', NOW(), :prepared_by
                         ) ON CONFLICT (dr_no) DO UPDATE SET
-                            delivery_date = EXCLUDED.delivery_date, customer_name = EXCLUDED.customer_name,
-                            deliver_to = EXCLUDED.deliver_to, address = EXCLUDED.address, po_no = EXCLUDED.po_no,
-                            order_form_no = EXCLUDED.order_form_no, terms = EXCLUDED.terms,
-                            prepared_by = EXCLUDED.prepared_by, encoded_on = EXCLUDED.encoded_on,
-                            is_deleted = EXCLUDED.is_deleted, edited_by = 'DBF_SYNC', edited_on = NOW()
+                            delivery_date = EXCLUDED.delivery_date,
+                            customer_name = EXCLUDED.customer_name,
+                            deliver_to = EXCLUDED.deliver_to,
+                            address = EXCLUDED.address,
+                            po_no = EXCLUDED.po_no,
+                            order_form_no = EXCLUDED.order_form_no,
+                            terms = EXCLUDED.terms,
+                            prepared_by = EXCLUDED.prepared_by,
+                            encoded_on = EXCLUDED.encoded_on,
+                            is_deleted = EXCLUDED.is_deleted,
+                            edited_by = 'DBF_SYNC',
+                            edited_on = NOW()
                     """), primary_recs)
 
+                    # Insert items
                     all_items_to_insert = [
-                        item for dr_num in dr_numbers_to_sync
-                        if dr_num in items_by_dr for item in items_by_dr[dr_num]
+                        item for dr_num in new_dr_numbers for item in items_by_dr.get(dr_num, [])
                     ]
                     if all_items_to_insert:
-                        print(f" -> Inserting {len(all_items_to_insert)} associated items...")
                         conn.execute(text("""
                             INSERT INTO product_delivery_items (
                                 dr_no, quantity, unit, product_code, product_color,
@@ -230,56 +234,34 @@ class SyncDeliveryWorker(QObject):
                                 :no_of_packing, :weight_per_pack, :lot_numbers, :attachments
                             )
                         """), all_items_to_insert)
-            print(" -> Database transaction committed successfully.")
 
-            # --- Step 4: Finalize and Emit Signal ---
+            print("-> Database transaction committed successfully.")
             msg = (f"Delivery sync complete.\n"
-                   f"{len(primary_recs)} primary records and "
-                   f"{len(all_items_to_insert)} items processed.")
+                   f"{len(primary_recs)} new primary records and "
+                   f"{item_count} new items processed.")
             self.finished.emit(True, msg)
 
         except dbfread.DBFNotFound as e:
-            self.finished.emit(False, f"File Not Found: A required delivery DBF file is missing.\nDetails: {e}")
+            self.finished.emit(False, f"File Not Found: Missing DBF file.\nDetails: {e}")
         except Exception as e:
             trace_info = traceback.format_exc()
-            print(f"DELIVERY SYNC CRITICAL ERROR: {e}\n{trace_info}")
-            self.finished.emit(False, (f"An unexpected error occurred during delivery sync:\n{e}\n\n"
-                                       "Check console/logs for technical details."))
+            print(f"DELIVERY SYNC ERROR: {e}\n{trace_info}")
+            self.finished.emit(False, f"Unexpected error:\n{e}\n\nCheck logs for details.")
 
 
-# This handler function will be connected to the worker's 'finished' signal
 def handle_sync_finish(success, message):
-    """Prints the final result of the sync process."""
     print("\n--- Sync Process Finished ---")
-    if success:
-        print("Status: SUCCESS")
-        print(f"Message: {message}")
-    else:
-        print("Status: FAILED")
-        print(f"Message: {message}")
-    # In a real GUI app, this would close the app or thread
+    print("Status:", "SUCCESS" if success else "FAILED")
+    print("Message:", message)
     if QCoreApplication.instance():
         QCoreApplication.instance().quit()
 
 
 if __name__ == "__main__":
-    # This block allows you to run the script directly to test the sync.
-
-    # We need a QCoreApplication for the signal/slot mechanism to work.
     app = QCoreApplication(sys.argv)
-
-    # 1. Ensure the database tables exist by running the creation function.
     print("--- Running Delivery Table Setup ---")
     create_delivery_legacy_tables()
-
-    # 2. Instantiate the worker and connect its signal.
     worker = SyncDeliveryWorker()
     worker.finished.connect(handle_sync_finish)
-
-    # 3. Run the worker.
     worker.run()
-
-    # The handle_sync_finish function will be called when the worker is done.
-    # We exit here because for a console script, the work is finished.
-    # In a GUI app, you would let app.exec() run.
     sys.exit()

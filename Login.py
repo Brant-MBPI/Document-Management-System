@@ -232,10 +232,9 @@ class AuthWindow(QMainWindow):
             if user:
                 window_alert.show_message(self, "Success", "Login successful!", icon_type="info")
                 self.close()
-                self.main_window = Main.MainWindow()
+                self.main_window = Main.MainWindow(username=username)
                 self.main_window.setWindowTitle("Document Management System")
                 self.main_window.resize(1000, 800)
-                self.main_window = Main.MainWindow(username=username)
                 self.main_window.showMaximized()
             else:
                 window_alert.show_message(self, "Error", "Invalid username or password.", icon_type="critical")
