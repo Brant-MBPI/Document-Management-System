@@ -1,11 +1,8 @@
-import os
-import subprocess
-import sys
-from PyQt6.QtCore import Qt, QDate, QRegularExpression, QTimer, QEvent, QObject, pyqtSignal
+
+from PyQt6.QtCore import Qt, QDate, QRegularExpression, QTimer, QEvent, QObject, pyqtSignal, QThread
 from PyQt6.QtGui import QIcon, QIntValidator, QRegularExpressionValidator, QFont, QAction
 from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QTabWidget, \
     QTableWidget, QLineEdit, QHeaderView, QTableWidgetItem, QScrollArea, QTextEdit, QPushButton, QDateEdit, QMessageBox, QAbstractItemView, QCompleter, QDialog, QLabel, QProgressBar
-
 from db import db_con, db_dr
 from alert import window_alert
 from table import msds_data_entry, coa_data_entry, table
@@ -946,8 +943,6 @@ class MainWindow(QMainWindow):
         self.loading.show()
 
         # Run in a worker thread instead of subprocess
-        from PyQt6.QtCore import QThread, pyqtSignal
-
         class Worker(QThread):
             finished = pyqtSignal()
 
@@ -1036,6 +1031,7 @@ class LoadingDialog(QDialog):
         self.progress.setRange(0, 0)  # Indeterminate (infinite loading)
         self.progress.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.progress)
+
 # def main():
 #     app = QApplication(sys.argv)
 #     window = MainWindow()

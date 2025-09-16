@@ -24,7 +24,7 @@ class AuthWindow(QMainWindow):
 
         # Logo
         self.logo_label = QLabel()
-        self.logo_label.setPixmap(QIcon(abs_path.resource("img/logo.png")).pixmap(100, 100))
+        self.logo_label.setPixmap(QIcon(abs_path.resource("img/logo.png")).pixmap(120, 120))
         self.logo_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.main_layout.addWidget(self.logo_label)
 

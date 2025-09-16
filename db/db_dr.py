@@ -31,7 +31,6 @@ except Exception as e:
 
 def create_delivery_legacy_tables():
     """Creates the necessary PostgreSQL tables for storing the legacy delivery data."""
-    print("Initializing database tables for legacy delivery data...")
     try:
         with engine.connect() as connection:
             with connection.begin():
@@ -82,7 +81,6 @@ def create_delivery_legacy_tables():
                     );
                 """))
 
-        print("Database tables for delivery initialized successfully.")
     except Exception as e:
         print(f"FATAL: Could not initialize delivery database tables: {e}")
         raise

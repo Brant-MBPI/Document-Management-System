@@ -1,15 +1,12 @@
-from datetime import datetime
 from PyQt6.QtCore import QDate, Qt
-from PyQt6.QtGui import QIntValidator
 from PyQt6.QtWidgets import (
     QLabel, QHBoxLayout, QHeaderView, QPushButton, QTableWidgetItem,
-    QFormLayout, QAbstractItemView, QWidget, QVBoxLayout, QGroupBox, QGridLayout  # Import QGridLayout
+    QAbstractItemView, QWidget, QVBoxLayout, QGroupBox, QGridLayout  # Import QGridLayout
 )
-from alert import window_alert
 from db import db_con
 from utils import abs_path
 
-current_coa_id = None  # Global variable to store the current COA ID
+current_coa_id = None
 
 
 def load_coa_details(self, coa_id):
@@ -61,7 +58,7 @@ def coa_data_entry_form(self):
     try:
         form_widget = QWidget()
         main_v_layout = QVBoxLayout(form_widget)  # Use QVBoxLayout for overall structure
-        main_v_layout.setContentsMargins(30, 20, 30, 30)  # Add overall padding
+        main_v_layout.setContentsMargins(30, 20, 30, 30)
         calendar_icon_path = abs_path.resource("img/calendar_icon.png").replace("\\", "/")
 
         form_widget.setStyleSheet(f"""
@@ -160,7 +157,7 @@ def coa_data_entry_form(self):
 
         # === Section 1: General Info ===
         general_info_group = QGroupBox()
-        general_info_layout = QGridLayout()  # Using QGridLayout for better control over field alignment
+        general_info_layout = QGridLayout()
         general_info_group.setLayout(general_info_layout)
 
         general_info_layout.setHorizontalSpacing(30)
@@ -315,7 +312,7 @@ def coa_data_entry_form(self):
                 color: #ffffff;
                 font-size: 14px; /* Slightly smaller font */
                 font-weight: 600;
-                padding: 8px 18px; /* Adjusted padding */
+                padding: 6px 16px; /* Adjusted padding */
                 border: none;
                 border-radius: 6px;
                 min-width: 100px; /* Adjusted min-width */
