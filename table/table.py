@@ -9,6 +9,17 @@ def load_msds_table(self):
     self.msds_records_table.setRowCount(0)
 
     records = db_con.get_all_msds_data()
+
+    if not records:
+        # Optional: Display a message or leave the table empty
+        # For example, you could add a row with "No data available"
+        self.msds_records_table.insertRow(0)
+        no_data_item = self.create_readonly_item("No MSDS records found.", column_idx=0)
+        self.msds_records_table.setItem(0, 0, no_data_item)
+        # You might want to span this item across all columns
+        self.msds_records_table.setSpan(0, 0, 1, self.msds_records_table.columnCount())
+        return # Exit the function as there's no data to process
+
     for row_idx, record in enumerate(records):
         msds_id = record[0]
         customer_name = record[1]
@@ -45,6 +56,16 @@ def load_coa_table(self):
 
     # Get data from DB
     records = db_con.get_all_coa_data()
+
+    if not records:
+        # Optional: Display a message or leave the table empty
+        # For example, you could add a row with "No data available"
+        self.coa_records_table.insertRow(0)
+        no_data_item = self.create_readonly_item("No MSDS records found.", column_idx=0)
+        self.coa_records_table.setItem(0, 0, no_data_item)
+        # You might want to span this item across all columns
+        self.coa_records_table.setSpan(0, 0, 1, self.coa_records_table.columnCount())
+        return
 
     for row_idx, record in enumerate(records):
         # unpack fields from your table (adjust indexes if needed)

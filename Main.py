@@ -984,7 +984,7 @@ class UserWidget(QWidget):
         layout.setContentsMargins(0, 0, 0, 0) # Remove margins to fit snugly
 
         # Username Label
-        self.username_label = QLabel(f"Hello,  {self.username}!")
+        self.username_label = QLabel(f"Hello, {self.username}!") if self.username is not None else QLabel("Hello!")
         font = QFont()
         font.setPointSize(14)
         font.setBold(True)

@@ -93,12 +93,22 @@ class SyncDeliveryWorker(QObject):
     finished = pyqtSignal(bool, str)
 
     def _get_safe_dr_num(self, dr_num_raw):
+        """
+        Safely converts raw DR_NUM to string, handling None and non-numeric inputs.
+        Returns None if not convertible to a clean integer string.
+        """
         if dr_num_raw is None:
             return None
         try:
+            # First attempt to convert to float (handles scientific notation, decimals)
+            # then to int (truncates), then to string
             return str(int(float(dr_num_raw)))
         except (ValueError, TypeError):
-            return None
+            # Fallback for strings that are not directly numeric but might contain numbers
+            s_dr_num = str(dr_num_raw).strip()
+            if s_dr_num.isdigit():  # Check if it's purely digits
+                return s_dr_num
+            return None  # Not a valid DR_NUM
 
     def _to_float(self, value, default=0.0):
         if value is None:
@@ -107,6 +117,7 @@ class SyncDeliveryWorker(QObject):
             return float(value)
         except (ValueError, TypeError):
             try:
+                # Attempt to strip and convert if it's a string
                 return float(str(value).strip()) if str(value).strip() else default
             except (ValueError, TypeError):
                 return default
@@ -115,25 +126,35 @@ class SyncDeliveryWorker(QObject):
         """Main execution method for the sync process (incremental)."""
         print("\n--- Starting Legacy Delivery Sync ---")
         try:
-            # --- Step 0: Get last synced ID ---
+            # --- Step 0: Get the maximum DR_NO already synced ---
             with engine.connect() as conn:
-                last_id = conn.execute(text("SELECT COALESCE(MAX(id), 0) FROM product_delivery_primary")).scalar()
-            print(f"Last synced ID in PostgreSQL: {last_id}")
+                # Get the maximum numeric DR_NO from product_delivery_primary
+                # using a regex check to ensure only valid numbers are cast
+                max_synced_dr_no = conn.execute(text("""
+                    SELECT COALESCE(MAX(CAST(dr_no AS INTEGER)), 0)
+                    FROM product_delivery_primary
+                    WHERE dr_no ~ '^[0-9]+$';
+                """)).scalar()
+            print(f"Max synced DR_NO in PostgreSQL: {max_synced_dr_no}")
 
             # --- Step 1: Process Primary Delivery Headers (tbl_del01.dbf) ---
             primary_recs = []
             print(f"Step 1: Reading headers from '{os.path.basename(DELIVERY_DBF_PATH)}'")
-            primary_count = 0
 
             with dbfread.DBF(DELIVERY_DBF_PATH, load=True, encoding='latin1') as dbf_primary:
                 for r in dbf_primary:
-                    primary_count += 1
-                    dr_num = self._get_safe_dr_num(r.get('T_DRNUM'))
-                    if not dr_num:
+                    dr_num_raw = r.get('T_DRNUM')
+                    dr_num = self._get_safe_dr_num(dr_num_raw)
+
+                    # Skip if DR_NUM is invalid or not purely numeric
+                    if not dr_num or not dr_num.isdigit():
                         continue
 
-                    # ✅ Only sync records newer than last synced ID
-                    if primary_count <= last_id:
+                    # Convert to integer for comparison
+                    dr_num_int = int(dr_num)
+
+                    # ✅ Only sync records with DR_NO > max_synced_dr_no
+                    if dr_num_int <= max_synced_dr_no:
                         continue
 
                     address = (str(r.get('T_ADD1', '')).strip() + ' ' +
@@ -156,7 +177,7 @@ class SyncDeliveryWorker(QObject):
             print(f"-> Found {len(primary_recs)} new primary records to sync.")
 
             if not primary_recs:
-                self.finished.emit(True, "Sync Info: No new delivery records found.")
+                self.finished.emit(True, f"Sync Info: No new delivery records (DR_NO > {max_synced_dr_no}) found.")
                 return
 
             # --- Step 2: Process Delivery Items (tbl_del02.dbf) ---
@@ -168,34 +189,34 @@ class SyncDeliveryWorker(QObject):
             with dbfread.DBF(DELIVERY_ITEMS_DBF_PATH, load=True, encoding='latin1') as dbf_items:
                 for item_rec in dbf_items:
                     dr_num = self._get_safe_dr_num(item_rec.get('T_DRNUM'))
-                    if dr_num not in new_dr_numbers:
-                        continue
+                    if dr_num in new_dr_numbers:  # Only pick items for the newly identified DR_NOs
+                        item_count += 1
+                        attachments = "\n".join(
+                            filter(None, [str(item_rec.get(f'T_DESC{i}', '')).strip() for i in range(1, 5)]))
 
-                    item_count += 1
-                    attachments = "\n".join(
-                        filter(None, [str(item_rec.get(f'T_DESC{i}', '')).strip() for i in range(1, 5)]))
+                        if dr_num not in items_by_dr:
+                            items_by_dr[dr_num] = []
+                        items_by_dr[dr_num].append({
+                            "dr_no": dr_num,
+                            "quantity": self._to_float(item_rec.get('T_TOTALWT')),
+                            "unit": str(item_rec.get('T_TOTALWTU', '')).strip(),
+                            "product_code": str(item_rec.get('T_PRODCODE', '')).strip(),
+                            "product_color": str(item_rec.get('T_PRODCOLO', '')).strip(),
+                            "no_of_packing": self._to_float(item_rec.get('T_NUMPACKI')),
+                            "weight_per_pack": self._to_float(item_rec.get('T_WTPERPAC')),
+                            "lot_numbers": "",
+                            "attachments": attachments
+                        })
 
-                    if dr_num not in items_by_dr:
-                        items_by_dr[dr_num] = []
-                    items_by_dr[dr_num].append({
-                        "dr_no": dr_num,
-                        "quantity": self._to_float(item_rec.get('T_TOTALWT')),
-                        "unit": str(item_rec.get('T_TOTALWTU', '')).strip(),
-                        "product_code": str(item_rec.get('T_PRODCODE', '')).strip(),
-                        "product_color": str(item_rec.get('T_PRODCOLO', '')).strip(),
-                        "no_of_packing": self._to_float(item_rec.get('T_NUMPACKI')),
-                        "weight_per_pack": self._to_float(item_rec.get('T_WTPERPAC')),
-                        "lot_numbers": "",
-                        "attachments": attachments
-                    })
-
-            print(f"-> Found {item_count} new item records to sync.")
+            print(f"-> Found {item_count} new item records for the new deliveries.")
 
             # --- Step 3: Insert New Records ---
             print("Step 3: Writing new data to PostgreSQL...")
             with engine.connect() as conn:
                 with conn.begin():
                     # Insert/Update headers
+                    # Keep ON CONFLICT for robustness, even though we filter by MAX(DR_NO),
+                    # it handles any edge cases or non-sequential DR_NOs
                     conn.execute(text("""
                         INSERT INTO product_delivery_primary (
                             dr_no, delivery_date, customer_name, deliver_to, address, po_no,
