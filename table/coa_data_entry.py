@@ -464,6 +464,7 @@ def populate_coa_fields(self, dr_no):
         self.coa_customer_input.clear()
         self.color_code_input.clear()
         self.po_number_input.clear()
+        self.lot_number_input.clear()
         self.delivery_date_input.clear()  # if it's a QDateEdit
         return
 
