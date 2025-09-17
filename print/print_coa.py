@@ -132,25 +132,71 @@ class FileCOA(QWidget):
         content.append(Paragraph("Certificate of Analysis", styles['TitleSans']))
         content.append(Spacer(1, 12))
 
-        details = [
-            ["Customer:", Paragraph(str(field_result[1]), styles['NormalText']), "", "", ""],
-            ["Color Code:", Paragraph(str(field_result[2]), styles['NormalText']), "", "", ""],
-            ["Quantity Deliver:", Paragraph(str(field_result[6]), styles['NormalText']), "", "", ""],
-            ["Delivery Date:", Paragraph(str(field_result[7].strftime(f"%B {date_format}, %Y")), styles['NormalText']), "", "", ""],
-            ["Lot Number:", Paragraph(str(field_result[3]), styles['NormalText']), "", "", ""],
-            ["Production Date:", Paragraph(str(field_result[8].strftime(f"%B {date_format}, %Y")), styles['NormalText']), "", "", ""],
-            ["Delivery receipt Number:", Paragraph(str(field_result[5]), styles['NormalText']), "", "P.O Number:", Paragraph(str(field_result[4]))],
-        ]
-        table = Table(details, colWidths=col_widths, spaceBefore=12, spaceAfter=12)
-        table.setStyle(TableStyle([
-            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
-            ('FONTSIZE', (0, 0), (-1, -1), 10),
-            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
-        ]))
-        content.append(table)
+        bold_style = ParagraphStyle('BoldText', parent=styles['NormalText'], fontName='Helvetica-Bold')
+
+        content.append(
+            Paragraph(f"<font name='Helvetica-Bold'>Customer:</font> {field_result[1]}", styles['NormalText']))
+        content.append(Spacer(1, 4))  # Small spacer between lines
+
+        content.append(
+            Paragraph(f"<font name='Helvetica-Bold'>Color Code:</font> {field_result[2]}", styles['NormalText']))
+        content.append(Spacer(1, 4))
+
+        content.append(
+            Paragraph(f"<font name='Helvetica-Bold'>Quantity Deliver:</font> {field_result[6]}", styles['NormalText']))
+        content.append(Spacer(1, 4))
+
+        date_format = "%-d" if platform.system() != "Windows" else "%#d"
+        content.append(Paragraph(
+            f"<font name='Helvetica-Bold'>Delivery Date:</font> {field_result[7].strftime(f'%B {date_format}, %Y')}",
+            styles['NormalText']))
+        content.append(Spacer(1, 4))
+
+        content.append(
+            Paragraph(f"<font name='Helvetica-Bold'>Lot Number:</font> {field_result[3]}", styles['NormalText']))
+        content.append(Spacer(1, 4))
+
+        content.append(Paragraph(
+            f"<font name='Helvetica-Bold'>Production Date:</font> {field_result[8].strftime(f'%B {date_format}, %Y')}",
+            styles['NormalText']))
+        content.append(Spacer(1, 4))
+
+        delivery_receipt_text = Paragraph(
+            f"<font name='Helvetica-Bold'>Delivery receipt Number: </font> {field_result[5]}", styles['NormalText'])
+        right_aligned_paragraph_style = ParagraphStyle(
+            name="RightAlignedCellText",
+            parent=styles['NormalText'],  # Inherit from NormalText for font, size etc.
+            alignment=2  # Set the internal alignment of the paragraph
+        )
+        if field_result[4]:  # not None and not ""
+            po_number_text = Paragraph(
+                f"<font name='Helvetica-Bold'>P.O Number: </font> {field_result[4]}",
+                right_aligned_paragraph_style
+            )
+        else:
+            po_number_text = Paragraph("", right_aligned_paragraph_style)
+
+        # Calculate page width for column widths
+        page_width = letter[0] - 50 - 50
+
+        delivery_po_table = Table(
+            [[delivery_receipt_text, po_number_text]],
+            colWidths=[page_width * 0.5, page_width * 0.5],  # Adjust ratio as desired
+            hAlign='LEFT',  # The table itself is left-aligned on the page
+            style=[
+                ('ALIGN', (0, 0), (0, 0), 'LEFT'),  # Align content of the first column to the left
+                ('ALIGN', (1, 0), (1, 0), 'RIGHT'),  # Align content of the second column to the right
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),  # Vertically center content if needed
+                ('LEFTPADDING', (0, 0), (-1, -1), 0),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 20),
+                ('TOPPADDING', (0, 0), (-1, -1), 0),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 0)
+            ]
+        )
+        content.append(delivery_po_table)
+
         content.append(Spacer(1, 12))
+
         content.append(Paragraph("<b>Summary of Analysis</b>", styles["SubHeading"]))
         content.append(Spacer(1, 12))
         # Summary of Analysis Table
@@ -187,15 +233,32 @@ class FileCOA(QWidget):
         content.append(Paragraph(lines, styles["NormalText"]))
         content.append(Paragraph(str(field_result[10]), styles["NormalText"]))
         content.append(Paragraph("Date: " + str(field_result[9].strftime(f"%B {date_format}, %Y")), styles["NormalText"]))
-        content.append(Spacer(1, 20))
+        content.append(Spacer(1, 36))
 
         # Storage section
-        content.append(Paragraph("<b>Storage</b>", styles["NormalText"]))
-        content.append(Paragraph(str(field_result[11]), IndentedText))
-        content.append(Paragraph("<b>Shelf Life: </b>", styles["NormalText"]))
-        content.append(Paragraph(str(field_result[12]), IndentedText))
-        content.append(Paragraph("<b>Suitability </b>", styles["NormalText"]))
-        content.append(Paragraph(str(field_result[13]), IndentedText))
+        # Serif font styles (closest to Times New Roman)
+        NormalSerif = ParagraphStyle(
+            "NormalSerif",
+            fontName="Times-Roman",
+            fontSize=10,
+            leading=12,
+            spaceAfter=10
+        )
+        BoldSerif = ParagraphStyle(
+            "BoldSerif",
+            fontName="Times-Roman",
+            fontSize=11,
+            leading=12,
+            spaceAfter=4
+        )
+        content.append(Paragraph("STORAGE", BoldSerif))
+        content.append(Paragraph(str(field_result[11]), NormalSerif))
+
+        content.append(Paragraph("SHELF LIFE:", BoldSerif))
+        content.append(Paragraph(str(field_result[12]), NormalSerif))
+
+        content.append(Paragraph("SUITABILITY", BoldSerif))
+        content.append(Paragraph(str(field_result[13]), NormalSerif))
 
         doc.build(content, onFirstPage=add_first_page_header)
         buffer.seek(0)
