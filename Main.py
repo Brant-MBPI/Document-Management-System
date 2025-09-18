@@ -9,7 +9,7 @@ from table import msds_data_entry, coa_data_entry, table
 from print.print_msds import FileMSDS
 from print.print_coa import FileCOA
 import Login
-from utils import abs_path
+from utils import abs_path, scroll_date
 
 
 class MainWindow(QMainWindow):
@@ -146,10 +146,15 @@ class MainWindow(QMainWindow):
         self.delivery_date_input = QDateEdit()
         self.delivery_date_input.setCalendarPopup(True)
         self.delivery_date_input.setDate(QDate.currentDate())
+        # Disable scroll for delivery_date_input
+        self.wheel_filter = scroll_date.DateWheelEventFilter()
+        self.delivery_date_input.installEventFilter(self.wheel_filter)
+
         self.lot_number_input = QLineEdit()
         self.production_date_input = QDateEdit()
         self.production_date_input.setCalendarPopup(True)
         self.production_date_input.setDate(QDate(QDate.currentDate().year(), QDate.currentDate().month(), 1))
+        self.production_date_input.installEventFilter(self.wheel_filter)
 
         self.dr_no_list = db_con.get_all_dr_no()
         # Create QCompleter with the list
@@ -188,6 +193,7 @@ class MainWindow(QMainWindow):
         self.creation_date_input = QDateEdit()
         self.creation_date_input.setCalendarPopup(True)
         self.creation_date_input.setDate(QDate.currentDate())
+        self.creation_date_input.installEventFilter(self.wheel_filter)
         self.coa_storage_input = QLineEdit()
         self.coa_shelf_life_input = QLineEdit()
         self.suitability_input = QLineEdit()
@@ -847,13 +853,10 @@ class MainWindow(QMainWindow):
             display_text = self.coa_records_table.item(row, 0).text()
             self.open_coa_preview(coa_id, display_text)
         if column == 2:  # edit column
-            print("clicked")
             coa_data_entry.current_coa_id = coa_id  # Store the selected COA ID
-            print("clicked 2", coa_id)
             coa_data_entry.load_coa_details(self, coa_id)
             # Switch to the COA tab
             self.coa_sub_tabs.setCurrentWidget(self.coa_data_entry_tab)
-            print("clicked 3")
         if column == 3:  # delete column
             confirm = window_alert.show_message(self, "Confirm Deletion",
                                         "Are you sure you want to delete this Certificate of Analysis record?",
