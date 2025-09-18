@@ -847,10 +847,13 @@ class MainWindow(QMainWindow):
             display_text = self.coa_records_table.item(row, 0).text()
             self.open_coa_preview(coa_id, display_text)
         if column == 2:  # edit column
+            print("clicked")
             coa_data_entry.current_coa_id = coa_id  # Store the selected COA ID
+            print("clicked 2", coa_id)
             coa_data_entry.load_coa_details(self, coa_id)
             # Switch to the COA tab
             self.coa_sub_tabs.setCurrentWidget(self.coa_data_entry_tab)
+            print("clicked 3")
         if column == 3:  # delete column
             confirm = window_alert.show_message(self, "Confirm Deletion",
                                         "Are you sure you want to delete this Certificate of Analysis record?",

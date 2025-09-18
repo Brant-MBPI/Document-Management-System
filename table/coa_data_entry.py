@@ -21,7 +21,7 @@ def load_coa_details(self, coa_id):
     self.lot_number_input.setText(str(field_result[3]))
     self.po_number_input.setText(str(field_result[4]))
     self.delivery_receipt_input.setText(str(field_result[5]))
-    self.quantity_delivered_input.setText(str(int(field_result[6])))
+    self.quantity_delivered_input.setText(str(field_result[6]))
 
     # Handle potential None for dates
     if field_result[7]:
