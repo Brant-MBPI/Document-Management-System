@@ -2,7 +2,7 @@
 import platform
 import io
 from PyQt6.QtCore import QBuffer, QIODevice, QSize, Qt, QPointF
-from PyQt6.QtGui import QPainter, QPageSize, QPageLayout
+from PyQt6.QtGui import QPainter, QPageSize, QPageLayout, QAction
 from PyQt6.QtPdf import QPdfDocument, QPdfDocumentRenderOptions
 from PyQt6.QtPdfWidgets import QPdfView
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QPushButton, QHBoxLayout, QFileDialog
@@ -15,7 +15,7 @@ from reportlab.lib import colors
 
 from alert import window_alert
 from db import db_con
-from print.pdf_header import add_first_page_header
+from print.pdf_header import add_first_page_header, add_coa_header
 
 
 class FileCOA(QWidget):
@@ -100,6 +100,11 @@ class FileCOA(QWidget):
         viewer_container.addWidget(self.pdf_viewer)
         viewer_container.addStretch(1)  # right stretch
         main_layout.addLayout(viewer_container)
+
+        self.print_action = QAction(self)
+        self.print_action.setShortcut("Ctrl+P")
+        self.print_action.triggered.connect(self.print_pdf)
+        self.addAction(self.print_action)
 
     def generate_pdf(self, coa_id):
         field_result = db_con.get_single_coa_data(coa_id)
@@ -260,7 +265,7 @@ class FileCOA(QWidget):
         content.append(Paragraph("SUITABILITY", BoldSerif))
         content.append(Paragraph(str(field_result[13]), NormalSerif))
 
-        doc.build(content, onFirstPage=add_first_page_header)
+        doc.build(content, onFirstPage=add_coa_header)
         buffer.seek(0)
         return buffer.getvalue()  # returns PDF bytes
 

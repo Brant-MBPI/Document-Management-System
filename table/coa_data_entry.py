@@ -4,7 +4,7 @@ from PyQt6.QtWidgets import (
     QAbstractItemView, QWidget, QVBoxLayout, QGroupBox, QGridLayout  # Import QGridLayout
 )
 from db import db_con
-from utils import abs_path
+from utils import abs_path, lot_format
 
 current_coa_id = None
 
@@ -470,11 +470,8 @@ def populate_coa_fields(self, dr_no):
         return
 
     # === Populate inputs ===
-    lot_no = fields[5] if fields and len(fields) > 5 else ""
-    if lot_no and lot_no.startswith("LOT #"):
-        lot_no = lot_no.replace("LOT #", "").strip()
-    else:
-        lot_no = ""
+    lot_no = lot_format.normalize(fields[5])
+
     self.coa_customer_input.setText(str(fields[2]))
     self.color_code_input.setText(str(fields[1]))
     self.po_number_input.setText(str(fields[4]))

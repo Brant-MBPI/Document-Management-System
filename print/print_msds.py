@@ -1,7 +1,7 @@
 
 import io
 from PyQt6.QtCore import QBuffer, QIODevice, QSize, Qt, QPointF
-from PyQt6.QtGui import QPainter, QPageSize, QPageLayout
+from PyQt6.QtGui import QPainter, QPageSize, QPageLayout, QAction
 from PyQt6.QtPdf import QPdfDocument, QPdfDocumentRenderOptions
 from PyQt6.QtPdfWidgets import QPdfView
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QPushButton, QHBoxLayout, QFileDialog
@@ -21,6 +21,8 @@ class FileMSDS(QWidget):
         super().__init__()
         self.setWindowTitle("Material Safety Data Sheet Preview")
         main_layout = QVBoxLayout(self)
+
+
 
         # PDF Document + Viewer
         self.pdf_doc = QPdfDocument(self)
@@ -98,6 +100,10 @@ class FileMSDS(QWidget):
         viewer_container.addStretch(1)  # right stretch
         main_layout.addLayout(viewer_container)
 
+        self.print_action = QAction(self)
+        self.print_action.setShortcut("Ctrl+P")
+        self.print_action.triggered.connect(self.print_pdf)
+        self.addAction(self.print_action)
 
     def generate_pdf(self, msds_id):
         field_result = db_con.get_single_msds_data(msds_id)

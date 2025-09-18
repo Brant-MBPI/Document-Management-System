@@ -194,7 +194,8 @@ class MainWindow(QMainWindow):
         self.btn_coa_submit = QPushButton("Submit")
         self.btn_coa_submit.clicked.connect(self.coa_btn_submit_clicked)
 
-        self.po_number_input.setValidator((QIntValidator(0, 2147483647)))
+        self.coa_widget = None
+        self.msds_widget = None
 
         self.msds_tab = QWidget()           #MSDS Main Tab
         self.msds_layout = QVBoxLayout(self.msds_tab)
@@ -244,7 +245,8 @@ class MainWindow(QMainWindow):
 
         self.msds_sub_tabs.currentChanged.connect(self.toggle_msds_search_bar)
         self.coa_sub_tabs.currentChanged.connect(self.toggle_coa_search_bar)
-
+        self.msds_search_bar.setFocus()
+        self.coa_search_bar.setFocus()
         self.msds_records_table = QTableWidget()
         self.msds_records_table.setProperty("class", "records_table")
 
@@ -621,7 +623,6 @@ class MainWindow(QMainWindow):
             "Quantity Delivered": quantity_delivered,
             "Lot Number": lot_number,
             "Delivery Receipt": delivery_receipt,
-            "PO Number": po_number,
             "Certified By": certified_by,
             "Storage": storage,
             "Shelf Life": shelf_life,
@@ -867,6 +868,7 @@ class MainWindow(QMainWindow):
         try:
             if index == 0:  # Records tab
                 self.msds_search_bar.show()
+                self.msds_search_bar.setFocus()
                 msds_data_entry.clear_msds_form(self)
             else:  # Other tabs
                 self.msds_search_bar.hide()
@@ -878,9 +880,9 @@ class MainWindow(QMainWindow):
         try:
             if index == 0:  # Records tab
                 self.coa_search_bar.show()
+                self.coa_search_bar.setFocus()
                 coa_data_entry.clear_coa_form(self)
             else:
-                self.coa_search_bar.hide()
                 self.coa_search_bar.hide()
                 self.coa_scroll_area.verticalScrollBar().setValue(0)
         except Exception as e:
@@ -925,16 +927,31 @@ class MainWindow(QMainWindow):
         self.summary_analysis_table.setFixedWidth(table_width)
 
     def open_msds_preview(self, msds_id, filename):
-        self.msds_widget = FileMSDS()  # create the widget
+        # If the widget already exists, close it first to avoid multiple instances
+        if self.msds_widget is not None:
+            self.msds_widget.close()
+            # It's good practice to deleteLater for QObjects that are not explicitly parented
+            # to be garbage collected when they are no longer visible.
+            self.msds_widget.deleteLater()
+        self.msds_widget = FileMSDS()
         self.msds_widget.show_pdf_preview(msds_id, filename)
         self.msds_widget.resize(900, 800)
         self.msds_widget.show()
+        self.msds_widget.activateWindow()
+        self.msds_widget.raise_()
+        # Bring to front and give focus
 
     def open_coa_preview(self, coa_id, filename):
-        self.coa_widget = FileCOA()  # create the widget
+        # If the widget already exists, close it first to avoid multiple instances
+        if self.coa_widget is not None:
+            self.coa_widget.close()
+            self.coa_widget.deleteLater()  # Good practice
+        self.coa_widget = FileCOA()
         self.coa_widget.show_pdf_preview(coa_id, filename)
         self.coa_widget.resize(900, 800)
         self.coa_widget.show()
+        self.coa_widget.activateWindow()
+        self.coa_widget.raise_()
 
     def run_sync_script(self):
         # Show loading dialog
