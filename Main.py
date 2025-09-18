@@ -9,7 +9,7 @@ from table import msds_data_entry, coa_data_entry, table
 from print.print_msds import FileMSDS
 from print.print_coa import FileCOA
 import Login
-from utils import abs_path, scroll_date
+from utils import abs_path, scroll_date, calendar_design
 
 
 class MainWindow(QMainWindow):
@@ -146,6 +146,8 @@ class MainWindow(QMainWindow):
         self.delivery_date_input = QDateEdit()
         self.delivery_date_input.setCalendarPopup(True)
         self.delivery_date_input.setDate(QDate.currentDate())
+        self.delivery_date_input.calendarWidget().setMinimumSize(370, 230)
+        self.delivery_date_input.calendarWidget().setStyleSheet(calendar_design.STYLESHEET)
         # Disable scroll for delivery_date_input
         self.wheel_filter = scroll_date.DateWheelEventFilter()
         self.delivery_date_input.installEventFilter(self.wheel_filter)
@@ -154,6 +156,8 @@ class MainWindow(QMainWindow):
         self.production_date_input = QDateEdit()
         self.production_date_input.setCalendarPopup(True)
         self.production_date_input.setDate(QDate(QDate.currentDate().year(), QDate.currentDate().month(), 1))
+        self.production_date_input.calendarWidget().setMinimumSize(370, 230)
+        self.production_date_input.calendarWidget().setStyleSheet(calendar_design.STYLESHEET)
         self.production_date_input.installEventFilter(self.wheel_filter)
 
         self.dr_no_list = db_con.get_all_dr_no()
@@ -193,6 +197,8 @@ class MainWindow(QMainWindow):
         self.creation_date_input = QDateEdit()
         self.creation_date_input.setCalendarPopup(True)
         self.creation_date_input.setDate(QDate.currentDate())
+        self.creation_date_input.calendarWidget().setMinimumSize(370, 230)
+        self.creation_date_input.calendarWidget().setStyleSheet(calendar_design.STYLESHEET)
         self.creation_date_input.installEventFilter(self.wheel_filter)
         self.coa_storage_input = QLineEdit()
         self.coa_shelf_life_input = QLineEdit()
