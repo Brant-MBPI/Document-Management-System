@@ -529,7 +529,8 @@ def get_dr_details(dr_no):
     cur = conn.cursor()
 
     cur.execute(
-        """SELECT a.dr_no, a.product_code, b.customer_name, b.delivery_date, b.po_no, a.attachments
+        """SELECT a.dr_no, a.product_code, b.customer_name, b.delivery_date, b.po_no, a.attachments, 
+                    TO_CHAR(a.quantity, 'FM999999990.00') || ' ' || a.unit AS quantity
                     FROM product_delivery_items a, product_delivery_primary b
                     WHERE a.dr_no = b.dr_no AND a.dr_no=%s ORDER BY a.id DESC""",
         (dr_no,)

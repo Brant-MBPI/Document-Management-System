@@ -465,7 +465,8 @@ def populate_coa_fields(self, dr_no):
         self.color_code_input.clear()
         self.po_number_input.clear()
         self.lot_number_input.clear()
-        self.delivery_date_input.clear()  # if it's a QDateEdit
+        self.quantity_delivered_input.clear()
+        self.delivery_date_input.clear()
         return
 
     # === Populate inputs ===
@@ -478,6 +479,7 @@ def populate_coa_fields(self, dr_no):
     self.color_code_input.setText(str(fields[1]))
     self.po_number_input.setText(str(fields[4]))
     self.lot_number_input.setText(lot_no)
+    self.quantity_delivered_input.setText(str(fields[6]))
 
     if fields[3]:
         self.delivery_date_input.setDate(QDate(fields[3].year, fields[3].month, fields[3].day))

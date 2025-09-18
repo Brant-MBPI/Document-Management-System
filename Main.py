@@ -195,7 +195,6 @@ class MainWindow(QMainWindow):
         self.btn_coa_submit.clicked.connect(self.coa_btn_submit_clicked)
 
         self.po_number_input.setValidator((QIntValidator(0, 2147483647)))
-        self.quantity_delivered_input.setValidator((QIntValidator(0, 2147483647)))
 
         self.msds_tab = QWidget()           #MSDS Main Tab
         self.msds_layout = QVBoxLayout(self.msds_tab)
