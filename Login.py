@@ -16,6 +16,7 @@ class AuthWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("Document Management System - Login")
         self.resize(600, 450)
+        self.setWindowIcon(QIcon(abs_path.resource("img/icon.ico")))
         db_con.create_tables()
         # Main layout
         self.main_layout = QVBoxLayout()
@@ -234,6 +235,7 @@ class AuthWindow(QMainWindow):
                 self.close()
                 self.main_window = Main.MainWindow(username=username)
                 self.main_window.setWindowTitle("Document Management System")
+                self.main_window.setWindowIcon(QIcon(abs_path.resource("img/icon.ico")))
                 self.main_window.resize(1000, 800)
                 self.main_window.showMaximized()
             else:

@@ -1,5 +1,6 @@
 import re
 
+
 def normalize(lot_no: str) -> str:
     if not lot_no:
         return ""
@@ -42,8 +43,7 @@ def normalize(lot_no: str) -> str:
                 all_expanded_parts.append(f"{prefix}{start_suffix} to {prefix}{end_suffix}")
                 last_known_prefix_for_this_chunk = prefix # Update prefix for this chunk
                 last_known_prefix_overall = prefix # Update overall persistent prefix
-                continue # Skip to next part
-
+                continue  # Skip to next part
 
             # --- PRE-PROCESS TO ESTABLISH / UPDATE last_known_prefix_for_this_chunk ---
             # Attempt to extract a prefix if the current part is a full lot number (e.g., "MB-09-7995H")
@@ -103,11 +103,11 @@ def normalize(lot_no: str) -> str:
             # So, we can remove the previous redundant clearing logic here.
             # We only need to ensure overall prefix is updated if a full lot number was added "as is"
             if re.match(r"^(MB-\d{2}-|\d{2}-)(\d+[A-Z]*)$", part) and not current_part_prefix_match:
-                 # This case catches full lot numbers that weren't range-matched or fully qualified ranges.
-                 # Example: just "MB-08-3680H" by itself.
-                 matched_prefix = re.match(r"^(MB-\d{2}-|\d{2}-)", part).group(1)
-                 last_known_prefix_for_this_chunk = matched_prefix
-                 last_known_prefix_overall = matched_prefix
-
+                # This case catches full lot numbers that weren't range-matched or fully qualified ranges.
+                # Example: just "MB-08-3680H" by itself.
+                matched_prefix = re.match(r"^(MB-\d{2}-|\d{2}-)", part).group(1)
+                last_known_prefix_for_this_chunk = matched_prefix
+                last_known_prefix_overall = matched_prefix
 
     return ", ".join(all_expanded_parts)
+

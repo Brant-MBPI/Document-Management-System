@@ -2,7 +2,7 @@
 import platform
 import io
 from PyQt6.QtCore import QBuffer, QIODevice, QSize, Qt, QPointF
-from PyQt6.QtGui import QPainter, QPageSize, QPageLayout, QAction
+from PyQt6.QtGui import QPainter, QPageSize, QPageLayout, QAction, QIcon
 from PyQt6.QtPdf import QPdfDocument, QPdfDocumentRenderOptions
 from PyQt6.QtPdfWidgets import QPdfView
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QPushButton, QHBoxLayout, QFileDialog
@@ -16,12 +16,14 @@ from reportlab.lib import colors
 from alert import window_alert
 from db import db_con
 from print.pdf_header import add_first_page_header, add_coa_header
+from utils import abs_path
 
 
 class FileCOA(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Certificate of Analysis Preview")
+        self.setWindowIcon(QIcon(abs_path.resource("img/icon.ico")))
         main_layout = QVBoxLayout(self)
 
         # PDF Document + Viewer
