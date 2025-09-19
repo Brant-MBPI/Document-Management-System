@@ -2,7 +2,8 @@
 from PyQt6.QtCore import Qt, QDate, QRegularExpression, QTimer, QEvent, QObject, pyqtSignal, QThread
 from PyQt6.QtGui import QIcon, QIntValidator, QRegularExpressionValidator, QFont, QAction
 from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QTabWidget, \
-    QTableWidget, QLineEdit, QHeaderView, QTableWidgetItem, QScrollArea, QTextEdit, QPushButton, QDateEdit, QMessageBox, QAbstractItemView, QCompleter, QDialog, QLabel, QProgressBar
+    QTableWidget, QLineEdit, QHeaderView, QTableWidgetItem, QScrollArea, QTextEdit, QPushButton, QDateEdit, \
+    QMessageBox, QAbstractItemView, QGroupBox, QCompleter, QDialog, QLabel, QProgressBar, QStackedLayout
 from db import db_con, db_dr
 from alert import window_alert
 from table import msds_data_entry, coa_data_entry, table
@@ -132,6 +133,16 @@ class MainWindow(QMainWindow):
         self.btn_msds_submit = QPushButton("Submit")
         self.btn_msds_submit.setProperty("class", "msds_submit_btn")
         self.btn_msds_submit.clicked.connect(self.msds_btn_submit_clicked)
+
+        # msds form switch
+        self.hazard_stacked_layout = QStackedLayout()
+        self.handling_storage_stacked_layout = QStackedLayout()
+
+        hazard_group = QGroupBox("3) Hazard Information")
+        self.hazard_group_v_layout = QVBoxLayout(hazard_group)
+
+        self.handling_storage_group = QGroupBox("7) Handling and Storage")
+        self.handling_storage_group_v_layout = QVBoxLayout(handling_storage_group)
 
         # COA form init
             #summary of analysis table

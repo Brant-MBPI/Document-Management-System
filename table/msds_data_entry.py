@@ -63,6 +63,8 @@ def load_msds_details(self, msds_id):
     self.btn_msds_submit.setText("Update")
     check_empty_fields(self)  # Call validation after loading data
 
+    self.hazard_stacked_layout.setCurrentIndex(1)
+
 
 def create_form(self):
     clear_msds_form(self)
@@ -266,12 +268,12 @@ def create_form(self):
     self.hazard_stacked_layout.addWidget(simplified_hazard_widget)  # Index 1: Simplified view
 
     hazard_group = QGroupBox("3) Hazard Information")
-    hazard_group_v_layout = QVBoxLayout(hazard_group)
+    self.hazard_group_v_layout = QVBoxLayout(hazard_group)
     button_h_layout = QHBoxLayout()
     button_h_layout.addStretch()
     button_h_layout.addWidget(self.hazard_toggle_button)
-    hazard_group_v_layout.addLayout(button_h_layout)
-    hazard_group_v_layout.addLayout(self.hazard_stacked_layout)
+    self.hazard_group_v_layout.addLayout(button_h_layout)
+    self.hazard_group_v_layout.addLayout(self.hazard_stacked_layout)
 
     main_v_layout.addWidget(hazard_group)
 
@@ -339,14 +341,11 @@ def create_form(self):
     elif isinstance(self.msds_storage_input, QTextEdit):
         self.msds_storage_input.textChanged.connect(lambda: validate_field(self.msds_storage_input))
 
-    self.handling_storage_stacked_layout = QStackedLayout()
     self.handling_storage_stacked_layout.addWidget(detailed_handling_storage_widget)  # Index 0: Detailed view
     self.handling_storage_stacked_layout.addWidget(simplified_handling_storage_widget)  # Index 1: Simplified view
 
-    handling_storage_group = QGroupBox("7) Handling and Storage")
-    handling_storage_group_v_layout = QVBoxLayout(handling_storage_group)
-    handling_storage_group_v_layout.addLayout(self.handling_storage_stacked_layout)
-    main_v_layout.addWidget(handling_storage_group)
+    self.handling_storage_group_v_layout.addLayout(self.handling_storage_stacked_layout)
+    main_v_layout.addWidget(self.handling_storage_group)
 
     def toggle_hazard_layout(checked):
         if checked:
@@ -454,6 +453,7 @@ def create_form(self):
 
     # Perform initial validation after all widgets are set up
     check_empty_fields(self)
+
 
 def form_btn(self):
     button_style = """
