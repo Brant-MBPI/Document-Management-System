@@ -87,6 +87,7 @@ class MainWindow(QMainWindow):
         self.eye_protection_input = QLineEdit()
         self.skin_protection_input = QLineEdit()
             #Section9
+        self.physical_property_rows = []
         self.appearance_input = QLineEdit()
         self.odor_input = QLineEdit()
         self.packaging_input = QLineEdit()

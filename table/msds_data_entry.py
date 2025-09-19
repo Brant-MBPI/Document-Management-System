@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QLabel, QWidget, QTabWidget, \
     QTableWidget, QLineEdit, QHeaderView, QTableWidgetItem, QFormLayout, QPushButton, QTextEdit, QGroupBox, QGridLayout, \
-    QStackedLayout
+    QStackedLayout, QInputDialog
 from PyQt6.QtCore import Qt  # Import Qt for alignment flags
 
 # Assuming alert and db_con are correctly imported
@@ -407,21 +407,7 @@ def create_form(self):
     main_v_layout.addWidget(create_form_group("8) Exposure Controls/Personal Protection", exposure_control_fields))
 
     # Section 9: Physical & Chemical Properties
-    physical_chemical_fields = [
-        ("Appearance:", self.appearance_input),
-        ("Odor:", self.odor_input),
-        ("Packaging:", self.packaging_input),
-        ("Carrier Material:", self.carrier_material_input),
-        ("Resin Suitability:", self.resin_suitability_input),
-        ("Light fastness (1-8):", self.light_fastness_input),
-        ("Heat Stability (1-5):", self.heat_stability_input),
-        ("Non Toxicity:", self.non_toxicity_input),
-        ("Flash Point:", self.flash_point_input),
-        ("Auto Ignition:", self.auto_ignition_input),
-        ("Explosion Property:", self.explosion_property_input),
-        ("Solubility (Water):", self.solubility_input),
-    ]
-    main_v_layout.addWidget(create_form_group("9) Physical & Chemical Properties", physical_chemical_fields))
+    main_v_layout.addWidget(create_dynamic_section9(self))
 
     # Section 10: Stability & Reactivity
     stability_reactivity_fields = [
@@ -462,6 +448,154 @@ def create_form(self):
     # Perform initial validation after all widgets are set up
     check_empty_fields(self)
 
+
+def create_dynamic_section9(self):
+    """Custom dynamic layout for Section 9."""
+    group = QGroupBox("9) Physical & Chemical Properties")
+    self.physical_properties_layout = QVBoxLayout()
+    self.physical_property_rows = []  # Reset for cleanliness
+
+    # Initial fixed properties with defaults (from your clear_msds_form)
+    initial_props = [
+        ("Appearance", "White pellet form"),
+        ("Odor", "Odorless"),
+        ("Packaging", "25 kgs."),
+        ("Carrier Material", "Polyolefin resin"),
+        ("Resin Suitability", "Polyolefin"),
+        ("Light fastness (1-8)", ""),
+        ("Heat Stability (1-5)", ""),
+        ("Non Toxicity", "Non-toxic, colorant contains no heavy metal"),
+        ("Flash Point", "N/A"),
+        ("Auto Ignition", "N/A"),
+        ("Explosion Property", "N/A"),
+        ("Solubility (Water)", "Insoluble"),
+    ]
+
+    for name, value in initial_props:
+        row = _create_property_row(self, name, value)
+        self.physical_properties_layout.addWidget(row)
+
+    # Add button row at the bottom
+    add_row = QWidget()
+    add_hlayout = QHBoxLayout(add_row)
+    add_hlayout.setContentsMargins(20, 10, 20, 10)
+    add_btn = QPushButton("Add Property")
+    add_btn.clicked.connect(lambda: _add_property(self))
+    add_hlayout.addWidget(add_btn)
+    add_hlayout.addStretch()
+    self.physical_properties_layout.addWidget(add_row)
+
+    # Initial button state update
+    _update_property_buttons(self)
+
+    group.setLayout(self.physical_properties_layout)
+    return group
+
+
+def _create_property_row(self, name, value):
+    """Create a single dynamic row widget."""
+    row_widget = QWidget()
+    row_layout = QHBoxLayout(row_widget)
+    row_layout.setContentsMargins(20, 10, 20, 10)
+
+    name_edit = QLineEdit(name)
+    value_edit = QLineEdit(value)
+    delete_btn = QPushButton("Delete")
+    up_btn = QPushButton("↑")
+    down_btn = QPushButton("↓")
+
+    # Layout: Property: [name] : [value (stretch)] [↑] [↓] [Delete]
+    row_layout.addWidget(QLabel("Property:"))
+    row_layout.addWidget(name_edit, stretch=1)
+    row_layout.addWidget(QLabel(":"))
+    row_layout.addWidget(value_edit, stretch=2)
+    row_layout.addWidget(up_btn)
+    row_layout.addWidget(down_btn)
+    row_layout.addWidget(delete_btn)
+
+    # Store references on row_widget for easy access
+    row_widget.name_edit = name_edit
+    row_widget.value_edit = value_edit
+    row_widget.up_btn = up_btn
+    row_widget.down_btn = down_btn
+    row_widget.delete_btn = delete_btn
+
+    # Track in order list
+    self.physical_property_rows.append((name_edit, value_edit))
+
+    # Connect validation (reuse your existing function)
+    name_edit.textChanged.connect(lambda: self.validate_field(name_edit))
+    value_edit.textChanged.connect(lambda: self.validate_field(value_edit))
+
+    # Button connections
+    def delete_row():
+        idx = self.physical_properties_layout.indexOf(row_widget)
+        if idx != -1 and idx < self.physical_properties_layout.count() - 1:  # Not the add row
+            self.physical_properties_layout.removeWidget(row_widget)
+            row_widget.deleteLater()
+            self.physical_property_rows.remove((name_edit, value_edit))
+            _update_property_buttons(self)
+
+    def move_up():
+        idx = self.physical_properties_layout.indexOf(row_widget)
+        if idx > 0 and idx < self.physical_properties_layout.count() - 1:
+            self.physical_properties_layout.removeWidget(row_widget)
+            self.physical_properties_layout.insertWidget(idx - 1, row_widget)
+            # Swap in tracking list to maintain order
+            prev_row_tuple = self.physical_property_rows[idx - 1]
+            self.physical_property_rows[idx - 1] = (name_edit, value_edit)
+            self.physical_property_rows[idx] = prev_row_tuple  # Wait, no—after remove/insert, indices shift
+            # Better: find and swap
+            for i, t in enumerate(self.physical_property_rows):
+                if t[0] == name_edit:
+                    if i > 0:
+                        self.physical_property_rows[i], self.physical_property_rows[i - 1] = \
+                        self.physical_property_rows[i - 1], self.physical_property_rows[i]
+                    break
+            _update_property_buttons(self)
+
+    def move_down():
+        idx = self.physical_properties_layout.indexOf(row_widget)
+        total_rows = self.physical_properties_layout.count() - 1  # Exclude add row
+        if 0 <= idx < total_rows - 1:
+            self.physical_properties_layout.removeWidget(row_widget)
+            self.physical_properties_layout.insertWidget(idx + 1, row_widget)
+            # Swap in tracking list
+            for i, t in enumerate(self.physical_property_rows):
+                if t[0] == name_edit:
+                    if i < len(self.physical_property_rows) - 1:
+                        self.physical_property_rows[i], self.physical_property_rows[i + 1] = \
+                        self.physical_property_rows[i + 1], self.physical_property_rows[i]
+                    break
+            _update_property_buttons(self)
+
+    delete_btn.clicked.connect(delete_row)
+    up_btn.clicked.connect(move_up)
+    down_btn.clicked.connect(move_down)
+
+    return row_widget
+
+
+def _add_property(self):
+    """Add a new empty row."""
+    name, ok = QInputDialog.getText(self, "Add Property", "Property Name:", text="")
+    if ok and name.strip():
+        row = _create_property_row(self, name.strip(), "")
+        # Insert before the add button row
+        self.physical_properties_layout.insertWidget(self.physical_properties_layout.count() - 1, row)
+        _update_property_buttons(self)
+
+
+def _update_property_buttons(self):
+    """Enable/disable up/down buttons based on position."""
+    total_rows = self.physical_properties_layout.count() - 1  # Exclude add row
+    for i in range(total_rows):
+        item = self.physical_properties_layout.itemAt(i)
+        if item and item.widget():
+            row_widget = item.widget()
+            if hasattr(row_widget, 'up_btn'):
+                row_widget.up_btn.setEnabled(i > 0)
+                row_widget.down_btn.setEnabled(i < total_rows - 1)
 
 def form_btn(self):
     button_style = """
@@ -548,16 +682,34 @@ def clear_msds_form(self):
         self.eye_protection_input.setText("Use safety glasses/ goggles.")
         self.skin_protection_input.setText(
             "Wear normal protective overalls. Sensitive skin can be protected further by use of barrier cream or moisturizer.")
-        self.appearance_input.setText("White pellet form")
-        self.odor_input.setText("Odorless")
-        self.packaging_input.setText("25 kgs.")
-        self.carrier_material_input.setText("Polyolefin resin")
-        self.resin_suitability_input.setText("Polyolefin")
-        self.non_toxicity_input.setText("Non-toxic, colorant contains no heavy metal")
-        self.flash_point_input.setText("N/A")
-        self.auto_ignition_input.setText("N/A")
-        self.explosion_property_input.setText("N/A")
-        self.solubility_input.setText("Insoluble")
+
+        # Reset Section 9 to initials
+        if hasattr(self, 'physical_properties_layout'):
+            while self.physical_properties_layout.count() > 1:  # Keep add row
+                item = self.physical_properties_layout.takeAt(0)
+                if item.widget():
+                    item.widget().deleteLater()
+            self.physical_property_rows.clear()
+
+            initial_props = [  # Same as in create_dynamic_section9
+                ("Appearance", "White pellet form"),
+                ("Odor", "Odorless"),
+                ("Packaging", "25 kgs."),
+                ("Carrier Material", "Polyolefin resin"),
+                ("Resin Suitability", "Polyolefin"),
+                ("Light fastness (1-8)", ""),
+                ("Heat Stability (1-5)", ""),
+                ("Non Toxicity", "Non-toxic, colorant contains no heavy metal"),
+                ("Flash Point", "N/A"),
+                ("Auto Ignition", "N/A"),
+                ("Explosion Property", "N/A"),
+                ("Solubility (Water)", "Insoluble"),
+            ]
+            for name, value in initial_props:
+                row = _create_property_row(self, name, value)
+                self.physical_properties_layout.insertWidget(self.physical_properties_layout.count() - 1, row)
+            _update_property_buttons(self)
+
         self.stability_reactivity_input.setPlainText("This product is chemically stable and non-reactive.")
         self.toxicological_input.setPlainText("This product is non-toxic and physiologically harmless.")
         self.ecological_input.setPlainText("No known harmful effects to human lives or to the environment.")
@@ -635,3 +787,6 @@ def check_empty_fields(self):
 
     for field in input_fields:
         validate_field(field)
+
+    for _, value_edit in self.physical_property_rows:
+        validate_field(value_edit)
