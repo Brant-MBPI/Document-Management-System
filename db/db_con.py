@@ -449,6 +449,21 @@ def get_single_msds_data(msds_id):
     return record
 
 
+def get_single_msds_section9(msds_id):
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute(
+        "SELECT * FROM msds_section_9 WHERE msds_id = %s ORDER BY property_order ASC;",
+        (msds_id,)
+    )
+    record = cur.fetchone()  # only one row expected
+
+    cur.close()
+    conn.close()
+    return record
+
+
 def get_single_coa_data(coa_id):
     conn = get_connection()
     cur = conn.cursor()

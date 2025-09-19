@@ -41,26 +41,14 @@ def load_msds_details(self, msds_id):
     self.hand_protection_input.setText(str(field_result[27]))
     self.eye_protection_input.setText(str(field_result[28]))
     self.skin_protection_input.setText(str(field_result[29]))
-    self.appearance_input.setText(str(field_result[30]))
-    self.odor_input.setText(str(field_result[31]))
-    self.packaging_input.setText(str(field_result[32]))
-    self.carrier_material_input.setText(str(field_result[33]))
-    self.resin_suitability_input.setText(str(field_result[34]))
-    self.light_fastness_input.setText(str(field_result[35]))
-    self.heat_stability_input.setText(str(field_result[36]))
-    self.non_toxicity_input.setText(str(field_result[37]))
-    self.flash_point_input.setText(str(field_result[38]))
-    self.auto_ignition_input.setText(str(field_result[39]))
-    self.explosion_property_input.setText(str(field_result[40]))
-    self.solubility_input.setText(str(field_result[41]))
-    self.stability_reactivity_input.setPlainText(str(field_result[42]))
-    self.toxicological_input.setPlainText(str(field_result[43]))
-    self.ecological_input.setPlainText(str(field_result[44]))
-    self.disposal_input.setPlainText(str(field_result[45]))
-    self.transport_input.setPlainText(str(field_result[46]))
-    self.regulatory_input.setPlainText(str(field_result[47]))
-    self.msds_shelf_life_input.setText(str(field_result[48]))
-    self.other_input.setPlainText(str(field_result[49]))
+    self.stability_reactivity_input.setPlainText(str(field_result[30]))
+    self.toxicological_input.setPlainText(str(field_result[31]))
+    self.ecological_input.setPlainText(str(field_result[32]))
+    self.disposal_input.setPlainText(str(field_result[33]))
+    self.transport_input.setPlainText(str(field_result[34]))
+    self.regulatory_input.setPlainText(str(field_result[35]))
+    self.msds_shelf_life_input.setText(str(field_result[36]))
+    self.other_input.setPlainText(str(field_result[37]))
     self.btn_msds_submit.setText("Update")
     check_empty_fields(self)  # Call validation after loading data
 
@@ -77,6 +65,56 @@ def load_msds_details(self, msds_id):
         self.handling_storage_stacked_layout.setCurrentIndex(0)
         self.hazard_single_field_input.clear()
         self.msds_storage_single_input.clear()
+
+    # --- Section 9: Physical & Chemical Properties ---
+    # 1. Clear existing dynamic rows
+    if hasattr(self, 'physical_properties_layout'):
+        # Iterate backwards to safely remove widgets
+        # The last widget is the "Add Property" button, so we stop before it.
+        while self.physical_properties_layout.count() > 1:
+            item = self.physical_properties_layout.takeAt(0)  # Take the first item (a row widget)
+            if item and item.widget():
+                item.widget().deleteLater()  # Delete the widget
+        self.physical_property_rows.clear()  # Clear the tracking list
+
+    # It should return a list of tuples: [(id, msds_id, property_order, property_name, property_value), ...]
+    section9_data = db_con.get_single_msds_section9(msds_id)
+
+    # 3. Create new rows based on fetched data
+    if section9_data:
+        for row_data in section9_data:
+            # Assuming row_data is (id, msds_id, property_order, property_name, property_value)
+            property_name = str(row_data[3])
+            property_value = str(row_data[4])
+            row_widget = _create_property_row(self, property_name, property_value)
+            # Insert before the "Add Property" button (which is always the last item)
+            self.physical_properties_layout.insertWidget(self.physical_properties_layout.count() - 1, row_widget)
+    else:
+        # If no custom properties, re-add the default ones (same logic as in clear_msds_form)
+        initial_props = [
+            ("Appearance", "White pellet form"),
+            ("Odor", "Odorless"),
+            ("Packaging", "25 kgs."),
+            ("Carrier Material", "Polyolefin resin"),
+            ("Resin Suitability", "Polyolefin"),
+            ("Light fastness (1-8)", ""),
+            ("Heat Stability (1-5)", ""),
+            ("Non Toxicity", "Non-toxic, colorant contains no heavy metal"),
+            ("Flash Point", "N/A"),
+            ("Auto Ignition", "N/A"),
+            ("Explosion Property", "N/A"),
+            ("Solubility (Water)", "Insoluble"),
+        ]
+        for name, value in initial_props:
+            row_widget = _create_property_row(self, name, value)
+            self.physical_properties_layout.insertWidget(self.physical_properties_layout.count() - 1, row_widget)
+
+    # 4. Update the state of the up/down buttons
+    _update_property_buttons(self)
+
+    # Ensure all fields, including the newly loaded dynamic ones, are validated for empty state
+    check_empty_fields(self)
+
 
 def create_form(self):
     clear_msds_form(self)
