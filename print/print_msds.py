@@ -181,29 +181,38 @@ class FileMSDS(QWidget):
 
         # Section 3
         content.append(Paragraph("3) Hazard Information", styles['SectionHeader']))
-        section3_content = [
-            [Paragraph("• Preliminaries", styles['NormalText']), ":", Paragraph(str(field_result[11]), styles['NormalText'])],
-            [Paragraph("• Preliminary route of entry", styles['NormalText']), ":", Paragraph(str(field_result[12]), styles['NormalText'])],
-            [Paragraph("• Symptoms of exposure", styles['NormalText']), ":", Paragraph(str(field_result[13]), styles['NormalText'])],
-            [Paragraph("• Restrictive conditions", styles['NormalText']), ":", Paragraph(str(field_result[14]), styles['NormalText'])],
-            [Paragraph("• Eyes", styles['NormalText']), ":", Paragraph(str(field_result[15]), styles['NormalText'])]
-        ]
 
-        table = Table(section3_content, colWidths=col_widths, hAlign='RIGHT', spaceBefore=12)
-        table_style(table)
-        content.append(Paragraph("Adverse Human Health Effects", IndentedText))
-        content.append(table)
-        content.append(Spacer(1, 12))
-        content.append(Paragraph(str(field_result[16]), IndentedText))
-        content.append(Spacer(1, 12))
+        hazard_fields = [str(field_result[i]) if field_result[i] else "" for i in range(11, 16)]
+
+        # Check if all hazard fields are empty
+        if all(v.strip() == "" for v in hazard_fields):
+            # Only show general note (field_result[16])
+            content.append(Paragraph(str(field_result[16]), IndentedText))
+            content.append(Spacer(1, 12))
+        else:
+            section3_content = [
+                [Paragraph("• Preliminaries", styles['NormalText']), ":", Paragraph(str(field_result[11]), styles['NormalText'])],
+                [Paragraph("• Preliminary route of entry", styles['NormalText']), ":", Paragraph(str(field_result[12]), styles['NormalText'])],
+                [Paragraph("• Symptoms of exposure", styles['NormalText']), ":", Paragraph(str(field_result[13]), styles['NormalText'])],
+                [Paragraph("• Restrictive conditions", styles['NormalText']), ":", Paragraph(str(field_result[14]), styles['NormalText'])],
+                [Paragraph("• Eyes", styles['NormalText']), ":", Paragraph(str(field_result[15]), styles['NormalText'])]
+            ]
+
+            table = Table(section3_content, colWidths=col_widths, hAlign='RIGHT', spaceBefore=12)
+            table_style(table)
+            content.append(Paragraph("Adverse Human Health Effects", IndentedText))
+            content.append(table)
+            content.append(Spacer(1, 12))
+            content.append(Paragraph(str(field_result[16]), IndentedText))
+            content.append(Spacer(1, 12))
 
         # Section 4
         content.append(Paragraph("4) First Aid Measures", styles['SectionHeader']))
         section4_content = [
-            [Paragraph('• Inhalation', styles['NormalText']), ':', Paragraph(str(field_result[17]), styles['NormalText'])],
-            [Paragraph('• Eyes', styles['NormalText']), ':', Paragraph(str(field_result[18]), styles['NormalText'])],
-            [Paragraph('• Skin', styles['NormalText']), ':', Paragraph(str(field_result[19]),styles['NormalText'])],
-            [Paragraph('• Ingestion', styles['NormalText']), ':', Paragraph(str(field_result[20]), styles['NormalText'])],
+            [Paragraph('• Inhalation', styles['NormalText']), '-', Paragraph(str(field_result[17]), styles['NormalText'])],
+            [Paragraph('• Eyes', styles['NormalText']), '-', Paragraph(str(field_result[18]), styles['NormalText'])],
+            [Paragraph('• Skin', styles['NormalText']), '-', Paragraph(str(field_result[19]),styles['NormalText'])],
+            [Paragraph('• Ingestion', styles['NormalText']), '-', Paragraph(str(field_result[20]), styles['NormalText'])],
            ]
 
         # Create the table
@@ -225,23 +234,28 @@ class FileMSDS(QWidget):
 
         # Section 7
         content.append(Paragraph("7) Handling and Storage", styles['SectionHeader']))
-        section7_content = [
-            [Paragraph('• Handling', styles['NormalText']), ':', Paragraph(str(field_result[23]), styles['NormalText'])],
-            [Paragraph('• Storage', styles['NormalText']), ':', Paragraph(str(field_result[24]), styles['NormalText'])]
-        ]
-        table = Table(section7_content, colWidths=col_widths, hAlign='RIGHT', spaceBefore=12)
-        table_style(table)
-        content.append(table)
-        content.append(Spacer(1, 12))
+        handling = str(field_result[23]).strip() if field_result[23] else ""
+        if handling:
+            section7_content = [
+                [Paragraph('• Handling', styles['NormalText']), ':', Paragraph(str(field_result[23]), styles['NormalText'])],
+                [Paragraph('• Storage', styles['NormalText']), ':', Paragraph(str(field_result[24]), styles['NormalText'])]
+            ]
+            table = Table(section7_content, colWidths=col_widths, hAlign='RIGHT', spaceBefore=12)
+            table_style(table)
+            content.append(table)
+            content.append(Spacer(1, 12))
+        else:
+            content.append(Paragraph(str(field_result[24]), IndentedText))
+            content.append(Spacer(1, 12))
 
         # Section 8
         content.append(Paragraph("8) Exposure Controls/ Personal Protection", styles['SectionHeader']))
         section8_content = [
-            [Paragraph('Exposure Control', styles['NormalText']), ':', Paragraph(str(field_result[25]),styles['NormalText'])],
-            [Paragraph('Respiratory Protection', styles['NormalText']), ':', Paragraph(str(field_result[26]), styles['NormalText'])],
-            [Paragraph('Hand Protection', styles['NormalText']), ':', Paragraph(str(field_result[27]), styles['NormalText'])],
-            [Paragraph('Eye Protection', styles['NormalText']), ':', Paragraph(str(field_result[28]), styles['NormalText'])],
-            [Paragraph('Skin Protection', styles['NormalText']), ':', Paragraph(str(field_result[29]), styles['NormalText'])]
+            [Paragraph('Exposure Control', styles['NormalText']), '-', Paragraph(str(field_result[25]),styles['NormalText'])],
+            [Paragraph('Respiratory Protection', styles['NormalText']), '', Paragraph(str(field_result[26]), styles['NormalText'])],
+            [Paragraph('Hand Protection', styles['NormalText']), '-', Paragraph(str(field_result[27]), styles['NormalText'])],
+            [Paragraph('Eye Protection', styles['NormalText']), '-', Paragraph(str(field_result[28]), styles['NormalText'])],
+            [Paragraph('Skin Protection', styles['NormalText']), '-', Paragraph(str(field_result[29]), styles['NormalText'])]
         ]
         table = Table(section8_content, colWidths=col_widths, hAlign='RIGHT', spaceBefore=12)
         table_style(table)

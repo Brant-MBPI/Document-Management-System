@@ -154,7 +154,7 @@ def create_form(self):
             QPushButton#HazardToggle:hover {
                 background-color: #5a6268;
             }
-             #detailedHazardWidget, #simplifiedHazardWidget {
+            #detailedHazardWidget, #simplifiedHazardWidget, #detailedHandlingStorageWidget, #simplifiedHandlingStorageWidget {
                 background-color: #ffffff;
             }
         """)
@@ -273,35 +273,6 @@ def create_form(self):
     hazard_group_v_layout.addLayout(button_h_layout)
     hazard_group_v_layout.addLayout(self.hazard_stacked_layout)
 
-    def toggle_hazard_layout(checked):
-        if checked:
-            self.hazard_stacked_layout.setCurrentIndex(1)  # Show simplified
-            self.hazard_toggle_button.setText("Show Detailed")
-            self.hazard_single_field_input.setText(
-                "No known harmful effects to human lives or to the environment.")
-
-            # Clear and disable all detailed fields except the general note
-            for _, input_widget in detailed_hazard_fields:
-                if input_widget != self.hazard_general_note_input and hasattr(input_widget, "clear"):
-                    input_widget.clear()
-
-            self.hazard_general_note_input.clear()
-        else:
-            self.hazard_stacked_layout.setCurrentIndex(0)  # Show detailed
-            self.hazard_toggle_button.setText("Switch Layout")
-            # Re-enable all fields
-            self.hazard_preliminaries_input.setText("Inert nuisance dust can cause lung irritation.")
-            self.hazard_entry_route_input.setText("Inhalation of airborne dust.")
-            self.hazard_symptoms_input.setText("Coughing, sneezing or irritation of the mucous membrane.")
-            self.hazard_restrictive_condition_input.setText("Breathing or respiratory tract disorder/disease")
-            self.hazard_eyes_input.setText("Inert foreign body hazard.")
-            self.hazard_general_note_input.setText(
-                "No adverse health effects during the course of normal industrial handling. If large quantities ingested, seek medical attention.")
-
-            self.hazard_single_field_input.clear()
-
-    self.hazard_toggle_button.clicked.connect(toggle_hazard_layout)
-
     main_v_layout.addWidget(hazard_group)
 
     # Section 4: First Aid Measures
@@ -325,12 +296,98 @@ def create_form(self):
     ]
     main_v_layout.addWidget(create_form_group("6) Accidental Release Measures", accidental_release_fields))
 
-    # Section 7: Handling and Storage
-    handling_storage_fields = [
+    # Section 7: Handling and Storage - NEW STACKED LAYOUT
+    # Detailed Handling and Storage Fields
+    detailed_handling_storage_fields = [
         ("Handling:", self.handling_input),
         ("Storage:", self.msds_storage_input),
     ]
-    main_v_layout.addWidget(create_form_group("7) Handling and Storage", handling_storage_fields))
+
+    # Create the detailed handling/storage view widget
+    detailed_handling_storage_widget = QWidget()
+    detailed_handling_storage_widget.setObjectName("detailedHandlingStorageWidget")
+    detailed_handling_storage_layout = QGridLayout(detailed_handling_storage_widget)
+    detailed_handling_storage_layout.setHorizontalSpacing(30)
+    detailed_handling_storage_layout.setVerticalSpacing(15)
+    detailed_handling_storage_layout.setContentsMargins(20, 10, 20, 20)
+    row_idx = 0
+    for label_text, input_widget in detailed_handling_storage_fields:
+        label = QLabel(label_text)
+        detailed_handling_storage_layout.addWidget(label, row_idx, 0,
+                                                   Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+        detailed_handling_storage_layout.addWidget(input_widget, row_idx, 1)
+        if isinstance(input_widget, QLineEdit):
+            input_widget.textChanged.connect(lambda text, widget=input_widget: validate_field(widget))
+        elif isinstance(input_widget, QTextEdit):
+            input_widget.textChanged.connect(lambda: validate_field(input_widget))
+        row_idx += 1
+
+    # Create the simplified handling/storage view widget (only Storage)
+    simplified_handling_storage_widget = QWidget()
+    simplified_handling_storage_widget.setObjectName("simplifiedHandlingStorageWidget")
+    simplified_handling_storage_layout = QGridLayout(simplified_handling_storage_widget)
+    simplified_handling_storage_layout.setHorizontalSpacing(30)
+    simplified_handling_storage_layout.setVerticalSpacing(15)
+    simplified_handling_storage_layout.setContentsMargins(20, 10, 20, 20)
+    label_storage_simplified = QLabel("Storage:")
+    simplified_handling_storage_layout.addWidget(label_storage_simplified, 0, 0,
+                                                 Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+    simplified_handling_storage_layout.addWidget(self.msds_storage_single_input, 0, 1)
+    if isinstance(self.msds_storage_input, QLineEdit):
+        self.msds_storage_input.textChanged.connect(
+            lambda text, widget=self.msds_storage_input: validate_field(widget))
+    elif isinstance(self.msds_storage_input, QTextEdit):
+        self.msds_storage_input.textChanged.connect(lambda: validate_field(self.msds_storage_input))
+
+    self.handling_storage_stacked_layout = QStackedLayout()
+    self.handling_storage_stacked_layout.addWidget(detailed_handling_storage_widget)  # Index 0: Detailed view
+    self.handling_storage_stacked_layout.addWidget(simplified_handling_storage_widget)  # Index 1: Simplified view
+
+    handling_storage_group = QGroupBox("7) Handling and Storage")
+    handling_storage_group_v_layout = QVBoxLayout(handling_storage_group)
+    handling_storage_group_v_layout.addLayout(self.handling_storage_stacked_layout)
+    main_v_layout.addWidget(handling_storage_group)
+
+    def toggle_hazard_layout(checked):
+        if checked:
+            self.hazard_stacked_layout.setCurrentIndex(1)  # Show simplified
+            self.hazard_toggle_button.setText("Show Detailed")
+            self.hazard_single_field_input.setText(
+                "No known harmful effects to human lives or to the environment.")
+
+            # Clear and disable all detailed fields except the general note
+            for _, input_widget in detailed_hazard_fields:
+                if input_widget != self.hazard_general_note_input and hasattr(input_widget, "clear"):
+                    input_widget.clear()
+
+            self.hazard_general_note_input.clear()
+            # section 7
+            self.handling_storage_stacked_layout.setCurrentIndex(1)
+            self.handling_input.clear()
+            self.msds_storage_input.clear()
+            self.msds_storage_single_input.setText(
+                "Store in a dry place and shaded area. Close bag after use to prevent moisture intake & soiling.")
+
+        else:
+            self.hazard_stacked_layout.setCurrentIndex(0)  # Show detailed
+            self.hazard_toggle_button.setText("Switch Layout")
+            # Re-enable all fields
+            self.hazard_preliminaries_input.setText("Inert nuisance dust can cause lung irritation.")
+            self.hazard_entry_route_input.setText("Inhalation of airborne dust.")
+            self.hazard_symptoms_input.setText("Coughing, sneezing or irritation of the mucous membrane.")
+            self.hazard_restrictive_condition_input.setText("Breathing or respiratory tract disorder/disease")
+            self.hazard_eyes_input.setText("Inert foreign body hazard.")
+            self.hazard_general_note_input.setText(
+                "No adverse health effects during the course of normal industrial handling. If large quantities ingested, seek medical attention.")
+
+            self.hazard_single_field_input.clear()
+            # section 7
+            self.handling_storage_stacked_layout.setCurrentIndex(0)
+            self.msds_storage_single_input.clear()
+            self.handling_input.setText("Use suitable ventilation to prevent excessive inhalation and skin contact. Avoid static discharge during powder handling operation")
+            self.msds_storage_input.setText("Store in dry area, wet material may become very slippery. Close bag after use to prevent moisture intake & soiling.")
+
+    self.hazard_toggle_button.clicked.connect(toggle_hazard_layout)
 
     # Section 8: Exposure Controls/Personal Protection
     exposure_control_fields = [
@@ -397,7 +454,6 @@ def create_form(self):
 
     # Perform initial validation after all widgets are set up
     check_empty_fields(self)
-
 
 def form_btn(self):
     button_style = """

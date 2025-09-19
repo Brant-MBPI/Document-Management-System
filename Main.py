@@ -78,6 +78,7 @@ class MainWindow(QMainWindow):
             #Section7
         self.handling_input = QLineEdit()
         self.msds_storage_input = QLineEdit()
+        self.msds_storage_single_input = QLineEdit()
             #Section8
         self.exposure_control_input = QLineEdit()
         self.respiratory_protection_input = QLineEdit()
@@ -479,6 +480,7 @@ class MainWindow(QMainWindow):
     def msds_btn_submit_clicked(self):
         try:
             general = self.hazard_general_note_input.text().strip() or self.hazard_single_field_input.text().strip()
+            storage = self.msds_storage_input.text().strip() or self.msds_storage_single_input.text().strip()
 
             # Collect all required fields
             required_fields = {
@@ -496,8 +498,8 @@ class MainWindow(QMainWindow):
                 "First Aid Ingestion": self.first_aid_ingestion_input.text(),
                 "Extinguishing Media": self.fire_fighting_media_input.toPlainText(),
                 "Accidental Release": self.accidental_release_input.toPlainText(),
-                "Handling": self.handling_input.text(),
-                "Storage": self.msds_storage_input.text(),
+
+                "Storage": storage,
                 "Exposure Control": self.exposure_control_input.text(),
                 "Respiratory Protection": self.respiratory_protection_input.text(),
                 "Hand Protection": self.hand_protection_input.text(),
@@ -561,7 +563,7 @@ class MainWindow(QMainWindow):
                 "fire_fighting_media": self.fire_fighting_media_input.toPlainText(),
                 "accidental_release_info": self.accidental_release_input.toPlainText(),
                 "handling_info": self.handling_input.text(),
-                "storage_info": self.msds_storage_input.text(),
+                "storage_info": storage,
 
                 "exposure_control_info": self.exposure_control_input.text(),
                 "respiratory_protection": self.respiratory_protection_input.text(),
