@@ -1,5 +1,6 @@
 from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QLabel, QWidget, QTabWidget, \
-    QTableWidget, QLineEdit, QHeaderView, QTableWidgetItem, QFormLayout, QPushButton, QTextEdit, QGroupBox, QGridLayout
+    QTableWidget, QLineEdit, QHeaderView, QTableWidgetItem, QFormLayout, QPushButton, QTextEdit, QGroupBox, QGridLayout, \
+    QStackedLayout
 from PyQt6.QtCore import Qt  # Import Qt for alignment flags
 
 # Assuming alert and db_con are correctly imported
@@ -71,77 +72,89 @@ def create_form(self):
     main_v_layout.setContentsMargins(30, 20, 30, 30)  # Add overall padding
 
     form_widget.setStyleSheet("""
-        QWidget {
-            background-color: #f8f9fa; /* Very light background for the whole form */
-            font-family: 'Inter', 'Segoe UI', sans-serif; /* Modern font */
-            color: #343a40; /* Dark gray for general text */
-        }
-        QLabel {
-            font-size: 14px; /* Changed from 14px to 12px */
-            font-weight: 500;
-            color: #495057; /* Slightly darker gray for labels */
-            padding-bottom: 2px; /* Small padding below labels */
-            background-color: transparent;
-        }
-        /* Specific style for the main header */
-        QLabel#mainHeader {
-            font-size: 32px;
-            font-weight: 700;
-            color: #2c3e50;
-            margin-bottom: 30px;
-            padding-bottom: 10px;
-            border-bottom: 3px solid #007bff; /* Primary blue underline */
-            text-align: center; /* This will center the text if the label's width allows */
-        }
-        QLineEdit, QTextEdit {
-            font-size: 14px;
-            padding: 10px 12px;
-            border: 1px solid #ced4da; /* Lighter, more neutral border */
-            border-radius: 6px; /* Slightly less rounded for a crisp look */
-            background-color: #ffffff;
-            min-height: 38px; /* Consistent height for QLineEdit */
-            selection-background-color: #aed6f1;
-            color: #343a40;
-        }
-        QLineEdit:focus, QTextEdit:focus {
-            border: 1px solid #007bff; /* Primary blue on focus */
-            background-color: #e9f5ff; /* Very light blue background on focus */
-            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25); /* Subtle focus ring */
-        }
-        /* Style for empty fields with red border */
-        QLineEdit.empty_field, QTextEdit.empty_field {
-            border: 1px solid #dc3545; /* Red border */
-            background-color: #ffebeb; /* Very light red background */
-        }
-        QLineEdit.empty_field:focus, QTextEdit.empty_field:focus {
-            border: 1px solid #dc3545; /* Keep red border on focus for empty fields */
-            box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.25); /* Red focus ring */
-        }
-        QTextEdit {
-            min-height: 85px; /* Slightly taller */
-            max-height: 120px; /* Allow more vertical space if needed but cap */
-            vertical-align: top;
-        }
-        QGroupBox {
-            font-size: 18px;
-            font-weight: 600;
-            color: #212529;
-            border: 1px solid #e0e0e0; /* Lighter border for group box */
-            border-radius: 8px;
-            margin-top: 2.0ex; /* Space for title */
-            background-color: #ffffff;
-            padding: 15px; /* Inner padding for group box content */
-        }
-        QGroupBox::title {
-            subcontrol-origin: margin;
-            subcontrol-position: top left;
-            padding: 0 10px; /* Wider padding for title text */
-            left: 15px; /* Adjust title position */
-            margin-left: 0px; /* No margin here, padding takes over */
-            color: #34495e;
-            background-color: #f8f9fa; /* Match widget background for cutout effect */
-        }
-    """)
+            QWidget {
+                background-color: #f8f9fa; /* Very light background for the whole form */
+                font-family: 'Inter', 'Segoe UI', sans-serif; /* Modern font */
+                color: #343a40; /* Dark gray for general text */
+            }
+            QLabel {
+                font-size: 14px; /* Changed from 14px to 12px */
+                font-weight: 500;
+                color: #495057; /* Slightly darker gray for labels */
+                padding-bottom: 2px; /* Small padding below labels */
+                background-color: transparent;
+            }
+            /* Specific style for the main header */
+            QLabel#mainHeader {
+                font-size: 32px;
+                font-weight: 700;
+                color: #2c3e50;
+                margin-bottom: 30px;
+                padding-bottom: 10px;
+                border-bottom: 3px solid #007bff; /* Primary blue underline */
+                text-align: center; /* This will center the text if the label's width allows */
+            }
+            QLineEdit, QTextEdit {
+                font-size: 14px;
+                padding: 10px 12px;
+                border: 1px solid #ced4da; /* Lighter, more neutral border */
+                border-radius: 6px; /* Slightly less rounded for a crisp look */
+                background-color: #ffffff;
+                min-height: 38px; /* Consistent height for QLineEdit */
+                selection-background-color: #aed6f1;
+                color: #343a40;
+            }
+            QLineEdit:focus, QTextEdit:focus {
+                border: 1px solid #007bff; /* Primary blue on focus */
+                background-color: #e9f5ff; /* Very light blue background on focus */
+                box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25); /* Subtle focus ring */
+            }
+            /* Style for empty fields with red border */
+            QLineEdit.empty_field, QTextEdit.empty_field {
+                border: 1px solid #dc3545; /* Red border */
+                background-color: #ffebeb; /* Very light red background */
+            }
+            QLineEdit.empty_field:focus, QTextEdit.empty_field:focus {
+                border: 1px solid #dc3545; /* Keep red border on focus for empty fields */
+                box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.25); /* Red focus ring */
+            }
+            QTextEdit {
+                min-height: 85px; /* Slightly taller */
+                max-height: 120px; /* Allow more vertical space if needed but cap */
+                vertical-align: top;
+            }
+            QGroupBox {
+                font-size: 18px;
+                font-weight: 600;
+                color: #212529;
+                border: 1px solid #e0e0e0; /* Lighter border for group box */
+                border-radius: 8px;
+                margin-top: 2.0ex; /* Space for title */
+                background-color: #ffffff;
+                padding: 15px; /* Inner padding for group box content */
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                subcontrol-position: top left;
+                padding: 0 10px; /* Wider padding for title text */
+                left: 15px; /* Adjust title position */
+                margin-left: 0px; /* No margin here, padding takes over */
+                color: #34495e;
+            }
+            QPushButton#HazardToggle {
+                background-color: #6c757d; /* A neutral gray */
+                color: #ffffff;
+                font-size: 13px;
+                padding: 5px 10px;
+                border: none;
+                border-radius: 4px;
+                min-width: 80px;
+                margin-bottom: 10px;
+            }
+            QPushButton#HazardToggle:hover {
+                background-color: #5a6268;
+            }
+        """)
 
     # === Header ===
     header = QLabel("Technical Data and Material Safety")
@@ -194,7 +207,13 @@ def create_form(self):
     main_v_layout.addWidget(create_form_group("2) Composition/Information on Ingredients", composition_fields))
 
     # Section 3: Hazard Information
-    hazard_fields = [
+    self.hazard_toggle_button = QPushButton("Switch Layout")
+    self.hazard_toggle_button.setObjectName("HazardToggle")  # For specific styling
+    self.hazard_toggle_button.setCheckable(True)  # Make it checkable for state management
+    self.hazard_toggle_button.setChecked(False)  # Start with detailed view
+
+    # Detailed Hazard Fields
+    detailed_hazard_fields = [
         ("Preliminaries:", self.hazard_preliminaries_input),
         ("Preliminary route of entry:", self.hazard_entry_route_input),
         ("Symptoms of Exposure:", self.hazard_symptoms_input),
@@ -202,7 +221,80 @@ def create_form(self):
         ("Eyes:", self.hazard_eyes_input),
         ("General Note:", self.hazard_general_note_input),
     ]
-    main_v_layout.addWidget(create_form_group("3) Hazard Information", hazard_fields))
+    # Simplified Hazard Field (only General Note)
+    simplified_hazard_fields = [
+        ("General Note:", self.hazard_single_field_input),  # Reuse the same input widget
+    ]
+
+    # Create the detailed view widget
+    detailed_hazard_widget = QWidget()
+    detailed_hazard_layout = QGridLayout(detailed_hazard_widget)
+    detailed_hazard_layout.setHorizontalSpacing(30)
+    detailed_hazard_layout.setVerticalSpacing(15)
+    detailed_hazard_layout.setContentsMargins(20, 10, 20, 20)
+    row_idx = 0
+    for label_text, input_widget in detailed_hazard_fields:
+        label = QLabel(label_text)
+        detailed_hazard_layout.addWidget(label, row_idx, 0, Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+        detailed_hazard_layout.addWidget(input_widget, row_idx, 1)
+        if isinstance(input_widget, QLineEdit):
+            input_widget.textChanged.connect(lambda text, widget=input_widget: validate_field(widget))
+        elif isinstance(input_widget, QTextEdit):
+            input_widget.textChanged.connect(lambda: validate_field(input_widget))
+        row_idx += 1
+
+    # Create the simplified view widget
+    simplified_hazard_widget = QWidget()
+    simplified_hazard_layout = QGridLayout(simplified_hazard_widget)
+    simplified_hazard_layout.setHorizontalSpacing(30)
+    simplified_hazard_layout.setVerticalSpacing(15)
+    simplified_hazard_layout.setContentsMargins(20, 10, 20, 20)
+    # Only add the General Note field to the simplified layout
+    label_general_note = QLabel("General Note:")
+    simplified_hazard_layout.addWidget(label_general_note, 0, 0,
+                                       Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+    simplified_hazard_layout.addWidget(self.hazard_single_field_input, 0, 1)
+
+    # Create a QStackedLayout for hazard information
+    self.hazard_stacked_layout = QStackedLayout()
+    self.hazard_stacked_layout.addWidget(detailed_hazard_widget)  # Index 0: Detailed view
+    self.hazard_stacked_layout.addWidget(simplified_hazard_widget)  # Index 1: Simplified view
+
+    hazard_group = QGroupBox("3) Hazard Information")
+    hazard_group_v_layout = QVBoxLayout(hazard_group)
+    button_h_layout = QHBoxLayout()
+    button_h_layout.addStretch()
+    button_h_layout.addWidget(self.hazard_toggle_button)
+    hazard_group_v_layout.addLayout(button_h_layout)
+    hazard_group_v_layout.addLayout(self.hazard_stacked_layout)
+
+    def toggle_hazard_layout(checked):
+        if checked:
+            self.hazard_stacked_layout.setCurrentIndex(1)  # Show simplified
+            self.hazard_toggle_button.setText("Show Detailed")
+
+            # Clear and disable all detailed fields except the general note
+            for _, input_widget in detailed_hazard_fields:
+                if input_widget != self.hazard_general_note_input:
+                    # Clear based on widget type
+                    if hasattr(input_widget, "clear"):
+                        input_widget.clear()
+                    self.hazard_general_note_input.clear()
+        else:
+            self.hazard_stacked_layout.setCurrentIndex(0)  # Show detailed
+            self.hazard_toggle_button.setText("Switch Layout")
+            # Re-enable all fields
+            self.hazard_preliminaries_input.setText("Inert nuisance dust can cause lung irritation.")
+            self.hazard_entry_route_input.setText("Inhalation of airborne dust.")
+            self.hazard_symptoms_input.setText("Coughing, sneezing or irritation of the mucous membrane.")
+            self.hazard_restrictive_condition_input.setText("Breathing or respiratory tract disorder/disease")
+            self.hazard_eyes_input.setText("Inert foreign body hazard.")
+            self.hazard_general_note_input.setText(
+                "No adverse health effects during the course of normal industrial handling. If large quantities ingested, seek medical attention.")
+
+    self.hazard_toggle_button.clicked.connect(toggle_hazard_layout)
+
+    main_v_layout.addWidget(hazard_group)
 
     # Section 4: First Aid Measures
     first_aid_fields = [

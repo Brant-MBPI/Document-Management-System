@@ -63,6 +63,7 @@ class MainWindow(QMainWindow):
         self.hazard_restrictive_condition_input = QLineEdit()
         self.hazard_eyes_input = QLineEdit()
         self.hazard_general_note_input = QLineEdit()
+        self.hazard_single_field_input = QLineEdit()
             #Section4
         self.first_aid_inhalation_input = QLineEdit()
         self.first_aid_eyes = QLineEdit()
@@ -477,6 +478,8 @@ class MainWindow(QMainWindow):
 
     def msds_btn_submit_clicked(self):
         try:
+            general = self.hazard_general_note_input.text().strip() or self.hazard_single_field_input.text().strip()
+
             # Collect all required fields
             required_fields = {
                 "Customer Name": self.customer_name_input.text(),
@@ -486,12 +489,7 @@ class MainWindow(QMainWindow):
                 "Facsimile": self.facsimile_label_input.text(),
                 "Email Adress": self.email_label_input.text(),
                 "Composition/Information on Ingredients": self.composition_input.toPlainText(),
-                "Hazard Preliminaries": self.hazard_preliminaries_input.text(),
-                "Preliminary": self.hazard_entry_route_input.text(),
-                "Symptoms of Exposure": self.hazard_symptoms_input.text(),
-                "Restrictive Condition": self.hazard_restrictive_condition_input.text(),
-                "Hazard Eyes": self.hazard_eyes_input.text(),
-                "Hazard General Note": self.hazard_general_note_input.text(),
+                "Hazard General Note": general,
                 "First Aid Inhalation": self.first_aid_inhalation_input.text(),
                 "First Aid Eyes": self.first_aid_eyes.text(),
                 "First Aid Skin": self.first_aid_skin_input.text(),
@@ -553,7 +551,7 @@ class MainWindow(QMainWindow):
                 "hazard_symptoms": self.hazard_symptoms_input.text(),
                 "hazard_restrictive_conditions": self.hazard_restrictive_condition_input.text(),
                 "hazard_eyes": self.hazard_eyes_input.text(),
-                "hazard_general_note": self.hazard_general_note_input.text(),
+                "hazard_general_note": general,
 
                 "first_aid_inhalation": self.first_aid_inhalation_input.text(),
                 "first_aid_eyes": self.first_aid_eyes.text(),
