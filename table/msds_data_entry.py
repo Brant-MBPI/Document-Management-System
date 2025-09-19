@@ -154,6 +154,9 @@ def create_form(self):
             QPushButton#HazardToggle:hover {
                 background-color: #5a6268;
             }
+             #detailedHazardWidget, #simplifiedHazardWidget {
+                background-color: #ffffff;
+            }
         """)
 
     # === Header ===
@@ -228,6 +231,7 @@ def create_form(self):
 
     # Create the detailed view widget
     detailed_hazard_widget = QWidget()
+    detailed_hazard_widget.setObjectName("detailedHazardWidget")  # Set object name for styling
     detailed_hazard_layout = QGridLayout(detailed_hazard_widget)
     detailed_hazard_layout.setHorizontalSpacing(30)
     detailed_hazard_layout.setVerticalSpacing(15)
@@ -245,6 +249,7 @@ def create_form(self):
 
     # Create the simplified view widget
     simplified_hazard_widget = QWidget()
+    simplified_hazard_widget.setObjectName("simplifiedHazardWidget")  # Set object name for styling
     simplified_hazard_layout = QGridLayout(simplified_hazard_widget)
     simplified_hazard_layout.setHorizontalSpacing(30)
     simplified_hazard_layout.setVerticalSpacing(15)
@@ -272,14 +277,15 @@ def create_form(self):
         if checked:
             self.hazard_stacked_layout.setCurrentIndex(1)  # Show simplified
             self.hazard_toggle_button.setText("Show Detailed")
+            self.hazard_single_field_input.setText(
+                "No known harmful effects to human lives or to the environment.")
 
             # Clear and disable all detailed fields except the general note
             for _, input_widget in detailed_hazard_fields:
-                if input_widget != self.hazard_general_note_input:
-                    # Clear based on widget type
-                    if hasattr(input_widget, "clear"):
-                        input_widget.clear()
-                    self.hazard_general_note_input.clear()
+                if input_widget != self.hazard_general_note_input and hasattr(input_widget, "clear"):
+                    input_widget.clear()
+
+            self.hazard_general_note_input.clear()
         else:
             self.hazard_stacked_layout.setCurrentIndex(0)  # Show detailed
             self.hazard_toggle_button.setText("Switch Layout")
@@ -291,6 +297,8 @@ def create_form(self):
             self.hazard_eyes_input.setText("Inert foreign body hazard.")
             self.hazard_general_note_input.setText(
                 "No adverse health effects during the course of normal industrial handling. If large quantities ingested, seek medical attention.")
+
+            self.hazard_single_field_input.clear()
 
     self.hazard_toggle_button.clicked.connect(toggle_hazard_layout)
 
