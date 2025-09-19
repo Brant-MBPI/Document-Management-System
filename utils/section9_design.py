@@ -1,5 +1,4 @@
-"""
-/* Styles for dynamic Section 9 */
+STYLESHEET = """
 QGroupBox#section9Group {
     font-size: 18px;
     font-weight: 600;
@@ -20,8 +19,9 @@ QGroupBox#section9Group::title {
     color: #34495e;
 }
 
-QLineEdit.propertyName {
+QLineEdit#propertyName {
     font-size: 14px;
+    font-weight: bold;
     padding: 10px 12px;
     border: 1px solid #ced4da;
     border-radius: 6px;
@@ -33,18 +33,18 @@ QLineEdit.propertyName {
     color: #343a40;
 }
 
-QLineEdit.propertyName:focus {
+QLineEdit#propertyName:focus {
     border: 1px solid #007bff;
     background-color: #e9f5ff;
     box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
 }
 
-QLineEdit.propertyName.empty_field {
+QLineEdit#propertyName.empty_field {
     border: 1px solid #dc3545;
     background-color: #ffebeb;
 }
 
-QLineEdit.propertyName.empty_field:focus {
+QLineEdit#propertyName.empty_field:focus {
     border: 1px solid #dc3545;
     box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.25);
 }
@@ -61,7 +61,25 @@ QPushButton#actionButton {
     max-width: 30px; /* Small buttons for up/down/delete */
     min-height: 30px;
 }
+QPushButton#actionButton_delete {
+    background-color: #dc3545; /* Neutral gray for action buttons */
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 5px 8px;
+    border: none;
+    border-radius: 4px;
+    min-width: 40px;
+    max-width: 80px; /* Small buttons for up/down/delete */
+    min-height: 30px;
+}
+QPushButton#actionButton_delete:hover {
+    background-color: #bb2d3b;  
+}
 
+QPushButton#actionButton_delete:pressed {
+    background-color: #a52834;   
+}
 QPushButton#actionButton:hover {
     background-color: #5a6268;
 }
@@ -95,7 +113,7 @@ QPushButton#addPropertyButton:pressed {
     background-color: #1e7e34;
 }
 
-QLabel.propertyLabel {
+QLabel#propertyLabel {
     font-size: 14px;
     font-weight: 500;
     color: #495057;

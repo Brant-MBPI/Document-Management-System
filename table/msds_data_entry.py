@@ -6,6 +6,7 @@ from PyQt6.QtCore import Qt  # Import Qt for alignment flags
 # Assuming alert and db_con are correctly imported
 from alert import window_alert
 from db import db_con
+from utils import section9_design
 
 current_msds_id = None  # Global variable to store the current MSDS ID
 
@@ -452,8 +453,10 @@ def create_form(self):
 def create_dynamic_section9(self):
     """Custom dynamic layout for Section 9."""
     group = QGroupBox("9) Physical & Chemical Properties")
+    group.setObjectName("section9Group")
     self.physical_properties_layout = QVBoxLayout()
     self.physical_property_rows = []  # Reset for cleanliness
+    group.setStyleSheet(section9_design.STYLESHEET)
 
     # Initial fixed properties with defaults (from your clear_msds_form)
     initial_props = [
@@ -480,6 +483,7 @@ def create_dynamic_section9(self):
     add_hlayout = QHBoxLayout(add_row)
     add_hlayout.setContentsMargins(20, 10, 20, 10)
     add_btn = QPushButton("Add Property")
+    add_btn.setObjectName("addPropertyButton")
     add_btn.clicked.connect(lambda: _add_property(self))
     add_hlayout.addWidget(add_btn)
     add_hlayout.addStretch()
@@ -499,18 +503,27 @@ def _create_property_row(self, name, value):
     row_layout.setContentsMargins(20, 10, 20, 10)
 
     name_edit = QLineEdit(name)
+    name_edit.setObjectName("propertyName")
     value_edit = QLineEdit(value)
+    value_edit.setProperty("class", "")
     delete_btn = QPushButton("Delete")
+    delete_btn.setObjectName("actionButton_delete")
     up_btn = QPushButton("↑")
+    up_btn.setObjectName("actionButton")
     down_btn = QPushButton("↓")
+    down_btn.setObjectName("actionButton")
 
     # Layout: Property: [name] : [value (stretch)] [↑] [↓] [Delete]
-    row_layout.addWidget(QLabel("Property:"))
+    label = QLabel("Property:")
+    label.setObjectName("propertyLabel")
+    row_layout.addWidget(label)
     row_layout.addWidget(name_edit, stretch=1)
     row_layout.addWidget(QLabel(":"))
     row_layout.addWidget(value_edit, stretch=2)
+    row_layout.addStretch()
     row_layout.addWidget(up_btn)
     row_layout.addWidget(down_btn)
+
     row_layout.addWidget(delete_btn)
 
     # Store references on row_widget for easy access
