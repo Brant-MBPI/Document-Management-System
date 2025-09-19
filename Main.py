@@ -138,11 +138,11 @@ class MainWindow(QMainWindow):
         self.hazard_stacked_layout = QStackedLayout()
         self.handling_storage_stacked_layout = QStackedLayout()
 
-        hazard_group = QGroupBox("3) Hazard Information")
-        self.hazard_group_v_layout = QVBoxLayout(hazard_group)
+        self.hazard_group = QGroupBox("3) Hazard Information")
+        self.hazard_group_v_layout = QVBoxLayout(self.hazard_group)
 
         self.handling_storage_group = QGroupBox("7) Handling and Storage")
-        self.handling_storage_group_v_layout = QVBoxLayout(handling_storage_group)
+        self.handling_storage_group_v_layout = QVBoxLayout(self.handling_storage_group)
 
         # COA form init
             #summary of analysis table

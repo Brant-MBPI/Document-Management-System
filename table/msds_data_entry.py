@@ -63,8 +63,19 @@ def load_msds_details(self, msds_id):
     self.btn_msds_submit.setText("Update")
     check_empty_fields(self)  # Call validation after loading data
 
-    self.hazard_stacked_layout.setCurrentIndex(1)
-
+    if not self.hazard_preliminaries_input.text().strip():
+        self.hazard_stacked_layout.setCurrentIndex(1)
+        self.hazard_general_note_input.clear()
+        self.hazard_single_field_input.setText(str(field_result[16]))
+        # section 7
+        self.handling_storage_stacked_layout.setCurrentIndex(1)
+        self.msds_storage_input.clear()
+        self.msds_storage_single_input.setText(str(field_result[24]))
+    else:
+        self.hazard_stacked_layout.setCurrentIndex(0)
+        self.handling_storage_stacked_layout.setCurrentIndex(0)
+        self.hazard_single_field_input.clear()
+        self.msds_storage_single_input.clear()
 
 def create_form(self):
     clear_msds_form(self)
@@ -263,19 +274,16 @@ def create_form(self):
     simplified_hazard_layout.addWidget(self.hazard_single_field_input, 0, 1)
 
     # Create a QStackedLayout for hazard information
-    self.hazard_stacked_layout = QStackedLayout()
     self.hazard_stacked_layout.addWidget(detailed_hazard_widget)  # Index 0: Detailed view
     self.hazard_stacked_layout.addWidget(simplified_hazard_widget)  # Index 1: Simplified view
 
-    hazard_group = QGroupBox("3) Hazard Information")
-    self.hazard_group_v_layout = QVBoxLayout(hazard_group)
     button_h_layout = QHBoxLayout()
     button_h_layout.addStretch()
     button_h_layout.addWidget(self.hazard_toggle_button)
     self.hazard_group_v_layout.addLayout(button_h_layout)
     self.hazard_group_v_layout.addLayout(self.hazard_stacked_layout)
 
-    main_v_layout.addWidget(hazard_group)
+    main_v_layout.addWidget(self.hazard_group)
 
     # Section 4: First Aid Measures
     first_aid_fields = [
