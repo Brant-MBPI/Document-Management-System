@@ -215,7 +215,7 @@ class FileCOA(QWidget):
             delivery_value = row[2]
             summary_data.append([parameter, standard_value, delivery_value])
 
-        summary_table = Table(summary_data, colWidths=[200, 150, 150], hAlign="LEFT")  # Adjusted colWidths for better match, hAlign LEFT
+        summary_table = Table(summary_data, colWidths=[170, 170, 170], hAlign="LEFT")  # Adjusted colWidths for better match, hAlign LEFT
         summary_table.setStyle(TableStyle([
             ('BOX', (0, 0), (-1, -1), 0.75, colors.black),
             ('LINEBELOW', (0, 0), (-1, -1), 0.75, colors.black),
@@ -249,7 +249,7 @@ class FileCOA(QWidget):
             fontName="Times-Roman",
             fontSize=10,
             leading=12,
-            spaceAfter=4  # Reduced spaceAfter
+            spaceAfter=10  # Reduced spaceAfter
         )
         BoldSerif = ParagraphStyle(
             "BoldSerif",
@@ -261,19 +261,11 @@ class FileCOA(QWidget):
         content.append(Paragraph("STORAGE", BoldSerif))
         content.append(Paragraph(str(field_result[11]), NormalSerif))
 
-        content.append(Paragraph("Shelf Life: 12 months", BoldSerif))  # Matched text from PDF
-        content.append(Paragraph("Shelflife is stated as a maximum from the date of production when the product is stored in unbroken packaging.", NormalSerif))
+        content.append(Paragraph("Shelf Life:", BoldSerif))
+        content.append(Paragraph(str(field_result[12]), NormalSerif))
 
-        # Removed SUITABILITY as it's not in the PDF
-
-        # Add FM000034 at bottom right
-        right_aligned_style = ParagraphStyle(
-            name="RightAligned",
-            parent=styles['NormalText'],
-            alignment=TA_RIGHT
-        )
-        content.append(Spacer(1, 24))  # Space before footer
-        content.append(Paragraph("FM000034", right_aligned_style))
+        if field_result[13]:
+            content.append(Paragraph("Suitability: " + str(field_result[13]), BoldSerif))
 
         doc.build(content, onFirstPage=add_coa_header)
         buffer.seek(0)

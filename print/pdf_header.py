@@ -54,17 +54,15 @@ def add_coa_header(canvas, doc):
         preserveAspectRatio=False
     )
 
-
-    canvas.setFont('Courier', 12)  # Use monospaced Courier font
-    canvas.setFillColor(colors.dimgray)  # Set text color (optional, but good practice)
+    canvas.setFont('Times-Roman', 10)  # Times New Roman equivalent, size 10
+    canvas.setFillColor(colors.dimgray)
 
     form_id_text = "FM000034"
-    # Calculate text width to precisely position it from the right edge
-    text_width = canvas.stringWidth(form_id_text, 'Courier', 12)
+    text_width = canvas.stringWidth(form_id_text, 'Times-Roman', 10)
 
     canvas.drawString(
         page_width - doc.rightMargin - text_width,
-        doc.bottomMargin - 20,  # Adjust -20 to move it up or down from the bottom margin
+        doc.bottomMargin - 10,
         form_id_text
     )
 

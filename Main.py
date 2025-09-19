@@ -637,8 +637,7 @@ class MainWindow(QMainWindow):
             "Delivery Receipt": delivery_receipt,
             "Certified By": certified_by,
             "Storage": storage,
-            "Shelf Life": shelf_life,
-            "Suitability": suitability
+            "Shelf Life": shelf_life
         }
 
         # Check if any required field is empty
