@@ -501,7 +501,7 @@ class MainWindow(QMainWindow):
                 "Manufactured By": self.manufactured_label_input.toPlainText(),
                 "Telephone No.": self.tel_label_input.text(),
                 "Facsimile": self.facsimile_label_input.text(),
-                "Email Adress": self.email_label_input.text(),
+                "Email Address": self.email_label_input.text(),
                 "Composition/Information on Ingredients": self.composition_input.toPlainText(),
                 "Hazard General Note": general,
                 "First Aid Inhalation": self.first_aid_inhalation_input.text(),
@@ -517,16 +517,8 @@ class MainWindow(QMainWindow):
                 "Hand Protection": self.hand_protection_input.text(),
                 "Eye Protection": self.eye_protection_input.text(),
                 "Skin Protection": self.skin_protection_input.text(),
-                "Appearance": self.appearance_input.text(),
-                "Odor": self.odor_input.text(),
-                "packaging": self.packaging_input.text(),
-                "carrier_material": self.carrier_material_input.text(),
-                "resin_suitability": self.resin_suitability_input.text(),
                 "Light Fastness": self.light_fastness_input.text(),
                 "Heat Stability": self.heat_stability_input.text(),
-                "Non Toxicity": self.non_toxicity_input.text(),
-                "Flash Point": self.flash_point_input.text(),
-                "Auto Ignition": self.auto_ignition_input.text(),
                 "Explosion Property": self.explosion_property_input.text(),
                 "Solubility": self.solubility_input.text(),
                 "Stability & Reactivity": self.stability_reactivity_input.toPlainText(),
@@ -583,18 +575,18 @@ class MainWindow(QMainWindow):
                 "eye_protection": self.eye_protection_input.text(),
                 "skin_protection": self.skin_protection_input.text(),
 
-                "appearance": self.appearance_input.text(),
-                "odor": self.odor_input.text(),
-                "packaging": self.packaging_input.text(),
-                "carrier_material": self.carrier_material_input.text(),
-                "resin_suitability": self.resin_suitability_input.text(),
-                "light_fastness": self.light_fastness_input.text(),
-                "heat_stability": self.heat_stability_input.text(),
-                "non_toxicity": self.non_toxicity_input.text(),
-                "flash_point": self.flash_point_input.text(),
-                "auto_ignition_temp": self.auto_ignition_input.text(),
-                "explosion_property": self.explosion_property_input.text(),
-                "solubility_water": self.solubility_input.text(),
+                # "appearance": self.appearance_input.text(),
+                # "odor": self.odor_input.text(),
+                # "packaging": self.packaging_input.text(),
+                # "carrier_material": self.carrier_material_input.text(),
+                # "resin_suitability": self.resin_suitability_input.text(),
+                # "light_fastness": self.light_fastness_input.text(),
+                # "heat_stability": self.heat_stability_input.text(),
+                # "non_toxicity": self.non_toxicity_input.text(),
+                # "flash_point": self.flash_point_input.text(),
+                # "auto_ignition_temp": self.auto_ignition_input.text(),
+                # "explosion_property": self.explosion_property_input.text(),
+                # "solubility_water": self.solubility_input.text(),
 
                 "stability_reactivity": self.stability_reactivity_input.toPlainText(),
                 "toxicological_info": self.toxicological_input.toPlainText(),
@@ -606,6 +598,13 @@ class MainWindow(QMainWindow):
                 "other_info": self.other_input.toPlainText()
             }
 
+            section9_data = {}
+            for name_edit, value_edit in self.physical_property_rows:
+                property_name = name_edit.text().strip()
+                property_value = value_edit.text().strip()
+                if property_name:  # Only add if the property name is not empty
+                    section9_data[property_name] = property_value
+
             # Save
             try:
                 if msds_data_entry.current_msds_id is not None:  # Update existing MSDS
@@ -613,7 +612,7 @@ class MainWindow(QMainWindow):
                     window_alert.show_message(self, "Success", "MSDS updated successfully!", icon_type="info")
                     msds_data_entry.current_msds_id = None
                 else:  # Save new MSDS
-                    db_con.save_msds_sheet(msds_data)
+                    db_con.save_msds_sheet(msds_data, section9_data)
                     window_alert.show_message(self, "Success", "MSDS saved successfully!", icon_type="info")
             except Exception as e:
                 window_alert.show_message(self, "Database Error", str(e), icon_type="critical")

@@ -60,19 +60,6 @@ def create_tables():
             eye_protection TEXT,
             skin_protection TEXT,
             
-            appearance VARCHAR(100),
-            odor VARCHAR(100),
-            packaging VARCHAR(100),
-            carrier_material VARCHAR(100),
-            resin_suitability VARCHAR(100),
-            light_fastness VARCHAR(50),
-            heat_stability VARCHAR(50),
-            non_toxicity VARCHAR(100),
-            flash_point VARCHAR(50),
-            auto_ignition_temp VARCHAR(50),
-            explosion_property VARCHAR(50),
-            solubility_water VARCHAR(100),
-            
             stability_reactivity TEXT,
             toxicological_info TEXT,
             ecological_info TEXT,
@@ -83,6 +70,17 @@ def create_tables():
             other_info TEXT
         );
     """)
+
+    # section9
+    cur.execute("""
+            CREATE TABLE IF NOT EXISTS msds_section_9 (
+                id SERIAL PRIMARY KEY,
+                msds_id INTEGER NOT NULL REFERENCES msds_sheets(id) ON DELETE CASCADE,
+                property_order INT NOT NULL, 
+                property_name TEXT NOT NULL, 
+                property_value TEXT
+            );
+        """)
 
     # Certificate of Analysis
 
@@ -132,96 +130,87 @@ def create_tables():
 
 
 # Create
-def save_msds_sheet(data):
+def save_msds_sheet(data, section9):
     conn = get_connection()
+    msds_id = None
 
     try:
-        cur = conn.cursor()
+        with conn:
+            with conn.cursor() as cur:
+                # Insert into msds_sheets
+                cur.execute("""
+                    INSERT INTO msds_sheets (
+                        customer_name,
+                        trade_name,
+                        product_code,
+                        manufacturer_info,
+                        contact_tel,
+                        contact_facsimile,
+                        contact_email,
+                        composition_info,
+                        hazard_preliminaries,
+                        hazard_entry_route,
+                        hazard_symptoms,
+                        hazard_restrictive_conditions,
+                        hazard_eyes,
+                        hazard_general_note,
+                        first_aid_inhalation,
+                        first_aid_eyes,
+                        first_aid_skin,
+                        first_aid_ingestion,
+                        fire_fighting_media,
+                        accidental_release_info,
+                        handling_info,
+                        storage_info,
+                        exposure_control_info,
+                        respiratory_protection,
+                        hand_protection,
+                        eye_protection,
+                        skin_protection,
+                        stability_reactivity,
+                        toxicological_info,
+                        ecological_info,
+                        disposal_info,
+                        transport_info,
+                        regulatory_info,
+                        shelf_life_info,
+                        other_info
+                    )
+                    VALUES (
+                        %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s
+                    )
+                    RETURNING id;
+                """, (
+                    data["customer_name"], data["trade_name"], data["product_code"], data["manufacturer_info"],
+                    data["contact_tel"], data["contact_facsimile"], data["contact_email"], data["composition_info"],
+                    data["hazard_preliminaries"], data["hazard_entry_route"], data["hazard_symptoms"],
+                    data["hazard_restrictive_conditions"], data["hazard_eyes"], data["hazard_general_note"],
+                    data["first_aid_inhalation"], data["first_aid_eyes"], data["first_aid_skin"],
+                    data["first_aid_ingestion"], data["fire_fighting_media"], data["accidental_release_info"],
+                    data["handling_info"], data["storage_info"], data["exposure_control_info"],
+                    data["respiratory_protection"], data["hand_protection"], data["eye_protection"],
+                    data["skin_protection"], data["stability_reactivity"], data["toxicological_info"],
+                    data["ecological_info"], data["disposal_info"], data["transport_info"],
+                    data["regulatory_info"], data["shelf_life_info"], data["other_info"]
+                ))
+                msds_id = cur.fetchone()[0]
 
-        cur.execute("""
-            INSERT INTO msds_sheets (
-                customer_name,
-                trade_name,
-                product_code,
-                manufacturer_info,
-                contact_tel,
-                contact_facsimile,
-                contact_email,
-                composition_info,
-                hazard_preliminaries,
-                hazard_entry_route,
-                hazard_symptoms,
-                hazard_restrictive_conditions,
-                hazard_eyes,
-                hazard_general_note,
-                first_aid_inhalation,
-                first_aid_eyes,
-                first_aid_skin,
-                first_aid_ingestion,
-                fire_fighting_media,
-                accidental_release_info,
-                handling_info,
-                storage_info,
-                exposure_control_info,
-                respiratory_protection,
-                hand_protection,
-                eye_protection,
-                skin_protection,
-                appearance,
-                odor,
-                packaging,
-                carrier_material,
-                resin_suitability,
-                light_fastness,
-                heat_stability,
-                non_toxicity,
-                flash_point,
-                auto_ignition_temp,
-                explosion_property,
-                solubility_water,
-                stability_reactivity,
-                toxicological_info,
-                ecological_info,
-                disposal_info,
-                transport_info,
-                regulatory_info,
-                shelf_life_info,
-                other_info
-            )
-            VALUES (
-                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                %s, %s, %s, %s, %s, %s, %s
-            )
-            RETURNING id;
-        """, (
-            data["customer_name"], data["trade_name"], data["product_code"], data["manufacturer_info"],
-            data["contact_tel"], data["contact_facsimile"], data["contact_email"], data["composition_info"],
-            data["hazard_preliminaries"], data["hazard_entry_route"], data["hazard_symptoms"],
-            data["hazard_restrictive_conditions"], data["hazard_eyes"], data["hazard_general_note"],
-            data["first_aid_inhalation"], data["first_aid_eyes"], data["first_aid_skin"],
-            data["first_aid_ingestion"], data["fire_fighting_media"], data["accidental_release_info"],
-            data["handling_info"], data["storage_info"], data["exposure_control_info"],
-            data["respiratory_protection"], data["hand_protection"], data["eye_protection"],
-            data["skin_protection"], data["appearance"], data["odor"],
-            data["packaging"], data["carrier_material"], data["resin_suitability"],
-            data["light_fastness"], data["heat_stability"], data["non_toxicity"],
-            data["flash_point"], data["auto_ignition_temp"], data["explosion_property"],
-            data["solubility_water"], data["stability_reactivity"], data["toxicological_info"],
-            data["ecological_info"], data["disposal_info"], data["transport_info"],
-            data["regulatory_info"], data["shelf_life_info"], data["other_info"]
-        ))
+                # Insert Section 9 properties
+                for idx, (name_edit, value_edit) in enumerate(section9, start=1):
+                    property_name = name_edit.text().strip()
+                    property_value = value_edit.text().strip()
+                    if property_name:
+                        cur.execute("""
+                            INSERT INTO msds_section_9 (msds_id, property_order, property_name, property_value)
+                            VALUES (%s, %s, %s, %s)
+                        """, (msds_id, idx, property_name, property_value))
 
-        conn.commit()
-        cur.close()
-        conn.close()
-
-    except Exception as e:
+    finally:
         if conn:
-            conn.rollback()
-        raise e
+            conn.close()
 
 
 def save_certificate_of_analysis(data, summary_of_analysis):
