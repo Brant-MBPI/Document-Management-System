@@ -427,6 +427,8 @@ def clear_coa_form(self):
         """Clear all input fields and the summary table."""
         global current_coa_id
         current_coa_id = None
+        self.color_code_input.blockSignals(True)
+        self.delivery_receipt_input.blockSignals(True)
         self.coa_customer_input.clear()
         self.color_code_input.clear()
         self.lot_number_input.clear()
@@ -451,35 +453,44 @@ def clear_coa_form(self):
         ])
         adjust_table_height(self)
         self.btn_coa_submit.setText("Submit")
-
+        self.color_code_input.blockSignals(False)
+        self.delivery_receipt_input.blockSignals(False)
     except Exception as e:
         print(str(e))
 
 
 def populate_coa_fields(self, dr_no):
-    fields = db_con.get_dr_details(dr_no)
-    self.quantity_delivered_input.clear()
-    if not fields:  # None or empty tuple
-        # Clear fields or just exit
-        self.coa_customer_input.clear()
-        self.color_code_input.clear()
-        self.po_number_input.clear()
-        self.lot_number_input.clear()
+    self.color_code_input.blockSignals(True)
+    self.delivery_receipt_input.blockSignals(True)
+    try:
+        fields = db_con.get_dr_details(dr_no)
         self.quantity_delivered_input.clear()
-        self.delivery_date_input.clear()
-        return
+        if not fields:  # None or empty tuple
+            # Clear fields or just exit
+            self.coa_customer_input.clear()
+            self.color_code_input.clear()
+            self.po_number_input.clear()
+            self.lot_number_input.clear()
+            self.quantity_delivered_input.clear()
+            self.delivery_date_input.clear()
+            return
 
-    # === Populate inputs ===
-    lot_no = lot_format.normalize(fields[5])
+        # === Populate inputs ===
+        lot_no = lot_format.normalize(fields[5])
 
-    self.coa_customer_input.setText(str(fields[2]))
-    self.color_code_input.setText(str(fields[1]))
-    self.po_number_input.setText(str(fields[4]))
-    self.lot_number_input.setText(lot_no)
-    self.quantity_delivered_input.setText(str(fields[6]))
+        self.coa_customer_input.setText(str(fields[2]))
+        self.color_code_input.setText(str(fields[1]))
+        self.po_number_input.setText(str(fields[4]))
+        self.lot_number_input.setText(lot_no)
+        self.quantity_delivered_input.setText(str(fields[6]))
 
-    if fields[3]:
-        self.delivery_date_input.setDate(QDate(fields[3].year, fields[3].month, fields[3].day))
+        if fields[3]:
+            self.delivery_date_input.setDate(QDate(fields[3].year, fields[3].month, fields[3].day))
+    except Exception as e:
+        print(e)
+    finally:
+        self.color_code_input.blockSignals(False)
+        self.delivery_receipt_input.blockSignals(False)
 
 
 def populate_coa_summary(self):
@@ -511,4 +522,6 @@ def populate_coa_summary(self):
     self.summary_analysis_table.setItem(2, 1, QTableWidgetItem(str(heat_stability)))
 
     adjust_table_height(self)
+
+
 

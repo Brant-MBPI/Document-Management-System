@@ -8,10 +8,8 @@ from reportlab.lib.units import cm
 def add_first_page_header(canvas, doc):
     canvas.saveState()
     # Convert cm to points (1 cm ≈ 28.35 pt)
-    cm = 28.35
-    logo_width = 18.9 * cm
-    logo_height = 3.14 * cm
-
+    logo_width = 17.29 * cm
+    logo_height = 3.32 * cm
     # Page size
     page_width, page_height = doc.pagesize
 
@@ -37,8 +35,8 @@ def add_coa_header(canvas, doc):
     # cm = 28.35  # reportlab.lib.units already provides cm, so no need to redefine
 
     # Define dimensions based on the first logo
-    logo_width = 18.9 * cm
-    logo_height = 3.14 * cm
+    logo_width = 17.29 * cm
+    logo_height = 3.32 * cm
 
     # Page size
     page_width, page_height = doc.pagesize

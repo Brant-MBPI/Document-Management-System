@@ -115,7 +115,7 @@ class FileMSDS(QWidget):
         doc = SimpleDocTemplate(
             buffer,
             pagesize=letter,
-            rightMargin=50, leftMargin=50, topMargin=90, bottomMargin=50
+            rightMargin=50, leftMargin=50, topMargin=96, bottomMargin=50
         )
         styles = getSampleStyleSheet()
         styles.add(
