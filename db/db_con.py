@@ -116,6 +116,37 @@ def create_tables():
     """)
 
     cur.execute("""
+            CREATE TABLE IF NOT EXISTS certificates_of_analysis_rrf(
+                id SERIAL PRIMARY KEY,
+                customer_name VARCHAR(255),
+                color_code VARCHAR(100),
+
+                lot_number VARCHAR(100) UNIQUE,
+                po_number VARCHAR(100),
+                rrf_number VARCHAR(100),
+                quantity_delivered NUMERIC(10, 2),
+                delivery_date DATE,
+                production_date DATE,
+                certification_date DATE,
+                certified_by VARCHAR(255),
+                storage_instructions TEXT,
+                shelf_life_coa VARCHAR(100),
+                suitability TEXT,
+                creation_date TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+            );
+        """)
+
+    cur.execute("""
+            CREATE TABLE IF NOT EXISTS coa_analysis_results_rrf (
+                id SERIAL PRIMARY KEY,
+                coa_id INTEGER NOT NULL REFERENCES certificates_of_analysis(id) ON DELETE CASCADE,
+                parameter_name VARCHAR(255) NOT NULL,
+                standard_value VARCHAR(100),
+                delivery_value VARCHAR(100)
+            );
+        """)
+
+    cur.execute("""
         CREATE TABLE IF NOT EXISTS tbl_user (
             id SERIAL PRIMARY KEY,
             username VARCHAR(128) NOT NULL,
@@ -251,6 +282,60 @@ def save_certificate_of_analysis(data, summary_of_analysis):
 
             cur.execute("""
                 INSERT INTO coa_analysis_results (
+                    coa_id, parameter_name, standard_value, delivery_value
+                ) VALUES (%s, %s, %s, %s)
+            """, (coa_id, parameter, standard_value, delivery_value))
+
+        conn.commit()
+        cur.close()
+        conn.close()
+
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        raise e
+
+
+def save_certificate_of_analysis_rrf(data, summary_of_analysis):
+    conn = get_connection()
+    try:
+        cur = conn.cursor()
+
+        # Insert into certificates_of_analysis
+        cur.execute("""
+            INSERT INTO certificates_of_analysis_rrf (
+                customer_name, 
+                color_code, 
+                lot_number, 
+                po_number, 
+                rrf_number, 
+                quantity_delivered, 
+                delivery_date, 
+                production_date, 
+                certification_date, 
+                certified_by, 
+                storage_instructions, 
+                shelf_life_coa, 
+                suitability
+            )
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            RETURNING id;
+        """, (
+            data["customer_name"], data["color_code"], data["lot_number"], data["po_number"],
+            data["delivery_receipt"], data["quantity_delivered"], data["delivery_date"],
+            data["production_date"], data["creation_date"], data["certified_by"],
+            data["storage"], data["shelf_life"], data["suitability"]
+        ))
+
+        coa_id = cur.fetchone()[0]
+
+        # Insert analysis results
+        for parameter, values in summary_of_analysis.items():
+            standard_value = values[0]
+            delivery_value = values[1]
+
+            cur.execute("""
+                INSERT INTO coa_analysis_results_rrf (
                     coa_id, parameter_name, standard_value, delivery_value
                 ) VALUES (%s, %s, %s, %s)
             """, (coa_id, parameter, standard_value, delivery_value))
@@ -405,6 +490,62 @@ def update_certificate_of_analysis(coa_id, data, summary_of_analysis):
         raise e
 
 
+def update_certificate_of_analysis_rrf(coa_id, data, summary_of_analysis):
+    conn = get_connection()
+    try:
+        cur = conn.cursor()
+
+        # Insert into certificates_of_analysis
+        cur.execute("""
+            UPDATE certificates_of_analysis_rrf
+            SET 
+                customer_name = %s, 
+                color_code = %s, 
+                lot_number = %s, 
+                po_number = %s, 
+                rrf_number = %s, 
+                quantity_delivered = %s, 
+                delivery_date = %s, 
+                production_date = %s, 
+                certification_date = %s, 
+                certified_by = %s, 
+                storage_instructions = %s, 
+                shelf_life_coa = %s, 
+                suitability = %s
+            WHERE id = %s;
+        """, (
+            data["customer_name"], data["color_code"], data["lot_number"], data["po_number"],
+            data["delivery_receipt"], data["quantity_delivered"], data["delivery_date"],
+            data["production_date"], data["creation_date"], data["certified_by"],
+            data["storage"], data["shelf_life"], data["suitability"],
+            coa_id
+        ))
+        # Delete existing analysis results
+        cur.execute("""
+            DELETE FROM coa_analysis_results_rrf WHERE coa_id = %s;
+        """, (coa_id,))
+
+        # Insert analysis results
+        for parameter, values in summary_of_analysis.items():
+            standard_value = values[0]
+            delivery_value = values[1]
+
+            cur.execute("""
+                INSERT INTO coa_analysis_results_rrf (
+                    coa_id, parameter_name, standard_value, delivery_value
+                ) VALUES (%s, %s, %s, %s)
+            """, (coa_id, parameter, standard_value, delivery_value))
+
+        conn.commit()
+        cur.close()
+        conn.close()
+
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        raise e
+
+
 #     Read
 def get_all_msds_data():
     conn = get_connection()
@@ -423,6 +564,18 @@ def get_all_coa_data():
     cur = conn.cursor()
 
     cur.execute("SELECT * FROM certificates_of_analysis ORDER BY id DESC;")
+    records = cur.fetchall()
+
+    cur.close()
+    conn.close()
+    return records
+
+
+def get_all_coa_data_rrf():
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("SELECT * FROM certificates_of_analysis_rrf ORDER BY id DESC;")
     records = cur.fetchall()
 
     cur.close()
@@ -491,6 +644,37 @@ def get_coa_analysis_results(coa_id):
     return results
 
 
+def get_single_coa_data_rrf(coa_id):
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute(
+        "SELECT * FROM certificates_of_analysis_rrf WHERE id = %s;",
+        (coa_id,)
+    )
+    record = cur.fetchone()  # only one row expected
+
+    cur.close()
+    conn.close()
+    return record
+
+
+def get_coa_analysis_results_rrf(coa_id):
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT parameter_name, standard_value, delivery_value 
+        FROM coa_analysis_results_rrf 
+        WHERE coa_id = %s;
+    """, (coa_id,))
+    results = cur.fetchall()
+
+    cur.close()
+    conn.close()
+    return results
+
+
 # Delete
 def delete_msds_sheet(msds_id):
     conn = get_connection()
@@ -514,6 +698,22 @@ def delete_certificate_of_analysis(coa_id):
     try:
         cur = conn.cursor()
         cur.execute("DELETE FROM certificates_of_analysis WHERE id = %s;", (coa_id,))
+
+        conn.commit()
+        cur.close()
+        conn.close()
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        raise e
+
+
+def delete_certificate_of_analysis_rrf(coa_id):
+    conn = get_connection()
+
+    try:
+        cur = conn.cursor()
+        cur.execute("DELETE FROM certificates_of_analysis_rrf WHERE id = %s;", (coa_id,))
 
         conn.commit()
         cur.close()

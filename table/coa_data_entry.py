@@ -54,7 +54,7 @@ def load_coa_details(self, coa_id):
     self.delivery_receipt_input.blockSignals(False)
 
 
-def coa_data_entry_form(self):
+def coa_data_entry_form(self, is_rrf=False):
     try:
         form_widget = QWidget()
         main_v_layout = QVBoxLayout(form_widget)  # Use QVBoxLayout for overall structure
@@ -177,7 +177,7 @@ def coa_data_entry_form(self):
         general_info_layout.addWidget(self.quantity_delivered_input, 1, 3)
 
         # Row 2: Delivery Receipt & PO Number
-        general_info_layout.addWidget(QLabel("Delivery Receipt:"), 2, 0, Qt.AlignmentFlag.AlignRight)
+        general_info_layout.addWidget(QLabel("Delivery Receipt N:"), 2, 0, Qt.AlignmentFlag.AlignRight)
         receipt_input_layout = QHBoxLayout()
         receipt_input_layout.addWidget(self.delivery_receipt_input, alignment=Qt.AlignmentFlag.AlignVCenter)
         self.sync_button.setStyleSheet("""

@@ -248,8 +248,38 @@ class MainWindow(QMainWindow):
         search_icon_coa = QAction(QIcon(abs_path.resource("img/search_icon.png")), "Search", self.coa_search_bar)
         self.coa_search_bar.addAction(search_icon_coa, QLineEdit.ActionPosition.TrailingPosition)
 
+        self.coa_corner = QWidget()
+        self.coa_corner_h = QHBoxLayout(self.coa_corner)
+        self.coa_corner_h.setContentsMargins(0, 0, 0, 0)
+        self.coa_corner_h.setSpacing(12)
+        self.btn_switch_rrf = QPushButton()
+        self.btn_switch_rrf.setCheckable(True)
+        self.btn_switch_rrf.setText("Switch to RRF")
+        self.btn_switch_rrf.toggled.connect(self.toggle_rrf)
+
+        self.coa_corner_h.addWidget(self.btn_switch_rrf)
+        self.coa_corner_h.addWidget(self.coa_search_bar)
+
+        self.btn_switch_rrf.setFixedHeight(28)
+        self.btn_switch_rrf.setStyleSheet("""
+            QPushButton {
+                background-color: #1976D2;
+                color: white;
+                border-radius: 4px;
+                padding: 4px 10px;
+                font-size: 12px;
+                margin-bottom: 5px;
+            }
+            QPushButton:hover {
+                background-color: #1565C0;
+            }
+            QPushButton:pressed {
+                background-color: #0D47A1;
+            }
+        """)
+
         self.msds_sub_tabs.setCornerWidget(self.msds_search_bar)
-        self.coa_sub_tabs.setCornerWidget(self.coa_search_bar)
+        self.coa_sub_tabs.setCornerWidget(self.coa_corner)
 
         self.msds_sub_tabs.currentChanged.connect(self.toggle_msds_search_bar)
         self.coa_sub_tabs.currentChanged.connect(self.toggle_coa_search_bar)
@@ -982,6 +1012,53 @@ class MainWindow(QMainWindow):
             # Re-open the AuthWindow (assuming Login.AuthWindow is your login screen)
             self.auth_window = Login.AuthWindow()
             self.auth_window.show()
+
+    def toggle_rrf(self, checked):
+        if checked:
+            self.btn_switch_rrf.setText("Switch to COA")
+            self.btn_switch_rrf.setStyleSheet("""
+                QPushButton {
+                    background-color: #388E3C;
+                    color: white;
+                    border-radius: 4px;
+                    padding: 4px 10px;
+                    font-size: 12px;
+                    margin-bottom: 5px;
+                }
+                QPushButton:hover { background-color: #2E7D32; }
+                QPushButton:pressed { background-color: #1B5E20; }
+            """)
+
+            # Load RRF Table
+            table.load_rrf_table(self)
+            # Remove previous search connection
+            self.coa_label_timer.timeout.disconnect()
+            # Connect a new one
+            self.coa_label_timer.timeout.connect(
+                lambda: table.search_coa_rrf(self, self.coa_search_bar.text())
+            )
+
+        else:   #back to COA
+            self.btn_switch_rrf.setText("Switch to RRF")
+            self.btn_switch_rrf.setStyleSheet("""
+                QPushButton {
+                    background-color: #1976D2;
+                    color: white;
+                    border-radius: 4px;
+                    padding: 4px 10px;
+                    font-size: 12px;
+                    margin-bottom: 5px;
+                }
+                QPushButton:hover { background-color: #1565C0; }
+                QPushButton:pressed { background-color: #0D47A1; }
+            """)
+            # Back to COA table
+            table.load_coa_table(self)
+            self.coa_label_timer.timeout.disconnect()
+            # Connect to coa search
+            self.coa_label_timer.timeout.connect(
+                lambda: table.search_coa(self, self.coa_search_bar.text())
+            )
 
 
 class UserWidget(QWidget):
