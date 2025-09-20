@@ -122,21 +122,10 @@ class FileCOA(QWidget):
             ParagraphStyle(name="SectionHeader", fontName="Times-Roman", fontSize=14, leading=14, spaceAfter=12, spaceBefore=6, bold=True))
         styles.add(ParagraphStyle(name="SubHeading", fontName="Times-Bold", fontSize=12, leading=14, spaceAfter=4, alignment=TA_CENTER))
         styles.add(ParagraphStyle(name="NormalText", fontName="Times-Roman", fontSize=10, leading=12, spaceAfter=4))
-        IndentedText = ParagraphStyle('IndentedText', parent=styles['NormalText'], leftIndent=20)
-        styles.add(ParagraphStyle(
-            name="TitleSans",
-            fontName="Times-Bold",  # Changed to Times-Bold
-            fontSize=32,
-            leading=22,
-            alignment=1,  # center
-            spaceAfter=12
-        ))
-        date_format = "%-d" if platform.system() != "Windows" else "%#d"
+
         content = []
         page_width = letter[0] - 50 - 50
-        col_widths = [0.22 * page_width, 0.24 * page_width, 0.24 * page_width, 0.12 * page_width, 0.20 * page_width]
-        content.append(Paragraph("Certificate of Analysis", styles['TitleSans']))
-        content.append(Spacer(1, 12))
+        content.append(Spacer(1, 56))
 
         bold_style = ParagraphStyle('BoldText', parent=styles['NormalText'], fontName='Times-Bold')
 

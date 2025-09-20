@@ -210,12 +210,24 @@ class FileMSDS(QWidget):
 
         # Section 4
         content.append(Paragraph("4) First Aid Measures", styles['SectionHeader']))
-        section4_content = [
-            [Paragraph('• Inhalation', styles['NormalText']), '-', Paragraph(str(field_result[17]), styles['NormalText'])],
-            [Paragraph('• Eyes', styles['NormalText']), '-', Paragraph(str(field_result[18]), styles['NormalText'])],
-            [Paragraph('• Skin', styles['NormalText']), '-', Paragraph(str(field_result[19]),styles['NormalText'])],
-            [Paragraph('• Ingestion', styles['NormalText']), '-', Paragraph(str(field_result[20]), styles['NormalText'])],
-           ]
+        if self.isMasterBatch:
+            section4_content = [
+                [Paragraph('• Inhalation', styles['NormalText']), '-', Paragraph(str(field_result[17]), styles['NormalText'])],
+                [Paragraph('• Eyes', styles['NormalText']), '-', Paragraph(str(field_result[18]), styles['NormalText'])],
+                [Paragraph('• Skin', styles['NormalText']), '-', Paragraph(str(field_result[19]),styles['NormalText'])],
+                [Paragraph('• Ingestion', styles['NormalText']), '-', Paragraph(str(field_result[20]), styles['NormalText'])],
+               ]
+        else:
+            section4_content = [
+                [Paragraph('• Inhalation', styles['NormalText']), ':',
+                 Paragraph(str(field_result[17]), styles['NormalText'])],
+                [Paragraph('• Eyes', styles['NormalText']), ':',
+                 Paragraph(str(field_result[18]), styles['NormalText'])],
+                [Paragraph('• Skin', styles['NormalText']), ':',
+                 Paragraph(str(field_result[19]), styles['NormalText'])],
+                [Paragraph('• Ingestion', styles['NormalText']), ':',
+                 Paragraph(str(field_result[20]), styles['NormalText'])],
+            ]
 
         # Create the table
         table = Table(section4_content, colWidths=col_widths, hAlign='RIGHT', spaceBefore=12)
@@ -251,13 +263,27 @@ class FileMSDS(QWidget):
 
         # Section 8
         content.append(Paragraph("8) Exposure Controls/ Personal Protection", styles['SectionHeader']))
-        section8_content = [
-            [Paragraph('Exposure Control', styles['NormalText']), '-', Paragraph(str(field_result[25]),styles['NormalText'])],
-            [Paragraph('Respiratory Protection', styles['NormalText']), '', Paragraph(str(field_result[26]), styles['NormalText'])],
-            [Paragraph('Hand Protection', styles['NormalText']), '-', Paragraph(str(field_result[27]), styles['NormalText'])],
-            [Paragraph('Eye Protection', styles['NormalText']), '-', Paragraph(str(field_result[28]), styles['NormalText'])],
-            [Paragraph('Skin Protection', styles['NormalText']), '-', Paragraph(str(field_result[29]), styles['NormalText'])]
-        ]
+        if self.isMasterBatch:
+            section8_content = [
+                [Paragraph('Exposure Control', styles['NormalText']), '-', Paragraph(str(field_result[25]),styles['NormalText'])],
+                [Paragraph('Respiratory Protection', styles['NormalText']), '-', Paragraph(str(field_result[26]), styles['NormalText'])],
+                [Paragraph('Hand Protection', styles['NormalText']), '-', Paragraph(str(field_result[27]), styles['NormalText'])],
+                [Paragraph('Eye Protection', styles['NormalText']), '-', Paragraph(str(field_result[28]), styles['NormalText'])],
+                [Paragraph('Skin Protection', styles['NormalText']), '-', Paragraph(str(field_result[29]), styles['NormalText'])]
+            ]
+        else:
+            section8_content = [
+                [Paragraph('Exposure Control', styles['NormalText']), ':',
+                 Paragraph(str(field_result[25]), styles['NormalText'])],
+                [Paragraph('Respiratory Protection', styles['NormalText']), ':',
+                 Paragraph(str(field_result[26]), styles['NormalText'])],
+                [Paragraph('Hand Protection', styles['NormalText']), ':',
+                 Paragraph(str(field_result[27]), styles['NormalText'])],
+                [Paragraph('Eye Protection', styles['NormalText']), ':',
+                 Paragraph(str(field_result[28]), styles['NormalText'])],
+                [Paragraph('Skin Protection', styles['NormalText']), ':',
+                 Paragraph(str(field_result[29]), styles['NormalText'])]
+            ]
         table = Table(section8_content, colWidths=col_widths, hAlign='RIGHT', spaceBefore=12)
         table_style(table)
         content.append(table)
