@@ -24,8 +24,7 @@ class FileMSDS(QWidget):
         self.setWindowIcon(QIcon(abs_path.resource("img/icon.ico")))
         main_layout = QVBoxLayout(self)
 
-
-
+        self.isMasterBatch = False
         # PDF Document + Viewer
         self.pdf_doc = QPdfDocument(self)
         self.pdf_viewer = QPdfView(self)
@@ -109,6 +108,7 @@ class FileMSDS(QWidget):
 
     def generate_pdf(self, msds_id):
         field_result = db_con.get_single_msds_data(msds_id)
+        section9_data = db_con.get_single_msds_section9(msds_id)  # Fetch section 9 data
 
         # Create PDF
         buffer = io.BytesIO()
@@ -189,6 +189,7 @@ class FileMSDS(QWidget):
             # Only show general note (field_result[16])
             content.append(Paragraph(str(field_result[16]), IndentedText))
             content.append(Spacer(1, 12))
+            self.isMasterBatch = True
         else:
             section3_content = [
                 [Paragraph("• Preliminaries", styles['NormalText']), ":", Paragraph(str(field_result[11]), styles['NormalText'])],
@@ -205,6 +206,7 @@ class FileMSDS(QWidget):
             content.append(Spacer(1, 12))
             content.append(Paragraph(str(field_result[16]), IndentedText))
             content.append(Spacer(1, 12))
+            self.isMasterBatch = False
 
         # Section 4
         content.append(Paragraph("4) First Aid Measures", styles['SectionHeader']))
@@ -234,8 +236,7 @@ class FileMSDS(QWidget):
 
         # Section 7
         content.append(Paragraph("7) Handling and Storage", styles['SectionHeader']))
-        handling = str(field_result[23]).strip() if field_result[23] else ""
-        if handling:
+        if not self.isMasterBatch:
             section7_content = [
                 [Paragraph('• Handling', styles['NormalText']), ':', Paragraph(str(field_result[23]), styles['NormalText'])],
                 [Paragraph('• Storage', styles['NormalText']), ':', Paragraph(str(field_result[24]), styles['NormalText'])]
@@ -264,67 +265,65 @@ class FileMSDS(QWidget):
 
         # Section 9
         content.append(Paragraph("9) Physical & Chemical Properties", styles['SectionHeader']))
-        section9_content = [
-            [Paragraph('Appearance', styles['NormalText']), ':', Paragraph(str(field_result[30]), styles['NormalText'])],
-            [Paragraph('Odor', styles['NormalText']), ':', Paragraph(str(field_result[31]), styles['NormalText'])],
-            [Paragraph('Packaging', styles['NormalText']), ':', Paragraph(str(field_result[32]), styles['NormalText'])],
-            [Paragraph('Carrier Material', styles['NormalText']), ':', Paragraph(str(field_result[33]), styles['NormalText'])],
-            [Paragraph('Resin Suitability', styles['NormalText']), ':', Paragraph(str(field_result[34]), styles['NormalText'])],
-            [Paragraph('Light fastness (1-8)', styles['NormalText']), ':', Paragraph(str(field_result[35]), styles['NormalText'])],
-            [Paragraph('Heat Stability (1-5)', styles['NormalText']), ':', Paragraph(str(field_result[36]), styles['NormalText'])],
-            [Paragraph('Non-Toxicity', styles['NormalText']), ':', Paragraph(str(field_result[37]), styles['NormalText'])],
-            [Paragraph('Flash Point', styles['NormalText']), ':', Paragraph(str(field_result[38]), styles['NormalText'])],
-            [Paragraph('Auto Ignition', styles['NormalText']), ':', Paragraph(str(field_result[39]), styles['NormalText'])],
-            [Paragraph('Explosion Property', styles['NormalText']), ':', Paragraph(str(field_result[40]), styles['NormalText'])],
-            [Paragraph('Solubility (Water)', styles['NormalText']), ':', Paragraph(str(field_result[41]), styles['NormalText'])]
-        ]
-
-        # Create the table
-        table = Table(section9_content, colWidths=col_widths, hAlign='RIGHT', spaceBefore=12)
-        table_style(table)
-        content.append(table)
+        # New logic to use section9_data
+        if section9_data:
+            section9_table_content = []
+            for row in section9_data:
+                property_name = row[3] or ""
+                property_value = row[4] or ""
+                section9_table_content.append([
+                    Paragraph(str(property_name), styles['NormalText']),
+                    ':',
+                    Paragraph(str(property_value), styles['NormalText'])
+                ])
+            table = Table(section9_table_content, colWidths=col_widths, hAlign='RIGHT', spaceBefore=12)
+            table_style(table)  # Apply the same table style
+            content.append(table)
+        else:
+            content.append(
+                Paragraph("No specific physical and chemical properties information available.", IndentedText))
         content.append(Spacer(1, 12))
 
         # Section 10
         content.append(Paragraph("10) Stability & Reactivity", styles['SectionHeader']))
-        content.append(Paragraph(str(field_result[42]), IndentedText))
+        content.append(Paragraph(str(field_result[30]), IndentedText))
         content.append(Spacer(1, 12))
 
         # Section 11
         content.append(Paragraph("11) Toxicological Information", styles['SectionHeader']))
-        content.append(Paragraph(str(field_result[43]), IndentedText))
+        content.append(Paragraph(str(field_result[31]), IndentedText))
         content.append(Spacer(1, 12))
 
         # Section 12
         content.append(Paragraph("12) Ecological Information", styles['SectionHeader']))
-        content.append(Paragraph(str(field_result[44]), IndentedText))
+        content.append(Paragraph(str(field_result[32]), IndentedText))
         content.append(Spacer(1, 12))
         # Section 13
         content.append(Paragraph("13) Disposal", styles['SectionHeader']))
-        content.append(Paragraph(str(field_result[45]), IndentedText))
+        content.append(Paragraph(str(field_result[33]), IndentedText))
         content.append(Spacer(1, 12))
 
         # Section 14
         content.append(Paragraph("14) Transport Information", styles['SectionHeader']))
         content.append(
-            Paragraph(str(field_result[46]), IndentedText))
+            Paragraph(str(field_result[34]), IndentedText))
         content.append(Spacer(1, 12))
 
         # Section 15
         content.append(Paragraph("15) Regulatory Information", styles['SectionHeader']))
         content.append(Paragraph(
-            str(field_result[47]), IndentedText))
+            str(field_result[35]), IndentedText))
         content.append(Spacer(1, 12))
 
         # Section 16
         content.append(Paragraph("16) Shelf-Life", styles['SectionHeader']))
         content.append(
-            Paragraph(str(field_result[48]), IndentedText))
+            Paragraph(str(field_result[36]), IndentedText))
         content.append(Spacer(1, 12))
 
         # Section 17
         content.append(Paragraph("17) Other Information", styles['SectionHeader']))
-        content.append(Paragraph(str(field_result[49]), IndentedText))
+        content.append(Paragraph(str(field_result[37]), IndentedText))
         content.append(PageBreak())
 
         doc.build(content, onFirstPage=add_first_page_header)

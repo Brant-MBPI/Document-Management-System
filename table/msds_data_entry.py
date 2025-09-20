@@ -777,8 +777,6 @@ def clear_msds_form(self):
         for widget in [
             self.customer_name_input,
             self.trade_label_input,
-            self.heat_stability_input,
-            self.light_fastness_input
         ]:
             widget.blockSignals(True)
             widget.clear()

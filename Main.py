@@ -86,6 +86,8 @@ class MainWindow(QMainWindow):
         self.hand_protection_input = QLineEdit()
         self.eye_protection_input = QLineEdit()
         self.skin_protection_input = QLineEdit()
+            #Section9
+        self.physical_property_rows = []
             #Section10
         self.stability_reactivity_input = QTextEdit()
         self.stability_reactivity_input.setTabChangesFocus(True)
@@ -822,6 +824,7 @@ class MainWindow(QMainWindow):
         if column == 1:  # view column
             display_text = self.msds_records_table.item(row, 0).text()
             self.open_msds_preview(msds_id, display_text)
+
         if column == 2:  # edit column
             msds_data_entry.current_msds_id = msds_id  # Store the selected MSDS ID
             msds_data_entry.load_msds_details(self, msds_id)
