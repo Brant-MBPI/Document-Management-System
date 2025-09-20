@@ -89,30 +89,28 @@ def load_msds_details(self, msds_id):
             row_widget = _create_property_row(self, property_name, property_value)
             # Insert before the "Add Property" button (which is always the last item)
             self.physical_properties_layout.insertWidget(self.physical_properties_layout.count() - 1, row_widget)
-    else:
-        # If no custom properties, re-add the default ones (same logic as in clear_msds_form)
-        initial_props = [
-            ("Appearance", "White pellet form"),
-            ("Odor", "Odorless"),
-            ("Packaging", "25 kgs."),
-            ("Carrier Material", "Polyolefin resin"),
-            ("Resin Suitability", "Polyolefin"),
-            ("Light fastness (1-8)", ""),
-            ("Heat Stability (1-5)", ""),
-            ("Non Toxicity", "Non-toxic, colorant contains no heavy metal"),
-            ("Flash Point", "N/A"),
-            ("Auto Ignition", "N/A"),
-            ("Explosion Property", "N/A"),
-            ("Solubility (Water)", "Insoluble"),
-        ]
-        for name, value in initial_props:
-            row_widget = _create_property_row(self, name, value)
-            self.physical_properties_layout.insertWidget(self.physical_properties_layout.count() - 1, row_widget)
+    # else:
+    #     # If no custom properties, re-add the default ones (same logic as in clear_msds_form)
+    #     initial_props = [
+    #         ("Appearance", "White pellet form"),
+    #         ("Odor", "Odorless"),
+    #         ("Packaging", "25 kgs."),
+    #         ("Carrier Material", "Polyolefin resin"),
+    #         ("Resin Suitability", "Polyolefin"),
+    #         ("Light fastness (1-8)", ""),
+    #         ("Heat Stability (1-5)", ""),
+    #         ("Non Toxicity", "Non-toxic, colorant contains no heavy metal"),
+    #         ("Flash Point", "N/A"),
+    #         ("Auto Ignition", "N/A"),
+    #         ("Explosion Property", "N/A"),
+    #         ("Solubility (Water)", "Insoluble"),
+    #     ]
+    #     for name, value in initial_props:
+    #         row_widget = _create_property_row(self, name, value)
+    #         self.physical_properties_layout.insertWidget(self.physical_properties_layout.count() - 1, row_widget)
 
     # 4. Update the state of the up/down buttons
     _update_property_buttons(self)
-
-    # Ensure all fields, including the newly loaded dynamic ones, are validated for empty state
     check_empty_fields(self)
 
 
@@ -575,8 +573,8 @@ def _create_property_row(self, name, value):
     self.physical_property_rows.append((name_edit, value_edit))
 
     # Connect validation (reuse your existing function)
-    name_edit.textChanged.connect(lambda: self.validate_field(name_edit))
-    value_edit.textChanged.connect(lambda: self.validate_field(value_edit))
+    name_edit.textChanged.connect(lambda: validate_field(name_edit))
+    value_edit.textChanged.connect(lambda: validate_field(value_edit))
 
     # Button connections
     def delete_row():
@@ -647,6 +645,7 @@ def _update_property_buttons(self):
             if hasattr(row_widget, 'up_btn'):
                 row_widget.up_btn.setEnabled(i > 0)
                 row_widget.down_btn.setEnabled(i < total_rows - 1)
+
 
 def form_btn(self):
     button_style = """
@@ -826,11 +825,7 @@ def check_empty_fields(self):
         self.first_aid_skin_input, self.first_aid_ingestion_input, self.fire_fighting_media_input,
         self.accidental_release_input, self.handling_input, self.msds_storage_input,
         self.exposure_control_input, self.respiratory_protection_input, self.hand_protection_input,
-        self.eye_protection_input, self.skin_protection_input, self.appearance_input,
-        self.odor_input, self.packaging_input, self.carrier_material_input,
-        self.resin_suitability_input, self.light_fastness_input, self.heat_stability_input,
-        self.non_toxicity_input, self.flash_point_input, self.auto_ignition_input,
-        self.explosion_property_input, self.solubility_input, self.stability_reactivity_input,
+        self.eye_protection_input, self.skin_protection_input, self.stability_reactivity_input,
         self.toxicological_input, self.ecological_input, self.disposal_input,
         self.transport_input, self.regulatory_input, self.msds_shelf_life_input,
         self.other_input

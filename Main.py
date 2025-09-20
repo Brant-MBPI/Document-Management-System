@@ -86,26 +86,6 @@ class MainWindow(QMainWindow):
         self.hand_protection_input = QLineEdit()
         self.eye_protection_input = QLineEdit()
         self.skin_protection_input = QLineEdit()
-            #Section9
-        self.physical_property_rows = []
-        self.appearance_input = QLineEdit()
-        self.odor_input = QLineEdit()
-        self.packaging_input = QLineEdit()
-        self.carrier_material_input = QLineEdit()
-        self.resin_suitability_input = QLineEdit()
-        heat_regex = QRegularExpression(r'^[1-5](-[1-5])?$')
-        heat_validator = QRegularExpressionValidator(heat_regex)
-        self.heat_stability_input = QLineEdit()
-        self.heat_stability_input.setValidator(heat_validator)
-        light_regex = QRegularExpression(r'^[1-8](-[1-8])?$')
-        light_validator = QRegularExpressionValidator(light_regex)
-        self.light_fastness_input = QLineEdit()
-        self.light_fastness_input.setValidator(light_validator)
-        self.non_toxicity_input = QLineEdit()
-        self.flash_point_input = QLineEdit()
-        self.auto_ignition_input = QLineEdit()
-        self.explosion_property_input = QLineEdit()
-        self.solubility_input = QLineEdit()
             #Section10
         self.stability_reactivity_input = QTextEdit()
         self.stability_reactivity_input.setTabChangesFocus(True)
@@ -517,10 +497,7 @@ class MainWindow(QMainWindow):
                 "Hand Protection": self.hand_protection_input.text(),
                 "Eye Protection": self.eye_protection_input.text(),
                 "Skin Protection": self.skin_protection_input.text(),
-                "Light Fastness": self.light_fastness_input.text(),
-                "Heat Stability": self.heat_stability_input.text(),
-                "Explosion Property": self.explosion_property_input.text(),
-                "Solubility": self.solubility_input.text(),
+
                 "Stability & Reactivity": self.stability_reactivity_input.toPlainText(),
                 "Toxicological": self.toxicological_input.toPlainText(),
                 "Ecological": self.ecological_input.toPlainText(),
@@ -608,7 +585,7 @@ class MainWindow(QMainWindow):
             # Save
             try:
                 if msds_data_entry.current_msds_id is not None:  # Update existing MSDS
-                    db_con.update_msds_sheet(msds_data_entry.current_msds_id, msds_data)
+                    db_con.update_msds_sheet(msds_data_entry.current_msds_id, msds_data, section9_data)
                     window_alert.show_message(self, "Success", "MSDS updated successfully!", icon_type="info")
                     msds_data_entry.current_msds_id = None
                 else:  # Save new MSDS

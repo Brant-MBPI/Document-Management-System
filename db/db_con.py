@@ -199,9 +199,7 @@ def save_msds_sheet(data, section9):
                 msds_id = cur.fetchone()[0]
 
                 # Insert Section 9 properties
-                for idx, (name_edit, value_edit) in enumerate(section9, start=1):
-                    property_name = name_edit.text().strip()
-                    property_value = value_edit.text().strip()
+                for idx, (property_name, property_value) in enumerate(section9.items(), start=1):
                     if property_name:
                         cur.execute("""
                             INSERT INTO msds_section_9 (msds_id, property_order, property_name, property_value)
@@ -268,89 +266,87 @@ def save_certificate_of_analysis(data, summary_of_analysis):
 
 
 # Update
-def update_msds_sheet(msds_id, data):
+def update_msds_sheet(msds_id, data, section9):
     conn = get_connection()
 
     try:
-        cur = conn.cursor()
+        with conn:
+            with conn.cursor() as cur:
+                # Update main MSDS sheet
+                cur.execute("""
+                    UPDATE msds_sheets
+                    SET 
+                        customer_name = %s,
+                        trade_name = %s,
+                        product_code = %s,
+                        manufacturer_info = %s,
+                        contact_tel = %s,
+                        contact_facsimile = %s,
+                        contact_email = %s,
+                        composition_info = %s,
+                        hazard_preliminaries = %s,
+                        hazard_entry_route = %s,
+                        hazard_symptoms = %s,
+                        hazard_restrictive_conditions = %s,
+                        hazard_eyes = %s,
+                        hazard_general_note = %s,
+                        first_aid_inhalation = %s,
+                        first_aid_eyes = %s,
+                        first_aid_skin = %s,
+                        first_aid_ingestion = %s,
+                        fire_fighting_media = %s,
+                        accidental_release_info = %s,
+                        handling_info = %s,
+                        storage_info = %s,
+                        exposure_control_info = %s,
+                        respiratory_protection = %s,
+                        hand_protection = %s,
+                        eye_protection = %s,
+                        skin_protection = %s,
+                        stability_reactivity = %s,
+                        toxicological_info = %s,
+                        ecological_info = %s,
+                        disposal_info = %s,
+                        transport_info = %s,
+                        regulatory_info = %s,
+                        shelf_life_info = %s,
+                        other_info = %s,
+                        last_modified_date = NOW()
+                    WHERE id = %s;
+                """, (
+                    data["customer_name"], data["trade_name"], data["product_code"], data["manufacturer_info"],
+                    data["contact_tel"], data["contact_facsimile"], data["contact_email"], data["composition_info"],
+                    data["hazard_preliminaries"], data["hazard_entry_route"], data["hazard_symptoms"],
+                    data["hazard_restrictive_conditions"], data["hazard_eyes"], data["hazard_general_note"],
+                    data["first_aid_inhalation"], data["first_aid_eyes"], data["first_aid_skin"],
+                    data["first_aid_ingestion"], data["fire_fighting_media"], data["accidental_release_info"],
+                    data["handling_info"], data["storage_info"], data["exposure_control_info"],
+                    data["respiratory_protection"], data["hand_protection"], data["eye_protection"],
+                    data["skin_protection"], data["stability_reactivity"], data["toxicological_info"],
+                    data["ecological_info"], data["disposal_info"], data["transport_info"],
+                    data["regulatory_info"], data["shelf_life_info"], data["other_info"],
+                    msds_id
+                ))
 
-        cur.execute("""
-            UPDATE msds_sheets
-            SET 
-                customer_name = %s,
-                trade_name = %s,
-                product_code = %s,
-                manufacturer_info = %s,
-                contact_tel = %s,
-                contact_facsimile = %s,
-                contact_email = %s,
-                composition_info = %s,
-                hazard_preliminaries = %s,
-                hazard_entry_route = %s,
-                hazard_symptoms = %s,
-                hazard_restrictive_conditions = %s,
-                hazard_eyes = %s,
-                hazard_general_note = %s,
-                first_aid_inhalation = %s,
-                first_aid_eyes = %s,
-                first_aid_skin = %s,
-                first_aid_ingestion = %s,
-                fire_fighting_media = %s,
-                accidental_release_info = %s,
-                handling_info = %s,
-                storage_info = %s,
-                exposure_control_info = %s,
-                respiratory_protection = %s,
-                hand_protection = %s,
-                eye_protection = %s,
-                skin_protection = %s,
-                appearance = %s,
-                odor = %s,
-                packaging = %s,
-                carrier_material = %s,
-                resin_suitability = %s,
-                light_fastness = %s,
-                heat_stability = %s,
-                non_toxicity = %s,
-                flash_point = %s,
-                auto_ignition_temp = %s,
-                explosion_property = %s,
-                solubility_water = %s,
-                stability_reactivity = %s,
-                toxicological_info = %s,
-                ecological_info = %s,
-                disposal_info = %s,
-                transport_info = %s,
-                regulatory_info = %s,
-                shelf_life_info = %s,
-                other_info = %s,
-                last_modified_date = NOW()
-            WHERE id = %s;
-        """, (
-            data["customer_name"], data["trade_name"], data["product_code"], data["manufacturer_info"],
-            data["contact_tel"], data["contact_facsimile"], data["contact_email"], data["composition_info"],
-            data["hazard_preliminaries"], data["hazard_entry_route"], data["hazard_symptoms"],
-            data["hazard_restrictive_conditions"], data["hazard_eyes"], data["hazard_general_note"],
-            data["first_aid_inhalation"], data["first_aid_eyes"], data["first_aid_skin"],
-            data["first_aid_ingestion"], data["fire_fighting_media"], data["accidental_release_info"],
-            data["handling_info"], data["storage_info"], data["exposure_control_info"],
-            data["respiratory_protection"], data["hand_protection"], data["eye_protection"],
-            data["skin_protection"], data["appearance"], data["odor"],
-            data["packaging"], data["carrier_material"], data["resin_suitability"],
-            data["light_fastness"], data["heat_stability"], data["non_toxicity"],
-            data["flash_point"], data["auto_ignition_temp"], data["explosion_property"],
-            data["solubility_water"], data["stability_reactivity"], data["toxicological_info"],
-            data["ecological_info"], data["disposal_info"], data["transport_info"],
-            data["regulatory_info"], data["shelf_life_info"], data["other_info"],
-            msds_id
-        ))
-        conn.commit()
-        cur.close()
-        conn.close()
+                # --- Section 9 update ---
+                # Clear old Section 9 records
+                cur.execute("DELETE FROM msds_section_9 WHERE msds_id = %s", (msds_id,))
+
+                # Insert fresh Section 9 records
+                for idx, (property_name, property_value) in enumerate(section9.items(), start=1):
+                    if property_name:
+                        cur.execute("""
+                            INSERT INTO msds_section_9 (msds_id, property_order, property_name, property_value)
+                            VALUES (%s, %s, %s, %s)
+                        """, (msds_id, idx, property_name, property_value))
+
     except Exception as e:
         if conn:
             conn.rollback()
         raise e
+    finally:
+        if conn:
+            conn.close()
 
 
 def update_certificate_of_analysis(coa_id, data, summary_of_analysis):
@@ -457,7 +453,7 @@ def get_single_msds_section9(msds_id):
         "SELECT * FROM msds_section_9 WHERE msds_id = %s ORDER BY property_order ASC;",
         (msds_id,)
     )
-    record = cur.fetchone()  # only one row expected
+    record = cur.fetchall()  # only one row expected
 
     cur.close()
     conn.close()
