@@ -139,7 +139,7 @@ def coa_data_entry_form(self, is_rrf=False):
         """)
 
         # === Header ===
-        header = QLabel("Certificate of Analysis")
+        header = self.coa_header_label
         header.setStyleSheet("""
             font-size: 32px;
             font-weight: 700;
@@ -177,7 +177,7 @@ def coa_data_entry_form(self, is_rrf=False):
         general_info_layout.addWidget(self.quantity_delivered_input, 1, 3)
 
         # Row 2: Delivery Receipt & PO Number
-        general_info_layout.addWidget(QLabel("Delivery Receipt N:"), 2, 0, Qt.AlignmentFlag.AlignRight)
+        general_info_layout.addWidget(self.delivery_receipt_label, 2, 0, Qt.AlignmentFlag.AlignRight)
         receipt_input_layout = QHBoxLayout()
         receipt_input_layout.addWidget(self.delivery_receipt_input, alignment=Qt.AlignmentFlag.AlignVCenter)
         self.sync_button.setStyleSheet("""

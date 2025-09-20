@@ -4,7 +4,7 @@ from PyQt6.QtGui import QIcon, QIntValidator, QRegularExpressionValidator, QFont
 from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QTabWidget, \
     QTableWidget, QLineEdit, QHeaderView, QTableWidgetItem, QScrollArea, QTextEdit, QPushButton, QDateEdit, \
     QMessageBox, QAbstractItemView, QGroupBox, QCompleter, QDialog, QLabel, QProgressBar, QStackedLayout
-from db import db_con, db_dr
+from db import db_con, db_dr, db_rrf
 from alert import window_alert
 from table import msds_data_entry, coa_data_entry, table
 from print.print_msds import FileMSDS
@@ -156,6 +156,9 @@ class MainWindow(QMainWindow):
         self.production_date_input.calendarWidget().setStyleSheet(calendar_design.STYLESHEET)
         self.production_date_input.installEventFilter(self.wheel_filter)
 
+        self.is_rrf = False
+        self.delivery_receipt_label = QLabel("Delivery Receipt No:")
+        self.coa_header_label = QLabel("Certificate of Analysis")
         self.dr_no_list = db_con.get_all_dr_no()
         # Create QCompleter with the list
         completer = QCompleter(self.dr_no_list)
@@ -691,13 +694,24 @@ class MainWindow(QMainWindow):
         # Save
         try:
             if coa_data_entry.current_coa_id is not None:  # Update existing COA
-                db_con.update_certificate_of_analysis(coa_data_entry.current_coa_id, coa_data, summary_of_analysis)
-                window_alert.show_message(self, "Success", f"Certificate of Analysis updated successfully!", icon_type="info")
-                coa_data_entry.current_coa_id = None
+                if self.is_rrf: # RRF
+                    db_con.update_certificate_of_analysis_rrf(coa_data_entry.current_coa_id, coa_data, summary_of_analysis)
+                    window_alert.show_message(self, "Success", f"Certificate of Analysis - RRF updated successfully!",
+                                              icon_type="info")
+                    coa_data_entry.current_coa_id = None
+                else:   #COA
+                    db_con.update_certificate_of_analysis(coa_data_entry.current_coa_id, coa_data, summary_of_analysis)
+                    window_alert.show_message(self, "Success", f"Certificate of Analysis updated successfully!", icon_type="info")
+                    coa_data_entry.current_coa_id = None
 
             else:  # Save new COA
-                db_con.save_certificate_of_analysis(coa_data, summary_of_analysis)
-                window_alert.show_message(self,"Success", f"Certificate of Analysis saved successfully!", icon_type="info")
+                if self.is_rrf:  # RRF
+                    db_con.save_certificate_of_analysis_rrf(coa_data, summary_of_analysis)
+                    window_alert.show_message(self, "Success", f"Certificate of Analysis - RRF saved successfully!",
+                                              icon_type="info")
+                else:  # COA
+                    db_con.save_certificate_of_analysis(coa_data, summary_of_analysis)
+                    window_alert.show_message(self,"Success", f"Certificate of Analysis saved successfully!", icon_type="info")
         except Exception as e:
             window_alert.show_message(self, "Database Error", str(e), icon_type="critical")
         finally:
@@ -1002,6 +1016,25 @@ class MainWindow(QMainWindow):
         self.worker.finished.connect(self.loading.accept)
         self.worker.start()
 
+    def run_sync_script_rrf(self):
+        # Show loading dialog
+        self.rrf_loading_dialog = LoadingDialog(self)
+        self.rrf_loading_dialog.show()
+
+        # Run in a worker thread
+        class RRFWorker(QThread):
+            sync_finished = pyqtSignal()
+
+            def run(self):
+                # Replace with the actual object and method you want to run
+                db_rrf.SyncRRFWorker().run()
+                self.sync_finished.emit()
+
+        self.rrf_sync_worker = RRFWorker()
+        self.rrf_sync_worker.sync_finished.connect(self.rrf_loading_dialog.accept)
+        self.rrf_sync_worker.start()
+
+
     def logout(self):
         confirm = window_alert.show_message(self, "Logout Confirmation",
                                             "Are you sure you want to log out?",
@@ -1015,6 +1048,7 @@ class MainWindow(QMainWindow):
 
     def toggle_rrf(self, checked):
         if checked:
+            self.is_rrf = True
             self.btn_switch_rrf.setText("Switch to COA")
             self.btn_switch_rrf.setStyleSheet("""
                 QPushButton {
@@ -1038,7 +1072,20 @@ class MainWindow(QMainWindow):
                 lambda: table.search_coa_rrf(self, self.coa_search_bar.text())
             )
 
+            #Data Entry
+            self.coa_header_label.setText("Certificate of Analysis - RRF")
+            self.delivery_receipt_label.setText("RRF No:")
+
+            #  change the connected function
+            try:
+                self.sync_button.clicked.disconnect()
+            except TypeError:
+                pass
+            # Connect a new function
+            self.sync_button.clicked.connect(self.run_sync_script_rrf)
+
         else:   #back to COA
+            self.is_rrf = False
             self.btn_switch_rrf.setText("Switch to RRF")
             self.btn_switch_rrf.setStyleSheet("""
                 QPushButton {
@@ -1059,6 +1106,18 @@ class MainWindow(QMainWindow):
             self.coa_label_timer.timeout.connect(
                 lambda: table.search_coa(self, self.coa_search_bar.text())
             )
+
+            # Data Entry
+            self.coa_header_label.setText("Certificate of Analysis")
+            self.delivery_receipt_label.setText("Delivery Receipt No:")
+
+            #  change the connected function
+            try:
+                self.sync_button.clicked.disconnect()
+            except TypeError:
+                pass
+            # Connect a new function
+            self.sync_button.clicked.connect(self.run_sync_script)
 
 
 class UserWidget(QWidget):
