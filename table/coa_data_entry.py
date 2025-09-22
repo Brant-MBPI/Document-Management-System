@@ -464,7 +464,6 @@ def populate_coa_fields(self, dr_no):
     self.delivery_receipt_input.blockSignals(True)
     try:
         fields = db_con.get_dr_details(dr_no)
-        self.quantity_delivered_input.clear()
         if not fields:  # None or empty tuple
             # Clear fields or just exit
             self.coa_customer_input.clear()
@@ -483,6 +482,39 @@ def populate_coa_fields(self, dr_no):
         self.po_number_input.setText(str(fields[4]))
         self.lot_number_input.setText(lot_no)
         self.quantity_delivered_input.setText(str(fields[6]))
+
+        if fields[3]:
+            self.delivery_date_input.setDate(QDate(fields[3].year, fields[3].month, fields[3].day))
+    except Exception as e:
+        print(e)
+    finally:
+        self.color_code_input.blockSignals(False)
+        self.delivery_receipt_input.blockSignals(False)
+
+
+def populate_coa_rrf_fields(self, rrf_no):
+    self.color_code_input.blockSignals(True)
+    self.delivery_receipt_input.blockSignals(True)
+    try:
+        fields = db_con.get_rrf_details(rrf_no)
+        if not fields:  # None or empty tuple
+            # Clear fields or just exit
+            self.coa_customer_input.clear()
+            self.color_code_input.clear()
+            self.po_number_input.clear()
+            self.lot_number_input.clear()
+            self.quantity_delivered_input.clear()
+            self.delivery_date_input.clear()
+            return
+
+        # === Populate inputs ===
+        # lot_no = lot_format.normalize(fields[5])
+
+        self.coa_customer_input.setText(str(fields[2]))
+        self.color_code_input.setText(str(fields[1]))
+        # self.po_number_input.setText(str(fields[4]))
+        # self.lot_number_input.setText(lot_no)
+        self.quantity_delivered_input.setText(str(fields[5]))
 
         if fields[3]:
             self.delivery_date_input.setDate(QDate(fields[3].year, fields[3].month, fields[3].day))

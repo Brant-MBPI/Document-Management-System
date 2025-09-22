@@ -160,11 +160,12 @@ class MainWindow(QMainWindow):
         self.delivery_receipt_label = QLabel("Delivery Receipt No:")
         self.coa_header_label = QLabel("Certificate of Analysis")
         self.dr_no_list = db_con.get_all_dr_no()
+        self.rrf_no_list = db_con.get_all_rrf_no()
         # Create QCompleter with the list
-        completer = QCompleter(self.dr_no_list)
-        completer.setFilterMode(Qt.MatchFlag.MatchStartsWith)  # Suggest if text is contained anywhere
+        self.completer = QCompleter(self.dr_no_list)
+        self.completer.setFilterMode(Qt.MatchFlag.MatchStartsWith)  # Suggest if text is contained anywhere
         self.delivery_receipt_input = QLineEdit()
-        completer.popup().setStyleSheet("""
+        self.completer.popup().setStyleSheet("""
             QListView {
                 background-color: white;
                 border: 1px solid gray;
@@ -182,7 +183,7 @@ class MainWindow(QMainWindow):
                 color: white;
             }
         """)
-        self.delivery_receipt_input.setCompleter(completer)
+        self.delivery_receipt_input.setCompleter(self.completer)
         self.delivery_receipt_timer = self.setup_finished_typing(
             self.delivery_receipt_input,
             lambda: coa_data_entry.populate_coa_fields(self, self.delivery_receipt_input.text()),
@@ -694,12 +695,12 @@ class MainWindow(QMainWindow):
         # Save
         try:
             if coa_data_entry.current_coa_id is not None:  # Update existing COA
-                if self.is_rrf: # RRF
+                if self.is_rrf:  # RRF
                     db_con.update_certificate_of_analysis_rrf(coa_data_entry.current_coa_id, coa_data, summary_of_analysis)
                     window_alert.show_message(self, "Success", f"Certificate of Analysis - RRF updated successfully!",
                                               icon_type="info")
                     coa_data_entry.current_coa_id = None
-                else:   #COA
+                else:   # COA
                     db_con.update_certificate_of_analysis(coa_data_entry.current_coa_id, coa_data, summary_of_analysis)
                     window_alert.show_message(self, "Success", f"Certificate of Analysis updated successfully!", icon_type="info")
                     coa_data_entry.current_coa_id = None
@@ -716,7 +717,10 @@ class MainWindow(QMainWindow):
             window_alert.show_message(self, "Database Error", str(e), icon_type="critical")
         finally:
             coa_data_entry.clear_coa_form(self)
-            table.load_coa_table(self)
+            if self.is_rrf:
+                table.load_rrf_table(self)
+            else:
+                table.load_coa_table(self)
             coa_data_entry.adjust_table_height(self)
             self.coa_scroll_area.verticalScrollBar().setValue(0)
             self.coa_sub_tabs.setCurrentIndex(0)
@@ -1065,15 +1069,21 @@ class MainWindow(QMainWindow):
 
             # Load RRF Table
             table.load_rrf_table(self)
-            # Remove previous search connection
+            # Remove previous typing connection
             self.coa_label_timer.timeout.disconnect()
+            self.delivery_receipt_timer.timeout.disconnect()
             # Connect a new one
             self.coa_label_timer.timeout.connect(
                 lambda: table.search_coa_rrf(self, self.coa_search_bar.text())
             )
+            self.delivery_receipt_timer.timeout.connect(
+                lambda: coa_data_entry.populate_coa_rrf_fields(self, self.delivery_receipt_input.text())
+            )
+            
 
             #Data Entry
             self.coa_header_label.setText("Certificate of Analysis - RRF")
+            self.completer.model().setStringList(self.rrf_no_list)
             self.delivery_receipt_label.setText("RRF No:")
 
             #  change the connected function
@@ -1102,13 +1112,18 @@ class MainWindow(QMainWindow):
             # Back to COA table
             table.load_coa_table(self)
             self.coa_label_timer.timeout.disconnect()
-            # Connect to coa search
+            self.delivery_receipt_timer.timeout.disconnect()
+            # Connect back to original type connection
             self.coa_label_timer.timeout.connect(
                 lambda: table.search_coa(self, self.coa_search_bar.text())
+            )
+            self.delivery_receipt_timer.timeout.connect(
+                lambda: coa_data_entry.populate_coa_fields(self, self.delivery_receipt_input.text())
             )
 
             # Data Entry
             self.coa_header_label.setText("Certificate of Analysis")
+            self.completer.model().setStringList(self.dr_no_list)
             self.delivery_receipt_label.setText("Delivery Receipt No:")
 
             #  change the connected function

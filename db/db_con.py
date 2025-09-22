@@ -93,13 +93,13 @@ def create_tables():
             lot_number VARCHAR(100) UNIQUE,
             po_number VARCHAR(100),
             delivery_receipt_number VARCHAR(100),
-            quantity_delivered NUMERIC(10, 2),
+            quantity_delivered TEXT,
             delivery_date DATE,
             production_date DATE,
             certification_date DATE,
             certified_by VARCHAR(255),
             storage_instructions TEXT,
-            shelf_life_coa VARCHAR(100),
+            shelf_life_coa VARCHAR(255),
             suitability TEXT,
             creation_date TIMESTAMP WITH TIME ZONE DEFAULT NOW()
         );
@@ -124,13 +124,13 @@ def create_tables():
                 lot_number VARCHAR(100) UNIQUE,
                 po_number VARCHAR(100),
                 rrf_number VARCHAR(100),
-                quantity_delivered NUMERIC(10, 2),
+                quantity_delivered TEXT,
                 delivery_date DATE,
                 production_date DATE,
                 certification_date DATE,
                 certified_by VARCHAR(255),
                 storage_instructions TEXT,
-                shelf_life_coa VARCHAR(100),
+                shelf_life_coa VARCHAR(255),
                 suitability TEXT,
                 creation_date TIMESTAMP WITH TIME ZONE DEFAULT NOW()
             );
@@ -139,7 +139,7 @@ def create_tables():
     cur.execute("""
             CREATE TABLE IF NOT EXISTS coa_analysis_results_rrf (
                 id SERIAL PRIMARY KEY,
-                coa_id INTEGER NOT NULL REFERENCES certificates_of_analysis(id) ON DELETE CASCADE,
+                coa_rrf_id INTEGER NOT NULL REFERENCES certificates_of_analysis_rrf(id) ON DELETE CASCADE,
                 parameter_name VARCHAR(255) NOT NULL,
                 standard_value VARCHAR(100),
                 delivery_value VARCHAR(100)
@@ -327,7 +327,7 @@ def save_certificate_of_analysis_rrf(data, summary_of_analysis):
             data["storage"], data["shelf_life"], data["suitability"]
         ))
 
-        coa_id = cur.fetchone()[0]
+        coa_rrf_id = cur.fetchone()[0]
 
         # Insert analysis results
         for parameter, values in summary_of_analysis.items():
@@ -336,9 +336,9 @@ def save_certificate_of_analysis_rrf(data, summary_of_analysis):
 
             cur.execute("""
                 INSERT INTO coa_analysis_results_rrf (
-                    coa_id, parameter_name, standard_value, delivery_value
+                    coa_rrf_id, parameter_name, standard_value, delivery_value
                 ) VALUES (%s, %s, %s, %s)
-            """, (coa_id, parameter, standard_value, delivery_value))
+            """, (coa_rrf_id, parameter, standard_value, delivery_value))
 
         conn.commit()
         cur.close()
@@ -522,7 +522,7 @@ def update_certificate_of_analysis_rrf(coa_id, data, summary_of_analysis):
         ))
         # Delete existing analysis results
         cur.execute("""
-            DELETE FROM coa_analysis_results_rrf WHERE coa_id = %s;
+            DELETE FROM coa_analysis_results_rrf WHERE coa_rrf_id = %s;
         """, (coa_id,))
 
         # Insert analysis results
@@ -532,7 +532,7 @@ def update_certificate_of_analysis_rrf(coa_id, data, summary_of_analysis):
 
             cur.execute("""
                 INSERT INTO coa_analysis_results_rrf (
-                    coa_id, parameter_name, standard_value, delivery_value
+                    coa_rrf_id, parameter_name, standard_value, delivery_value
                 ) VALUES (%s, %s, %s, %s)
             """, (coa_id, parameter, standard_value, delivery_value))
 
@@ -666,7 +666,7 @@ def get_coa_analysis_results_rrf(coa_id):
     cur.execute("""
         SELECT parameter_name, standard_value, delivery_value 
         FROM coa_analysis_results_rrf 
-        WHERE coa_id = %s;
+        WHERE coa_rrf_id = %s;
     """, (coa_id,))
     results = cur.fetchall()
 
@@ -744,6 +744,28 @@ def get_dr_details(dr_no):
     return record
 
 
+def get_rrf_details(rrf_no):
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute(
+        """SELECT a.rrf_no, a.product_code, b.customer_name, b.rrf_date, a.remarks, 
+                    TO_CHAR(a.quantity, 'FM999999990.00') || ' ' || a.unit AS quantity
+                    FROM rrf_items a, rrf_primary b
+                    WHERE a.rrf_no = b.rrf_no AND a.rrf_no=%s ORDER BY a.id DESC""",
+        (rrf_no,)
+    )
+    record = cur.fetchone()  # only one row expected
+
+    cur.close()
+    conn.close()
+    if record is None:
+        return ()  # or return None, depending on how you want to handle it
+    return record
+
+
+
+
 def get_summary_from_msds(code, dr_no):
     conn = get_connection()
     cur = conn.cursor()
@@ -777,7 +799,19 @@ def get_all_dr_no():
     conn = get_connection()
     cur = conn.cursor()
 
-    cur.execute("SELECT dr_no FROM product_delivery_items;")
+    cur.execute("SELECT dr_no FROM product_delivery_items ORDER BY CAST(dr_no AS INTEGER);")
+    records = cur.fetchall()  # only one row expected
+
+    cur.close()
+    conn.close()
+    return [row[0] for row in records]
+
+
+def get_all_rrf_no():
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("SELECT rrf_no FROM rrf_items ORDER BY CAST(rrf_no AS INTEGER);")
     records = cur.fetchall()  # only one row expected
 
     cur.close()
