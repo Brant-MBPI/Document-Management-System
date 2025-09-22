@@ -783,6 +783,24 @@ def get_rrf_lot_po(dr_no):
     return record
 
 
+def get_rrf_prod_date(dr_no):
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute(
+        """SELECT production_date FROM certificates_of_analysis
+                    WHERE delivery_receipt_number=%s;""",
+        (dr_no,)
+    )
+    record = cur.fetchone()  # only one row expected
+
+    cur.close()
+    conn.close()
+    if record is None:
+        return ()  # or return None, depending on how you want to handle it
+    return record
+
+
 def get_summary_from_msds(code, dr_no):
     conn = get_connection()
     cur = conn.cursor()

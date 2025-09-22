@@ -521,14 +521,12 @@ def populate_coa_rrf_fields(self, rrf_no):
             dr_num = ""
 
         add_lot_po = db_con.get_rrf_lot_po(dr_num)
+        add_prod_date = db_con.get_rrf_prod_date(dr_num)
 
         if not add_lot_po:  # None or empty
-            self.coa_customer_input.clear()
-            self.color_code_input.clear()
             self.po_number_input.clear()
             self.lot_number_input.clear()
-            self.quantity_delivered_input.clear()
-            self.delivery_date_input.clear()
+            self.production_date_input.clear()
             return
 
         # === Populate inputs ===
@@ -542,6 +540,8 @@ def populate_coa_rrf_fields(self, rrf_no):
 
         if fields[3]:
             self.delivery_date_input.setDate(QDate(fields[3].year, fields[3].month, fields[3].day))
+        if add_prod_date[0]:
+            self.production_date_input.setDate(QDate(add_prod_date[0].year, add_prod_date[0].month, add_prod_date[0].day))
     except Exception as e:
         print(e, "rrf")
     finally:
