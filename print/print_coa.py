@@ -134,30 +134,30 @@ class FileCOA(QWidget):
 
         content.append(
             Paragraph(f"<font name='Times-Bold'>Customer:</font> {field_result[1]}", styles['NormalText']))
-        content.append(Spacer(1, 4))  # Small spacer between lines
+        content.append(Spacer(1, 10))  # Small spacer between lines
 
         content.append(
             Paragraph(f"<font name='Times-Bold'>Color Code:</font> {field_result[2]}", styles['NormalText']))
-        content.append(Spacer(1, 4))
+        content.append(Spacer(1, 10))
 
         content.append(
             Paragraph(f"<font name='Times-Bold'>Quantity Deliver:</font> {field_result[6]}", styles['NormalText']))
-        content.append(Spacer(1, 4))
+        content.append(Spacer(1, 10))
 
         date_format = "%-d" if platform.system() != "Windows" else "%#d"
         content.append(Paragraph(
             f"<font name='Times-Bold'>Delivery Date:</font> {field_result[7].strftime(f'%B {date_format}, %Y')}",
             styles['NormalText']))
-        content.append(Spacer(1, 4))
+        content.append(Spacer(1, 10))
 
         content.append(
             Paragraph(f"<font name='Times-Bold'>Lot Number:</font> {field_result[3]}", styles['NormalText']))
-        content.append(Spacer(1, 4))
+        content.append(Spacer(1, 10))
 
         content.append(Paragraph(
             f"<font name='Times-Bold'>Production Date:</font> {field_result[8].strftime(f'%B {date_format}, %Y')}",
             styles['NormalText']))
-        content.append(Spacer(1, 4))
+        content.append(Spacer(1, 10))
 
         if is_rrf:
             delivery_receipt_text = Paragraph(
@@ -197,7 +197,7 @@ class FileCOA(QWidget):
         )
         content.append(delivery_po_table)
 
-        content.append(Spacer(1, 12))
+        content.append(Spacer(1, 16))
 
         content.append(Paragraph("<b>Summary of Analysis</b>", styles["SubHeading"]))
         content.append(Spacer(1, 12))
@@ -232,11 +232,13 @@ class FileCOA(QWidget):
 
         name_len = len(field_result[10])
         lines = "_" * name_len  # Keep simple underline
-
-        content.append(Paragraph("Certified by:", styles["NormalText"]))
-        content.append(Spacer(1, 4))  # Adjusted spacing
-        content.append(Paragraph(lines, styles["NormalText"]))
-        content.append(Paragraph(str(field_result[10]), styles["NormalText"]))
+        indent = ParagraphStyle(
+            name="indent",
+            parent=styles['NormalText'],  # Inherit from NormalText for font, size etc.
+            leftIndent=55
+        )
+        content.append(Paragraph(f"Certified by: {lines}", styles["NormalText"]))
+        content.append(Paragraph(str(field_result[10]), indent))
         content.append(Paragraph("Date: " + str(field_result[9].strftime(f"%B {date_format}, %Y")), styles["NormalText"]))
         content.append(Spacer(1, 24))  # Reduced spacer before storage
 

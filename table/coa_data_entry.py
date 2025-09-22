@@ -477,7 +477,7 @@ def populate_coa_fields(self, dr_no):
             self.po_number_input.clear()
             self.lot_number_input.clear()
             self.quantity_delivered_input.clear()
-            self.delivery_date_input.clear()
+            self.delivery_date_input.setDate(QDate.currentDate())
             return
 
         # === Populate inputs ===
@@ -510,7 +510,7 @@ def populate_coa_rrf_fields(self, rrf_no):
             self.po_number_input.clear()
             self.lot_number_input.clear()
             self.quantity_delivered_input.clear()
-            self.delivery_date_input.clear()
+            self.delivery_date_input.setDate(QDate.currentDate())
             return
 
         dr_pattern = r"DR\s*#\s*(\d+)"
@@ -526,7 +526,7 @@ def populate_coa_rrf_fields(self, rrf_no):
         if not add_lot_po:  # None or empty
             self.po_number_input.clear()
             self.lot_number_input.clear()
-            self.production_date_input.clear()
+            self.production_date_input.setDate(QDate.currentDate())
             return
 
         # === Populate inputs ===

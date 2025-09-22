@@ -263,13 +263,13 @@ class MainWindow(QMainWindow):
         self.coa_corner_h.addWidget(self.btn_switch_rrf)
         self.coa_corner_h.addWidget(self.coa_search_bar)
 
-        self.btn_switch_rrf.setFixedHeight(28)
+        self.btn_switch_rrf.setFixedHeight(32)
         self.btn_switch_rrf.setStyleSheet("""
             QPushButton {
                 background-color: #1976D2;
                 color: white;
                 border-radius: 4px;
-                padding: 4px 10px;
+                padding: 6px 10px;
                 font-size: 12px;
                 margin-bottom: 5px;
             }
