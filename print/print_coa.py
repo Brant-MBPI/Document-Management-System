@@ -107,7 +107,7 @@ class FileCOA(QWidget):
         self.print_action.triggered.connect(self.print_pdf)
         self.addAction(self.print_action)
 
-    def generate_pdf(self, coa_id, is_rrf):
+    def generate_pdf(self, coa_id, is_rrf=False):
         if is_rrf:
             field_result = db_con.get_single_coa_data_rrf(coa_id)
         else:

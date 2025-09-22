@@ -764,6 +764,23 @@ def get_rrf_details(rrf_no):
     return record
 
 
+def get_rrf_lot_po(dr_no):
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute(
+        """SELECT b.po_no, a.attachments
+                    FROM product_delivery_items a, product_delivery_primary b
+                    WHERE a.dr_no = b.dr_no AND a.dr_no=%s ORDER BY a.id DESC""",
+        (dr_no,)
+    )
+    record = cur.fetchone()  # only one row expected
+
+    cur.close()
+    conn.close()
+    if record is None:
+        return ()  # or return None, depending on how you want to handle it
+    return record
 
 
 def get_summary_from_msds(code, dr_no):

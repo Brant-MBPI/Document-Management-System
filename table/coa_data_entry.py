@@ -1,3 +1,5 @@
+import re
+
 from PyQt6.QtCore import QDate, Qt
 from PyQt6.QtWidgets import (
     QLabel, QHBoxLayout, QHeaderView, QPushButton, QTableWidgetItem,
@@ -9,11 +11,15 @@ from utils import abs_path, lot_format
 current_coa_id = None
 
 
-def load_coa_details(self, coa_id):
+def load_coa_details(self, coa_id, is_rrf):
     self.color_code_input.blockSignals(True)
     self.delivery_receipt_input.blockSignals(True)
-    field_result = db_con.get_single_coa_data(coa_id)
-    analysis_table_result = db_con.get_coa_analysis_results(coa_id)
+    if is_rrf:
+        field_result = db_con.get_single_coa_data_rrf(coa_id)
+        analysis_table_result = db_con.get_coa_analysis_results_rrf(coa_id)
+    else:
+        field_result = db_con.get_single_coa_data(coa_id)
+        analysis_table_result = db_con.get_coa_analysis_results(coa_id)
 
     # === Populate inputs ===
     self.coa_customer_input.setText(str(field_result[1]))
@@ -497,8 +503,26 @@ def populate_coa_rrf_fields(self, rrf_no):
     self.delivery_receipt_input.blockSignals(True)
     try:
         fields = db_con.get_rrf_details(rrf_no)
-        if not fields:  # None or empty tuple
-            # Clear fields or just exit
+
+        if not fields:  # if None or empty
+            self.coa_customer_input.clear()
+            self.color_code_input.clear()
+            self.po_number_input.clear()
+            self.lot_number_input.clear()
+            self.quantity_delivered_input.clear()
+            self.delivery_date_input.clear()
+            return
+
+        dr_pattern = r"DR\s*#\s*(\d+)"
+        match = re.search(dr_pattern, str(fields[4]))
+        if match:
+            dr_num = match.group(1)
+        else:
+            dr_num = ""
+
+        add_lot_po = db_con.get_rrf_lot_po(dr_num)
+
+        if not add_lot_po:  # None or empty
             self.coa_customer_input.clear()
             self.color_code_input.clear()
             self.po_number_input.clear()
@@ -508,18 +532,18 @@ def populate_coa_rrf_fields(self, rrf_no):
             return
 
         # === Populate inputs ===
-        # lot_no = lot_format.normalize(fields[5])
 
+        lot_no = lot_format.normalize(add_lot_po[1])
         self.coa_customer_input.setText(str(fields[2]))
         self.color_code_input.setText(str(fields[1]))
-        # self.po_number_input.setText(str(fields[4]))
-        # self.lot_number_input.setText(lot_no)
+        self.po_number_input.setText(str(add_lot_po[0]))
+        self.lot_number_input.setText(lot_no)
         self.quantity_delivered_input.setText(str(fields[5]))
 
         if fields[3]:
             self.delivery_date_input.setDate(QDate(fields[3].year, fields[3].month, fields[3].day))
     except Exception as e:
-        print(e)
+        print(e, "rrf")
     finally:
         self.color_code_input.blockSignals(False)
         self.delivery_receipt_input.blockSignals(False)
