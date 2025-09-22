@@ -177,7 +177,7 @@ class FileMSDS(QWidget):
         # Section 2
         content.append(Paragraph("2) Composition / Information on Ingredients", styles['SectionHeader']))
         content.append(Paragraph(str(field_result[10]), IndentedText))
-        content.append(Spacer(1, 12))
+        content.append(Spacer(1, 10))
 
         # Section 3
         content.append(Paragraph("3) Hazard Information", styles['SectionHeader']))
@@ -188,7 +188,7 @@ class FileMSDS(QWidget):
         if all(v.strip() == "" for v in hazard_fields):
             # Only show general note (field_result[16])
             content.append(Paragraph(str(field_result[16]), IndentedText))
-            content.append(Spacer(1, 12))
+            content.append(Spacer(1, 10))
             self.isMasterBatch = True
         else:
             section3_content = [
@@ -205,7 +205,7 @@ class FileMSDS(QWidget):
             content.append(table)
             content.append(Spacer(1, 12))
             content.append(Paragraph(str(field_result[16]), IndentedText))
-            content.append(Spacer(1, 12))
+            content.append(Spacer(1, 10))
             self.isMasterBatch = False
 
         # Section 4
@@ -238,13 +238,13 @@ class FileMSDS(QWidget):
         # Section 5
         content.append(Paragraph("5) Fire Fighting Measures", styles['SectionHeader']))
         content.append(Paragraph(str(field_result[21]), IndentedText))
-        content.append(Spacer(1, 12))
+        content.append(Spacer(1, 10))
 
         # Section 6
         content.append(Paragraph("6) Accidental Release Measures", styles['SectionHeader']))
         content.append(Paragraph(str(field_result[22]),
                                  IndentedText))
-        content.append(Spacer(1, 12))
+        content.append(Spacer(1, 10))
 
         # Section 7
         content.append(Paragraph("7) Handling and Storage", styles['SectionHeader']))
@@ -259,7 +259,7 @@ class FileMSDS(QWidget):
             content.append(Spacer(1, 12))
         else:
             content.append(Paragraph(str(field_result[24]), IndentedText))
-            content.append(Spacer(1, 12))
+            content.append(Spacer(1, 10))
 
         # Section 8
         content.append(Paragraph("8) Exposure Controls/ Personal Protection", styles['SectionHeader']))
@@ -308,44 +308,44 @@ class FileMSDS(QWidget):
         else:
             content.append(
                 Paragraph("No specific physical and chemical properties information available.", IndentedText))
-        content.append(Spacer(1, 12))
+        content.append(Spacer(1, 10))
 
         # Section 10
         content.append(Paragraph("10) Stability & Reactivity", styles['SectionHeader']))
         content.append(Paragraph(str(field_result[30]), IndentedText))
-        content.append(Spacer(1, 12))
+        content.append(Spacer(1, 10))
 
         # Section 11
         content.append(Paragraph("11) Toxicological Information", styles['SectionHeader']))
         content.append(Paragraph(str(field_result[31]), IndentedText))
-        content.append(Spacer(1, 12))
+        content.append(Spacer(1, 10))
 
         # Section 12
         content.append(Paragraph("12) Ecological Information", styles['SectionHeader']))
         content.append(Paragraph(str(field_result[32]), IndentedText))
-        content.append(Spacer(1, 12))
+        content.append(Spacer(1, 10))
         # Section 13
         content.append(Paragraph("13) Disposal", styles['SectionHeader']))
         content.append(Paragraph(str(field_result[33]), IndentedText))
-        content.append(Spacer(1, 12))
+        content.append(Spacer(1, 10))
 
         # Section 14
         content.append(Paragraph("14) Transport Information", styles['SectionHeader']))
         content.append(
             Paragraph(str(field_result[34]), IndentedText))
-        content.append(Spacer(1, 12))
+        content.append(Spacer(1, 10))
 
         # Section 15
         content.append(Paragraph("15) Regulatory Information", styles['SectionHeader']))
         content.append(Paragraph(
             str(field_result[35]), IndentedText))
-        content.append(Spacer(1, 12))
+        content.append(Spacer(1, 10))
 
         # Section 16
         content.append(Paragraph("16) Shelf-Life", styles['SectionHeader']))
         content.append(
             Paragraph(str(field_result[36]), IndentedText))
-        content.append(Spacer(1, 12))
+        content.append(Spacer(1, 10))
 
         # Section 17
         content.append(Paragraph("17) Other Information", styles['SectionHeader']))
