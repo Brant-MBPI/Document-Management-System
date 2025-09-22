@@ -124,13 +124,14 @@ def load_rrf_table(self):
         coa_id = record[0]  # id is usually first
         customer_name = record[1]
         color_code = record[2]
-        lot_number = record[3]
+        lot_number_full = record[3]
+        lot_number = lot_number_full.split("-")[-1] if lot_number_full else ""
         rrf_number = record[5]
         delivery_date = record[7]
         delivery_date_str = delivery_date.strftime("%m%d%y")
 
         # build display text
-        display_text = f"{delivery_date_str} RRFN{rrf_number} COA {customer_name} {color_code} {lot_number}".upper()
+        display_text = f"{delivery_date_str} RRF{rrf_number} COA {customer_name} {color_code} {lot_number}".upper()
 
         # insert row
         self.coa_records_table.insertRow(row_idx)
