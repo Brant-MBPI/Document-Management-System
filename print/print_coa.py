@@ -107,8 +107,11 @@ class FileCOA(QWidget):
         self.print_action.triggered.connect(self.print_pdf)
         self.addAction(self.print_action)
 
-    def generate_pdf(self, coa_id):
-        field_result = db_con.get_single_coa_data(coa_id)
+    def generate_pdf(self, coa_id, is_rrf=False):
+        if is_rrf:
+            field_result = db_con.get_single_coa_data_rrf(coa_id)
+        else:
+            field_result = db_con.get_single_coa_data(coa_id)
 
         # Create PDF
         buffer = io.BytesIO()
@@ -122,53 +125,46 @@ class FileCOA(QWidget):
             ParagraphStyle(name="SectionHeader", fontName="Times-Roman", fontSize=14, leading=14, spaceAfter=12, spaceBefore=6, bold=True))
         styles.add(ParagraphStyle(name="SubHeading", fontName="Times-Bold", fontSize=12, leading=14, spaceAfter=4, alignment=TA_CENTER))
         styles.add(ParagraphStyle(name="NormalText", fontName="Times-Roman", fontSize=10, leading=12, spaceAfter=4))
-        IndentedText = ParagraphStyle('IndentedText', parent=styles['NormalText'], leftIndent=20)
-        styles.add(ParagraphStyle(
-            name="TitleSans",
-            fontName="Times-Bold",  # Changed to Times-Bold
-            fontSize=32,
-            leading=22,
-            alignment=1,  # center
-            spaceAfter=12
-        ))
-        date_format = "%-d" if platform.system() != "Windows" else "%#d"
+
         content = []
         page_width = letter[0] - 50 - 50
-        col_widths = [0.22 * page_width, 0.24 * page_width, 0.24 * page_width, 0.12 * page_width, 0.20 * page_width]
-        content.append(Paragraph("Certificate of Analysis", styles['TitleSans']))
-        content.append(Spacer(1, 12))
+        content.append(Spacer(1, 56))
 
         bold_style = ParagraphStyle('BoldText', parent=styles['NormalText'], fontName='Times-Bold')
 
         content.append(
             Paragraph(f"<font name='Times-Bold'>Customer:</font> {field_result[1]}", styles['NormalText']))
-        content.append(Spacer(1, 4))  # Small spacer between lines
+        content.append(Spacer(1, 10))  # Small spacer between lines
 
         content.append(
             Paragraph(f"<font name='Times-Bold'>Color Code:</font> {field_result[2]}", styles['NormalText']))
-        content.append(Spacer(1, 4))
+        content.append(Spacer(1, 10))
 
         content.append(
             Paragraph(f"<font name='Times-Bold'>Quantity Deliver:</font> {field_result[6]}", styles['NormalText']))
-        content.append(Spacer(1, 4))
+        content.append(Spacer(1, 10))
 
         date_format = "%-d" if platform.system() != "Windows" else "%#d"
         content.append(Paragraph(
             f"<font name='Times-Bold'>Delivery Date:</font> {field_result[7].strftime(f'%B {date_format}, %Y')}",
             styles['NormalText']))
-        content.append(Spacer(1, 4))
+        content.append(Spacer(1, 10))
 
         content.append(
             Paragraph(f"<font name='Times-Bold'>Lot Number:</font> {field_result[3]}", styles['NormalText']))
-        content.append(Spacer(1, 4))
+        content.append(Spacer(1, 10))
 
         content.append(Paragraph(
             f"<font name='Times-Bold'>Production Date:</font> {field_result[8].strftime(f'%B {date_format}, %Y')}",
             styles['NormalText']))
-        content.append(Spacer(1, 4))
+        content.append(Spacer(1, 10))
 
-        delivery_receipt_text = Paragraph(
-            f"<font name='Times-Bold'>Delivery receipt Number: </font> {field_result[5]}", styles['NormalText'])
+        if is_rrf:
+            delivery_receipt_text = Paragraph(
+                f"<font name='Times-Bold'>RRF Number: </font> {field_result[5]}", styles['NormalText'])
+        else:
+            delivery_receipt_text = Paragraph(
+                f"<font name='Times-Bold'>Delivery receipt Number: </font> {field_result[5]}", styles['NormalText'])
         right_aligned_paragraph_style = ParagraphStyle(
             name="RightAlignedCellText",
             parent=styles['NormalText'],  # Inherit from NormalText for font, size etc.
@@ -201,13 +197,15 @@ class FileCOA(QWidget):
         )
         content.append(delivery_po_table)
 
-        content.append(Spacer(1, 12))
+        content.append(Spacer(1, 16))
 
         content.append(Paragraph("<b>Summary of Analysis</b>", styles["SubHeading"]))
         content.append(Spacer(1, 12))
         # Summary of Analysis Table
-        db_con.get_coa_analysis_results(coa_id)
-        rows = db_con.get_coa_analysis_results(coa_id)
+        if is_rrf:
+            rows = db_con.get_coa_analysis_results_rrf(coa_id)
+        else:
+            rows = db_con.get_coa_analysis_results(coa_id)
         summary_data = [["", "Standard", "Delivery"]]
         for row in rows:  # Fixed typo: rows -> row
             parameter = row[0]
@@ -234,11 +232,13 @@ class FileCOA(QWidget):
 
         name_len = len(field_result[10])
         lines = "_" * name_len  # Keep simple underline
-
-        content.append(Paragraph("Certified by:", styles["NormalText"]))
-        content.append(Spacer(1, 4))  # Adjusted spacing
-        content.append(Paragraph(lines, styles["NormalText"]))
-        content.append(Paragraph(str(field_result[10]), styles["NormalText"]))
+        indent = ParagraphStyle(
+            name="indent",
+            parent=styles['NormalText'],  # Inherit from NormalText for font, size etc.
+            leftIndent=55
+        )
+        content.append(Paragraph(f"Certified by: {lines}", styles["NormalText"]))
+        content.append(Paragraph(str(field_result[10]), indent))
         content.append(Paragraph("Date: " + str(field_result[9].strftime(f"%B {date_format}, %Y")), styles["NormalText"]))
         content.append(Spacer(1, 24))  # Reduced spacer before storage
 
@@ -271,10 +271,10 @@ class FileCOA(QWidget):
         buffer.seek(0)
         return buffer.getvalue()  # returns PDF bytes
 
-    def show_pdf_preview(self, coa_id, filename):
+    def show_pdf_preview(self, coa_id, filename, is_rrf):
         self.file_name = filename
         self.coa_id = coa_id
-        pdf_bytes = self.generate_pdf(coa_id)
+        pdf_bytes = self.generate_pdf(coa_id, is_rrf)
         # Wrap the PDF bytes in a QBuffer
         self.buffer = QBuffer()  # keep it as an instance attribute so it's not garbage collected
         self.buffer.setData(pdf_bytes)
