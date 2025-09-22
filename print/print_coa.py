@@ -107,8 +107,11 @@ class FileCOA(QWidget):
         self.print_action.triggered.connect(self.print_pdf)
         self.addAction(self.print_action)
 
-    def generate_pdf(self, coa_id):
-        field_result = db_con.get_single_coa_data(coa_id)
+    def generate_pdf(self, coa_id, is_rrf):
+        if is_rrf:
+            field_result = db_con.get_single_coa_data_rrf(coa_id)
+        else:
+            field_result = db_con.get_single_coa_data(coa_id)
 
         # Create PDF
         buffer = io.BytesIO()
@@ -156,8 +159,12 @@ class FileCOA(QWidget):
             styles['NormalText']))
         content.append(Spacer(1, 4))
 
-        delivery_receipt_text = Paragraph(
-            f"<font name='Times-Bold'>Delivery receipt Number: </font> {field_result[5]}", styles['NormalText'])
+        if is_rrf:
+            delivery_receipt_text = Paragraph(
+                f"<font name='Times-Bold'>RRF Number: </font> {field_result[5]}", styles['NormalText'])
+        else:
+            delivery_receipt_text = Paragraph(
+                f"<font name='Times-Bold'>Delivery receipt Number: </font> {field_result[5]}", styles['NormalText'])
         right_aligned_paragraph_style = ParagraphStyle(
             name="RightAlignedCellText",
             parent=styles['NormalText'],  # Inherit from NormalText for font, size etc.
@@ -195,8 +202,10 @@ class FileCOA(QWidget):
         content.append(Paragraph("<b>Summary of Analysis</b>", styles["SubHeading"]))
         content.append(Spacer(1, 12))
         # Summary of Analysis Table
-        db_con.get_coa_analysis_results(coa_id)
-        rows = db_con.get_coa_analysis_results(coa_id)
+        if is_rrf:
+            rows = db_con.get_coa_analysis_results_rrf(coa_id)
+        else:
+            rows = db_con.get_coa_analysis_results(coa_id)
         summary_data = [["", "Standard", "Delivery"]]
         for row in rows:  # Fixed typo: rows -> row
             parameter = row[0]
@@ -260,10 +269,10 @@ class FileCOA(QWidget):
         buffer.seek(0)
         return buffer.getvalue()  # returns PDF bytes
 
-    def show_pdf_preview(self, coa_id, filename):
+    def show_pdf_preview(self, coa_id, filename, is_rrf):
         self.file_name = filename
         self.coa_id = coa_id
-        pdf_bytes = self.generate_pdf(coa_id)
+        pdf_bytes = self.generate_pdf(coa_id, is_rrf)
         # Wrap the PDF bytes in a QBuffer
         self.buffer = QBuffer()  # keep it as an instance attribute so it's not garbage collected
         self.buffer.setData(pdf_bytes)

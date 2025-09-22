@@ -997,7 +997,7 @@ class MainWindow(QMainWindow):
             self.coa_widget.close()
             self.coa_widget.deleteLater()  # Good practice
         self.coa_widget = FileCOA()
-        self.coa_widget.show_pdf_preview(coa_id, filename)
+        self.coa_widget.show_pdf_preview(coa_id, filename, self.is_rrf)
         self.coa_widget.resize(900, 800)
         self.coa_widget.show()
         self.coa_widget.activateWindow()
