@@ -153,6 +153,25 @@ def create_tables():
             password VARCHAR(255)
         );
     """)
+
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS tbl_coa_certified_by (
+            id SERIAL PRIMARY KEY,
+            name VARCHAR(255) NOT NULL
+        );
+
+        INSERT INTO tbl_coa_certified_by (name)
+        SELECT t.name
+        FROM (VALUES
+            ('John Doe'),
+            ('Jane Doe'),
+            ('Michael Smith')
+        ) AS t(name)
+        WHERE NOT EXISTS (
+            SELECT 1 FROM tbl_coa_certified_by
+        );
+    """)
+
     db_dr.create_delivery_legacy_tables()
 
     conn.commit()
