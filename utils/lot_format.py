@@ -111,3 +111,31 @@ def normalize(lot_no: str) -> str:
 
     return ", ".join(all_expanded_parts)
 
+
+def lot_for_filename(lot_no: str) -> str:
+    if not lot_no:
+        return ""
+
+    # Split by commas
+    parts = [p.strip() for p in lot_no.split(",") if p.strip()]
+    result_parts = []
+
+    for part in parts:
+        # Handle ranges: "95-5448U to 95-5453U"
+        range_match = re.match(r"^(?:MB-\d{2}-|\d{2}-)?(\d+[A-Z]*)\s+to\s+(?:MB-\d{2}-|\d{2}-)?(\d+[A-Z]*)$", part)
+        if range_match:
+            start = range_match.group(1)
+            end = range_match.group(2)
+            result_parts.append(f"{start}-{end}")
+            continue
+
+        # Handle single lot numbers: "MB-21-4518AG" or "95-2087S"
+        single_match = re.match(r"^(?:MB-\d{2}-|\d{2}-)?(\d+[A-Z]*)$", part)
+        if single_match:
+            result_parts.append(single_match.group(1))
+            continue
+
+        # If nothing matches, just keep the original
+        result_parts.append(part)
+
+    return ", ".join(result_parts)

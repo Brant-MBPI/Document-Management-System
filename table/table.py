@@ -2,7 +2,7 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QTableWidget
 
 from db import db_con
-from utils import abs_path
+from utils import abs_path, lot_format
 
 
 def load_msds_table(self):
@@ -72,7 +72,8 @@ def load_coa_table(self):
         coa_id = record[0]  # id is usually first
         customer_name = record[1]
         color_code = record[2]
-        lot_number = record[3]
+        lot_number_full = record[3]
+        lot_number = lot_format.lot_for_filename(lot_number_full)
         delivery_receipt_number = record[5]
         delivery_date = record[7]
         delivery_date_str = delivery_date.strftime("%m%d%y")
@@ -125,7 +126,7 @@ def load_rrf_table(self):
         customer_name = record[1]
         color_code = record[2]
         lot_number_full = record[3]
-        lot_number = lot_number_full.split("-")[-1] if lot_number_full else ""
+        lot_number = lot_format.lot_for_filename(lot_number_full)
         rrf_number = record[5]
         delivery_date = record[7]
         delivery_date_str = delivery_date.strftime("%m%d%y")
