@@ -807,8 +807,7 @@ def get_summary_from_msds(code, dr_no):
 
     cur.execute(
         """SELECT 
-                    a.light_fastness,
-                    a.heat_stability,
+                    a.id,
                     i.product_color
                 FROM msds_sheets a
                 JOIN product_delivery_items i 
@@ -817,7 +816,7 @@ def get_summary_from_msds(code, dr_no):
                     ON i.dr_no = p.dr_no
                 WHERE a.product_code = %s
                   AND i.dr_no = %s
-                ORDER BY a.id DESC;
+                ORDER BY a.id DESC LIMIT 1;
             """,
         (code, dr_no,)
     )
@@ -852,6 +851,26 @@ def get_all_rrf_no():
     cur.close()
     conn.close()
     return [row[0] for row in records]
+
+
+def get_coa_table_msds(msds_id):
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT property_value
+        FROM msds_section_9 
+        WHERE msds_id = %s 
+          AND property_name IN ('Heat Stability (1-5)', 'Light fastness (1-8)')
+        ORDER BY CASE property_name
+            WHEN 'Light fastness (1-8)' THEN 1
+            WHEN 'Heat Stability (1-5)' THEN 2 END;
+    """, (msds_id,))
+    results = [row[0] for row in cur.fetchall()]
+
+    cur.close()
+    conn.close()
+    return results
 
 
 def authenticate_user(username, hashed_password):
