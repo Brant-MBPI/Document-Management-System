@@ -1,4 +1,3 @@
-
 import io
 from PyQt6.QtCore import QBuffer, QIODevice, QSize, Qt, QPointF
 from PyQt6.QtGui import QPainter, QPageSize, QPageLayout, QAction, QIcon
@@ -115,11 +114,11 @@ class FileMSDS(QWidget):
         doc = SimpleDocTemplate(
             buffer,
             pagesize=letter,
-            rightMargin=50, leftMargin=50, topMargin=96, bottomMargin=50
+            rightMargin=50, leftMargin=50, topMargin=96, bottomMargin=30
         )
         styles = getSampleStyleSheet()
         styles.add(
-            ParagraphStyle(name="SectionHeader", fontSize=14, leading=14, spaceAfter=6, spaceBefore=6, bold=True))
+            ParagraphStyle(name="SectionHeader", fontSize=12, leading=14, spaceAfter=6, spaceBefore=2, bold=True))
         styles.add(ParagraphStyle(name="NormalText", fontSize=10, leading=14, spaceAfter=4))
         IndentedText = ParagraphStyle(
             'IndentedText',
@@ -131,12 +130,19 @@ class FileMSDS(QWidget):
             fontName="Helvetica-Bold",  # built-in font
             fontSize=16,
             leading=22,
-            spaceAfter=10
+            spaceAfter=6
         ))
         content = []
         page_width = letter[0] - 50 - 50
         table_width = 0.90 * page_width
-        col_widths = [0.3 * table_width, 0.05 * table_width, 0.65 * table_width]
+        indent_width = 40
+        content_col_width = table_width - indent_width
+        col_widths = [
+            indent_width,
+            0.3 * content_col_width,
+            0.05 * content_col_width,
+            0.65 * content_col_width
+        ]
 
         # Title
         content.append(Paragraph("TECHNICAL DATA AND MATERIAL SAFETY DATA SHEET", styles['TitleSans']))
@@ -145,15 +151,15 @@ class FileMSDS(QWidget):
         # Section 1
         content.append(Paragraph("1) Product Identification", styles['SectionHeader']))
         section1_content = [
-            [Paragraph('Trade Name', styles['NormalText']), ':', Paragraph(str(field_result[2]), styles['NormalText'])],
-            [Paragraph('Manufactured by', styles['NormalText']), ':', Paragraph(str(field_result[6]), styles['NormalText'])],
-            [Paragraph('Tel No', styles['NormalText']), ':', Paragraph(str(field_result[7]), styles['NormalText'])],
-            [Paragraph('Facsimile', styles['NormalText']), ':', Paragraph(str(field_result[8]), styles['NormalText'])],
-            [Paragraph('Email Address', styles['NormalText']), ':', Paragraph(str(field_result[9]), styles['NormalText'])]
+            ['', Paragraph('Trade Name', styles['NormalText']), ':', Paragraph(str(field_result[2]), styles['NormalText'])],
+            ['', Paragraph('Manufactured By', styles['NormalText']), ':', Paragraph(str(field_result[6]), styles['NormalText'])],
+            ['', Paragraph('Tel No.', styles['NormalText']), ':', Paragraph(str(field_result[7]), styles['NormalText'])],
+            ['', Paragraph('Facsimile', styles['NormalText']), ':', Paragraph(str(field_result[8]), styles['NormalText'])],
+            ['', Paragraph('Email Address', styles['NormalText']), ':', Paragraph(str(field_result[9]), styles['NormalText'])]
         ]
 
         # Create the table
-        table = Table(section1_content, colWidths=col_widths, hAlign='RIGHT', spaceBefore=12)  # Adjust column widths as needed
+        table = Table(section1_content, colWidths=col_widths, hAlign='LEFT', spaceBefore=12)  # Changed to 'LEFT'
 
         # Apply styles
         def table_style(table_design):
@@ -161,8 +167,9 @@ class FileMSDS(QWidget):
                 ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
                 ('FONTSIZE', (0, 0), (-1, -1), 12),
                 ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-                ('ALIGN', (0, 0), (-1, -1), 'LEFT'),  # left-align all columns
-                ('ALIGN', (1, 0), (1, -1), 'CENTER'),  # center-align the middle ":"
+                ('ALIGN', (0, 0), (-1, -1), 'LEFT'),  # General left align
+                ('ALIGN', (1, 0), (1, -1), 'RIGHT'),  # Label column right align
+                ('ALIGN', (2, 0), (2, -1), 'CENTER'),  # Colon column center
                 ('LEFTPADDING', (0, 0), (-1, -1), 5),
                 ('RIGHTPADDING', (0, 0), (-1, -1), 5),
                 ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
@@ -175,9 +182,9 @@ class FileMSDS(QWidget):
         content.append(Spacer(1, 12))
 
         # Section 2
-        content.append(Paragraph("2) Composition / Information on Ingredients", styles['SectionHeader']))
+        content.append(Paragraph("2) Composition/Information on Ingredients", styles['SectionHeader']))
         content.append(Paragraph(str(field_result[10]), IndentedText))
-        content.append(Spacer(1, 10))
+        content.append(Spacer(1, 8))
 
         # Section 3
         content.append(Paragraph("3) Hazard Information", styles['SectionHeader']))
@@ -188,49 +195,38 @@ class FileMSDS(QWidget):
         if all(v.strip() == "" for v in hazard_fields):
             # Only show general note (field_result[16])
             content.append(Paragraph(str(field_result[16]), IndentedText))
-            content.append(Spacer(1, 10))
+            content.append(Spacer(1, 8))
             self.isMasterBatch = True
         else:
             section3_content = [
-                [Paragraph("• Preliminaries", styles['NormalText']), ":", Paragraph(str(field_result[11]), styles['NormalText'])],
-                [Paragraph("• Preliminary route of entry", styles['NormalText']), ":", Paragraph(str(field_result[12]), styles['NormalText'])],
-                [Paragraph("• Symptoms of exposure", styles['NormalText']), ":", Paragraph(str(field_result[13]), styles['NormalText'])],
-                [Paragraph("• Restrictive conditions", styles['NormalText']), ":", Paragraph(str(field_result[14]), styles['NormalText'])],
-                [Paragraph("• Eyes", styles['NormalText']), ":", Paragraph(str(field_result[15]), styles['NormalText'])]
+                ['', Paragraph("• Preliminaries", styles['NormalText']), ":", Paragraph(str(field_result[11]), styles['NormalText'])],
+                ['', Paragraph("• Preliminary route of entry", styles['NormalText']), ":", Paragraph(str(field_result[12]), styles['NormalText'])],
+                ['', Paragraph("• Symptoms of Exposure", styles['NormalText']), ":", Paragraph(str(field_result[13]), styles['NormalText'])],
+                ['', Paragraph("• Restrictive conditions", styles['NormalText']), ":", Paragraph(str(field_result[14]), styles['NormalText'])],
+                ['', Paragraph("• Eyes", styles['NormalText']), ":", Paragraph(str(field_result[15]), styles['NormalText'])]
             ]
 
-            table = Table(section3_content, colWidths=col_widths, hAlign='RIGHT', spaceBefore=12)
+            table = Table(section3_content, colWidths=col_widths, hAlign='LEFT', spaceBefore=12)
             table_style(table)
             content.append(Paragraph("Adverse Human Health Effects", IndentedText))
             content.append(table)
             content.append(Spacer(1, 12))
             content.append(Paragraph(str(field_result[16]), IndentedText))
-            content.append(Spacer(1, 10))
+            content.append(Spacer(1, 8))
             self.isMasterBatch = False
 
         # Section 4
         content.append(Paragraph("4) First Aid Measures", styles['SectionHeader']))
-        if self.isMasterBatch:
-            section4_content = [
-                [Paragraph('• Inhalation', styles['NormalText']), '-', Paragraph(str(field_result[17]), styles['NormalText'])],
-                [Paragraph('• Eyes', styles['NormalText']), '-', Paragraph(str(field_result[18]), styles['NormalText'])],
-                [Paragraph('• Skin', styles['NormalText']), '-', Paragraph(str(field_result[19]),styles['NormalText'])],
-                [Paragraph('• Ingestion', styles['NormalText']), '-', Paragraph(str(field_result[20]), styles['NormalText'])],
-               ]
-        else:
-            section4_content = [
-                [Paragraph('• Inhalation', styles['NormalText']), ':',
-                 Paragraph(str(field_result[17]), styles['NormalText'])],
-                [Paragraph('• Eyes', styles['NormalText']), ':',
-                 Paragraph(str(field_result[18]), styles['NormalText'])],
-                [Paragraph('• Skin', styles['NormalText']), ':',
-                 Paragraph(str(field_result[19]), styles['NormalText'])],
-                [Paragraph('• Ingestion', styles['NormalText']), ':',
-                 Paragraph(str(field_result[20]), styles['NormalText'])],
-            ]
+        colon_or_dash = '-' if self.isMasterBatch else ':'
+        section4_content = [
+            ['', Paragraph('• Inhalation', styles['NormalText']), colon_or_dash, Paragraph(str(field_result[17]), styles['NormalText'])],
+            ['', Paragraph('• Eyes', styles['NormalText']), colon_or_dash, Paragraph(str(field_result[18]), styles['NormalText'])],
+            ['', Paragraph('• Skin', styles['NormalText']), colon_or_dash, Paragraph(str(field_result[19]), styles['NormalText'])],
+            ['', Paragraph('• Ingestion', styles['NormalText']), colon_or_dash, Paragraph(str(field_result[20]), styles['NormalText'])],
+        ]
 
         # Create the table
-        table = Table(section4_content, colWidths=col_widths, hAlign='RIGHT', spaceBefore=12)
+        table = Table(section4_content, colWidths=col_widths, hAlign='LEFT', spaceBefore=12)
         table_style(table)
         content.append(table)
         content.append(Spacer(1, 12))
@@ -238,53 +234,40 @@ class FileMSDS(QWidget):
         # Section 5
         content.append(Paragraph("5) Fire Fighting Measures", styles['SectionHeader']))
         content.append(Paragraph(str(field_result[21]), IndentedText))
-        content.append(Spacer(1, 10))
+        content.append(Spacer(1, 8))
 
         # Section 6
         content.append(Paragraph("6) Accidental Release Measures", styles['SectionHeader']))
         content.append(Paragraph(str(field_result[22]),
                                  IndentedText))
-        content.append(Spacer(1, 10))
+        content.append(Spacer(1, 8))
 
         # Section 7
         content.append(Paragraph("7) Handling and Storage", styles['SectionHeader']))
         if not self.isMasterBatch:
             section7_content = [
-                [Paragraph('• Handling', styles['NormalText']), ':', Paragraph(str(field_result[23]), styles['NormalText'])],
-                [Paragraph('• Storage', styles['NormalText']), ':', Paragraph(str(field_result[24]), styles['NormalText'])]
+                ['', Paragraph('• Handling', styles['NormalText']), ':', Paragraph(str(field_result[23]), styles['NormalText'])],
+                ['', Paragraph('• Storage', styles['NormalText']), ':', Paragraph(str(field_result[24]), styles['NormalText'])],
             ]
-            table = Table(section7_content, colWidths=col_widths, hAlign='RIGHT', spaceBefore=12)
+            table = Table(section7_content, colWidths=col_widths, hAlign='LEFT', spaceBefore=12)
             table_style(table)
             content.append(table)
             content.append(Spacer(1, 12))
         else:
             content.append(Paragraph(str(field_result[24]), IndentedText))
-            content.append(Spacer(1, 10))
+            content.append(Spacer(1, 8))
 
         # Section 8
         content.append(Paragraph("8) Exposure Controls/ Personal Protection", styles['SectionHeader']))
-        if self.isMasterBatch:
-            section8_content = [
-                [Paragraph('Exposure Control', styles['NormalText']), '-', Paragraph(str(field_result[25]),styles['NormalText'])],
-                [Paragraph('Respiratory Protection', styles['NormalText']), '-', Paragraph(str(field_result[26]), styles['NormalText'])],
-                [Paragraph('Hand Protection', styles['NormalText']), '-', Paragraph(str(field_result[27]), styles['NormalText'])],
-                [Paragraph('Eye Protection', styles['NormalText']), '-', Paragraph(str(field_result[28]), styles['NormalText'])],
-                [Paragraph('Skin Protection', styles['NormalText']), '-', Paragraph(str(field_result[29]), styles['NormalText'])]
-            ]
-        else:
-            section8_content = [
-                [Paragraph('Exposure Control', styles['NormalText']), ':',
-                 Paragraph(str(field_result[25]), styles['NormalText'])],
-                [Paragraph('Respiratory Protection', styles['NormalText']), ':',
-                 Paragraph(str(field_result[26]), styles['NormalText'])],
-                [Paragraph('Hand Protection', styles['NormalText']), ':',
-                 Paragraph(str(field_result[27]), styles['NormalText'])],
-                [Paragraph('Eye Protection', styles['NormalText']), ':',
-                 Paragraph(str(field_result[28]), styles['NormalText'])],
-                [Paragraph('Skin Protection', styles['NormalText']), ':',
-                 Paragraph(str(field_result[29]), styles['NormalText'])]
-            ]
-        table = Table(section8_content, colWidths=col_widths, hAlign='RIGHT', spaceBefore=12)
+        colon_or_dash = '-' if self.isMasterBatch else ':'
+        section8_content = [
+            ['', Paragraph('• Exposure Control', styles['NormalText']), colon_or_dash, Paragraph(str(field_result[25]), styles['NormalText'])],
+            ['', Paragraph('• Respiratory Protection', styles['NormalText']), colon_or_dash, Paragraph(str(field_result[26]), styles['NormalText'])],
+            ['', Paragraph('• Hand Protection', styles['NormalText']), colon_or_dash, Paragraph(str(field_result[27]), styles['NormalText'])],
+            ['', Paragraph('• Eye Protection', styles['NormalText']), colon_or_dash, Paragraph(str(field_result[28]), styles['NormalText'])],
+            ['', Paragraph('• Skin Protection', styles['NormalText']), colon_or_dash, Paragraph(str(field_result[29]), styles['NormalText'])]
+        ]
+        table = Table(section8_content, colWidths=col_widths, hAlign='LEFT', spaceBefore=12)
         table_style(table)
         content.append(table)
         content.append(Spacer(1, 12))
@@ -297,59 +280,66 @@ class FileMSDS(QWidget):
             for row in section9_data:
                 property_name = row[3] or ""
                 property_value = row[4] or ""
-                section9_table_content.append([
-                    Paragraph(str(property_name), styles['NormalText']),
-                    ':',
-                    Paragraph(str(property_value), styles['NormalText'])
-                ])
-            table = Table(section9_table_content, colWidths=col_widths, hAlign='RIGHT', spaceBefore=12)
+                section9_table_content.append(
+                    ['', Paragraph(str(property_name), styles['NormalText']), ':', Paragraph(str(property_value), styles['NormalText'])]
+                )
+            table = Table(section9_table_content, colWidths=col_widths, hAlign='LEFT', spaceBefore=12)
             table_style(table)  # Apply the same table style
             content.append(table)
         else:
             content.append(
                 Paragraph("No specific physical and chemical properties information available.", IndentedText))
-        content.append(Spacer(1, 10))
+        content.append(Spacer(1, 8))
 
         # Section 10
         content.append(Paragraph("10) Stability & Reactivity", styles['SectionHeader']))
         content.append(Paragraph(str(field_result[30]), IndentedText))
-        content.append(Spacer(1, 10))
+        content.append(Spacer(1, 8))
+        section10_additional_content = [
+            ['', Paragraph('Conditions to avoid', styles['NormalText']), ':', Paragraph(str(field_result[31]), styles['NormalText'])],
+            ['', Paragraph('Materials to avoid', styles['NormalText']), ':', Paragraph(str(field_result[32]), styles['NormalText'])],
+            ['', Paragraph('Hazardous decomposition', styles['NormalText']), ':', Paragraph(str(field_result[33]), styles['NormalText'])]
+        ]
+        table = Table(section10_additional_content, colWidths=col_widths, hAlign='LEFT', spaceBefore=12)
+        table_style(table)
+        content.append(table)
+        content.append(Spacer(1, 8))
 
         # Section 11
         content.append(Paragraph("11) Toxicological Information", styles['SectionHeader']))
-        content.append(Paragraph(str(field_result[31]), IndentedText))
-        content.append(Spacer(1, 10))
+        content.append(Paragraph(str(field_result[34]), IndentedText))
+        content.append(Spacer(1, 8))
 
         # Section 12
         content.append(Paragraph("12) Ecological Information", styles['SectionHeader']))
-        content.append(Paragraph(str(field_result[32]), IndentedText))
-        content.append(Spacer(1, 10))
+        content.append(Paragraph(str(field_result[35]), IndentedText))
+        content.append(Spacer(1, 8))
         # Section 13
         content.append(Paragraph("13) Disposal", styles['SectionHeader']))
-        content.append(Paragraph(str(field_result[33]), IndentedText))
-        content.append(Spacer(1, 10))
+        content.append(Paragraph(str(field_result[36]), IndentedText))
+        content.append(Spacer(1, 8))
 
         # Section 14
         content.append(Paragraph("14) Transport Information", styles['SectionHeader']))
         content.append(
-            Paragraph(str(field_result[34]), IndentedText))
-        content.append(Spacer(1, 10))
+            Paragraph(str(field_result[37]), IndentedText))
+        content.append(Spacer(1, 8))
 
         # Section 15
         content.append(Paragraph("15) Regulatory Information", styles['SectionHeader']))
         content.append(Paragraph(
-            str(field_result[35]), IndentedText))
-        content.append(Spacer(1, 10))
+            str(field_result[38]), IndentedText))
+        content.append(Spacer(1, 8))
 
         # Section 16
         content.append(Paragraph("16) Shelf-Life", styles['SectionHeader']))
         content.append(
-            Paragraph(str(field_result[36]), IndentedText))
-        content.append(Spacer(1, 10))
+            Paragraph(str(field_result[39]), IndentedText))
+        content.append(Spacer(1, 8))
 
         # Section 17
         content.append(Paragraph("17) Other Information", styles['SectionHeader']))
-        content.append(Paragraph(str(field_result[37]), IndentedText))
+        content.append(Paragraph(str(field_result[40]), IndentedText))
         content.append(PageBreak())
 
         doc.build(content, onFirstPage=add_first_page_header)

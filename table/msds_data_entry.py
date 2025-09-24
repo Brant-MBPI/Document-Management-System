@@ -10,6 +10,7 @@ from utils import section9_design
 
 current_msds_id = None  # Global variable to store the current MSDS ID
 
+
 def load_msds_details(self, msds_id):
     field_result = db_con.get_single_msds_data(msds_id)
 
@@ -41,13 +42,16 @@ def load_msds_details(self, msds_id):
     self.eye_protection_input.setText(str(field_result[28]))
     self.skin_protection_input.setText(str(field_result[29]))
     self.stability_reactivity_input.setPlainText(str(field_result[30]))
-    self.toxicological_input.setPlainText(str(field_result[31]))
-    self.ecological_input.setPlainText(str(field_result[32]))
-    self.disposal_input.setPlainText(str(field_result[33]))
-    self.transport_input.setPlainText(str(field_result[34]))
-    self.regulatory_input.setPlainText(str(field_result[35]))
-    self.msds_shelf_life_input.setText(str(field_result[36]))
-    self.other_input.setPlainText(str(field_result[37]))
+    self.conditions_to_avoid_input.setText(str(field_result[31]))
+    self.materials_to_avoid_input.setText(str(field_result[32]))
+    self.hazardous_decomposition_input.setText(str(field_result[33]))
+    self.toxicological_input.setPlainText(str(field_result[34]))
+    self.ecological_input.setPlainText(str(field_result[35]))
+    self.disposal_input.setPlainText(str(field_result[36]))
+    self.transport_input.setPlainText(str(field_result[37]))
+    self.regulatory_input.setPlainText(str(field_result[38]))
+    self.msds_shelf_life_input.setText(str(field_result[39]))
+    self.other_input.setPlainText(str(field_result[40]))
     self.btn_msds_submit.setText("Update")
     check_empty_fields(self)  # Call validation after loading data
 
@@ -92,6 +96,7 @@ def load_msds_details(self, msds_id):
     # 4. Update the state of the up/down buttons
     _update_property_buttons(self)
     check_empty_fields(self)
+
 
 def create_form(self):
     clear_msds_form(self)

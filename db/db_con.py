@@ -27,40 +27,43 @@ def create_tables():
             product_code VARCHAR(100),
             creation_date TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
             last_modified_date TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-            
+
             manufacturer_info TEXT,
             contact_tel VARCHAR(50),
             contact_facsimile VARCHAR(50),
             contact_email VARCHAR(100),
-            
+
             composition_info TEXT,
-            
+
             hazard_preliminaries TEXT,
             hazard_entry_route TEXT,
             hazard_symptoms TEXT,
             hazard_restrictive_conditions TEXT,
             hazard_eyes TEXT,
             hazard_general_note TEXT,
-            
+
             first_aid_inhalation TEXT,
             first_aid_eyes TEXT,
             first_aid_skin TEXT,
             first_aid_ingestion TEXT,
-            
+
             fire_fighting_media TEXT,
-            
+
             accidental_release_info TEXT,
-            
+
             handling_info TEXT,
             storage_info TEXT,
-            
+
             exposure_control_info TEXT,
             respiratory_protection TEXT,
             hand_protection TEXT,
             eye_protection TEXT,
             skin_protection TEXT,
-            
+
             stability_reactivity TEXT,
+            conditions_to_avoid TEXT,
+            materials_to_avoid TEXT,
+            hazardous_decomposition TEXT,
             toxicological_info TEXT,
             ecological_info TEXT,
             disposal_info TEXT,
@@ -182,8 +185,6 @@ def create_tables():
 # Create
 def save_msds_sheet(data, section9):
     conn = get_connection()
-    msds_id = None
-
     try:
         with conn:
             with conn.cursor() as cur:
@@ -218,6 +219,9 @@ def save_msds_sheet(data, section9):
                         eye_protection,
                         skin_protection,
                         stability_reactivity,
+                        conditions_to_avoid,
+                        materials_to_avoid,
+                        hazardous_decomposition,
                         toxicological_info,
                         ecological_info,
                         disposal_info,
@@ -230,7 +234,7 @@ def save_msds_sheet(data, section9):
                         %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
                         %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
                         %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                        %s, %s, %s, %s, %s
+                        %s, %s, %s, %s, %s, %s, %s, %s
                     )
                     RETURNING id;
                 """, (
@@ -242,7 +246,8 @@ def save_msds_sheet(data, section9):
                     data["first_aid_ingestion"], data["fire_fighting_media"], data["accidental_release_info"],
                     data["handling_info"], data["storage_info"], data["exposure_control_info"],
                     data["respiratory_protection"], data["hand_protection"], data["eye_protection"],
-                    data["skin_protection"], data["stability_reactivity"], data["toxicological_info"],
+                    data["skin_protection"], data["stability_reactivity"], data["conditions_to_avoid"],
+                    data["materials_to_avoid"], data["hazardous_decomposition"], data["toxicological_info"],
                     data["ecological_info"], data["disposal_info"], data["transport_info"],
                     data["regulatory_info"], data["shelf_life_info"], data["other_info"]
                 ))
