@@ -118,7 +118,7 @@ class FileMSDS(QWidget):
         )
         styles = getSampleStyleSheet()
         styles.add(
-            ParagraphStyle(name="SectionHeader", fontSize=12, leading=14, spaceAfter=6, spaceBefore=2, bold=True))
+            ParagraphStyle(name="SectionHeader", fontSize=12, leading=14, spaceAfter=8, spaceBefore=2, bold=True))
         styles.add(ParagraphStyle(name="NormalText", fontSize=10, leading=14, spaceAfter=4))
         IndentedText = ParagraphStyle(
             'IndentedText',
