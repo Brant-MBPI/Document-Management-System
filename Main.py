@@ -90,6 +90,9 @@ class MainWindow(QMainWindow):
         #Section10
         self.stability_reactivity_input = QTextEdit()
         self.stability_reactivity_input.setTabChangesFocus(True)
+        self.conditions_to_avoid_input = QLineEdit("None")
+        self.materials_to_avoid_input = QLineEdit("None")
+        self.hazardous_decomposition_input = QLineEdit("None")
         #Section11
         self.toxicological_input = QTextEdit()
         self.toxicological_input.setTabChangesFocus(True)
@@ -534,6 +537,9 @@ class MainWindow(QMainWindow):
                 "Skin Protection": self.skin_protection_input.text(),
 
                 "Stability & Reactivity": self.stability_reactivity_input.toPlainText(),
+                "Conditions to avoid": self.conditions_to_avoid_input.text(),
+                "Materials to avoid": self.materials_to_avoid_input.text(),
+                "Hazardous decomposition": self.hazardous_decomposition_input.text(),
                 "Toxicological": self.toxicological_input.toPlainText(),
                 "Ecological": self.ecological_input.toPlainText(),
                 "Disposal": self.disposal_input.toPlainText(),

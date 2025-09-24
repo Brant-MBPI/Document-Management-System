@@ -10,7 +10,6 @@ from utils import section9_design
 
 current_msds_id = None  # Global variable to store the current MSDS ID
 
-
 def load_msds_details(self, msds_id):
     field_result = db_con.get_single_msds_data(msds_id)
 
@@ -89,30 +88,10 @@ def load_msds_details(self, msds_id):
             row_widget = _create_property_row(self, property_name, property_value)
             # Insert before the "Add Property" button (which is always the last item)
             self.physical_properties_layout.insertWidget(self.physical_properties_layout.count() - 1, row_widget)
-    # else:
-    #     # If no custom properties, re-add the default ones (same logic as in clear_msds_form)
-    #     initial_props = [
-    #         ("Appearance", "White pellet form"),
-    #         ("Odor", "Odorless"),
-    #         ("Packaging", "25 kgs."),
-    #         ("Carrier Material", "Polyolefin resin"),
-    #         ("Resin Suitability", "Polyolefin"),
-    #         ("Light fastness (1-8)", ""),
-    #         ("Heat Stability (1-5)", ""),
-    #         ("Non Toxicity", "Non-toxic, colorant contains no heavy metal"),
-    #         ("Flash Point", "N/A"),
-    #         ("Auto Ignition", "N/A"),
-    #         ("Explosion Property", "N/A"),
-    #         ("Solubility (Water)", "Insoluble"),
-    #     ]
-    #     for name, value in initial_props:
-    #         row_widget = _create_property_row(self, name, value)
-    #         self.physical_properties_layout.insertWidget(self.physical_properties_layout.count() - 1, row_widget)
 
     # 4. Update the state of the up/down buttons
     _update_property_buttons(self)
     check_empty_fields(self)
-
 
 def create_form(self):
     clear_msds_form(self)
@@ -219,27 +198,57 @@ def create_form(self):
     main_v_layout.addLayout(header_layout)  # Add header to the main layout
 
     # Helper function to create form groups with GridLayout for alignment
-    # This also connects the validation function
     def create_form_group(title, fields):
         group = QGroupBox(title)
-        layout = QGridLayout()
-        layout.setHorizontalSpacing(30)
-        layout.setVerticalSpacing(15)
-        layout.setContentsMargins(20, 25, 20, 20)
+        if title == "10) Stability & Reactivity":
+            # Use QHBoxLayout for a single row with two sections
+            main_layout = QHBoxLayout()
+            main_layout.setContentsMargins(20, 25, 20, 20)
+            main_layout.setSpacing(30)
 
-        row_idx = 0
-        for label_text, input_widget in fields:
-            label = QLabel(label_text)
-            # Changed AlignTop to AlignVCenter
-            layout.addWidget(label, row_idx, 0, Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
-            layout.addWidget(input_widget, row_idx, 1)
-            # Connect text changed signal for validation
-            if isinstance(input_widget, QLineEdit):
-                input_widget.textChanged.connect(lambda text, widget=input_widget: validate_field(widget))
-            elif isinstance(input_widget, QTextEdit):
-                input_widget.textChanged.connect(lambda: validate_field(input_widget))
-            row_idx += 1
-        group.setLayout(layout)
+            # Left side: Details (QTextEdit, no label)
+            details_layout = QVBoxLayout()
+            details_widget = fields[0][1]  # self.stability_reactivity_input (QTextEdit)
+            details_layout.addWidget(details_widget)
+            main_layout.addLayout(details_layout, stretch=2)  # Give more space to Details
+
+            # Right side: Three QLineEdit fields in a vertical layout
+            right_layout = QVBoxLayout()
+            right_layout.setSpacing(15)
+            for label_text, input_widget in fields[1:]:  # Skip Details
+                field_layout = QHBoxLayout()
+                label = QLabel(label_text)
+                field_layout.addWidget(label, alignment=Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+                field_layout.addWidget(input_widget)
+                right_layout.addLayout(field_layout)
+                # Connect text changed signal for validation
+                if isinstance(input_widget, QLineEdit):
+                    input_widget.textChanged.connect(lambda text, widget=input_widget: validate_field(widget))
+            main_layout.addLayout(right_layout, stretch=1)
+
+            group.setLayout(main_layout)
+        else:
+            # Original single-column layout for other sections
+            layout = QGridLayout()
+            layout.setHorizontalSpacing(30)
+            layout.setVerticalSpacing(15)
+            layout.setContentsMargins(20, 25, 20, 20)
+            row_idx = 0
+            for label_text, input_widget in fields:
+                if label_text:  # Only create and add label if label_text is non-empty
+                    label = QLabel(label_text)
+                    layout.addWidget(label, row_idx, 0, Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+                    layout.addWidget(input_widget, row_idx, 1)
+                else:
+                    # If no label, span the widget across both columns
+                    layout.addWidget(input_widget, row_idx, 0, 1, 2)
+                # Connect text changed signal for validation
+                if isinstance(input_widget, QLineEdit):
+                    input_widget.textChanged.connect(lambda text, widget=input_widget: validate_field(widget))
+                elif isinstance(input_widget, QTextEdit):
+                    input_widget.textChanged.connect(lambda: validate_field(input_widget))
+                row_idx += 1
+            group.setLayout(layout)
         return group
 
     # Section 1: Product Identification
@@ -304,7 +313,6 @@ def create_form(self):
     simplified_hazard_layout.setHorizontalSpacing(30)
     simplified_hazard_layout.setVerticalSpacing(15)
     simplified_hazard_layout.setContentsMargins(20, 10, 20, 20)
-    # Only add the General Note field to the simplified layout
     label_general_note = QLabel("General Note:")
     simplified_hazard_layout.addWidget(label_general_note, 0, 0,
                                        Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
@@ -344,7 +352,6 @@ def create_form(self):
     main_v_layout.addWidget(create_form_group("6) Accidental Release Measures", accidental_release_fields))
 
     # Section 7: Handling and Storage - NEW STACKED LAYOUT
-    # Detailed Handling and Storage Fields
     detailed_handling_storage_fields = [
         ("Handling:", self.handling_input),
         ("Storage:", self.msds_storage_input),
@@ -355,7 +362,7 @@ def create_form(self):
     detailed_handling_storage_widget.setObjectName("detailedHandlingStorageWidget")
     detailed_handling_storage_layout = QGridLayout(detailed_handling_storage_widget)
     detailed_handling_storage_layout.setHorizontalSpacing(30)
-    detailed_handling_storage_layout.setVerticalSpacing(15)
+    detailed_hazard_layout.setVerticalSpacing(15)
     detailed_handling_storage_layout.setContentsMargins(20, 10, 20, 20)
     row_idx = 0
     for label_text, input_widget in detailed_handling_storage_fields:
@@ -415,7 +422,6 @@ def create_form(self):
         else:
             self.hazard_stacked_layout.setCurrentIndex(0)  # Show detailed
             self.hazard_toggle_button.setText("Switch Layout")
-            # Re-enable all fields
             self.hazard_preliminaries_input.setText("Inert nuisance dust can cause lung irritation.")
             self.hazard_entry_route_input.setText("Inhalation of airborne dust.")
             self.hazard_symptoms_input.setText("Coughing, sneezing or irritation of the mucous membrane.")
@@ -448,7 +454,10 @@ def create_form(self):
 
     # Section 10: Stability & Reactivity
     stability_reactivity_fields = [
-        ("Details:", self.stability_reactivity_input),
+        ("", self.stability_reactivity_input),
+        ("Conditions to avoid:", self.conditions_to_avoid_input),
+        ("Materials to avoid:", self.materials_to_avoid_input),
+        ("Hazardous decomposition:", self.hazardous_decomposition_input),
     ]
     main_v_layout.addWidget(create_form_group("10) Stability & Reactivity", stability_reactivity_fields))
 
@@ -484,7 +493,6 @@ def create_form(self):
 
     # Perform initial validation after all widgets are set up
     check_empty_fields(self)
-
 
 def create_dynamic_section9(self):
     """Custom dynamic layout for Section 9."""
@@ -531,7 +539,6 @@ def create_dynamic_section9(self):
     group.setLayout(self.physical_properties_layout)
     return group
 
-
 def _create_property_row(self, name, value):
     """Create a single dynamic row widget."""
     row_widget = QWidget()
@@ -559,7 +566,6 @@ def _create_property_row(self, name, value):
     row_layout.addStretch()
     row_layout.addWidget(up_btn)
     row_layout.addWidget(down_btn)
-
     row_layout.addWidget(delete_btn)
 
     # Store references on row_widget for easy access
@@ -590,11 +596,6 @@ def _create_property_row(self, name, value):
         if idx > 0 and idx < self.physical_properties_layout.count() - 1:
             self.physical_properties_layout.removeWidget(row_widget)
             self.physical_properties_layout.insertWidget(idx - 1, row_widget)
-            # Swap in tracking list to maintain order
-            prev_row_tuple = self.physical_property_rows[idx - 1]
-            self.physical_property_rows[idx - 1] = (name_edit, value_edit)
-            self.physical_property_rows[idx] = prev_row_tuple  # Wait, no—after remove/insert, indices shift
-            # Better: find and swap
             for i, t in enumerate(self.physical_property_rows):
                 if t[0] == name_edit:
                     if i > 0:
@@ -609,7 +610,6 @@ def _create_property_row(self, name, value):
         if 0 <= idx < total_rows - 1:
             self.physical_properties_layout.removeWidget(row_widget)
             self.physical_properties_layout.insertWidget(idx + 1, row_widget)
-            # Swap in tracking list
             for i, t in enumerate(self.physical_property_rows):
                 if t[0] == name_edit:
                     if i < len(self.physical_property_rows) - 1:
@@ -624,16 +624,13 @@ def _create_property_row(self, name, value):
 
     return row_widget
 
-
 def _add_property(self):
     """Add a new empty row."""
     name, ok = QInputDialog.getText(self, "Add Property", "Property Name:", text="")
     if ok and name.strip():
         row = _create_property_row(self, name.strip(), "")
-        # Insert before the add button row
         self.physical_properties_layout.insertWidget(self.physical_properties_layout.count() - 1, row)
         _update_property_buttons(self)
-
 
 def _update_property_buttons(self):
     """Enable/disable up/down buttons based on position."""
@@ -645,7 +642,6 @@ def _update_property_buttons(self):
             if hasattr(row_widget, 'up_btn'):
                 row_widget.up_btn.setEnabled(i > 0)
                 row_widget.down_btn.setEnabled(i < total_rows - 1)
-
 
 def form_btn(self):
     button_style = """
@@ -681,7 +677,6 @@ def form_btn(self):
     submit_button_row.addWidget(self.btn_msds_submit)
     submit_button_row.addStretch()  # Center button
     return submit_button_row
-
 
 def clear_msds_form(self):
     """Clear all input fields and the summary table."""
@@ -761,6 +756,9 @@ def clear_msds_form(self):
             _update_property_buttons(self)
 
         self.stability_reactivity_input.setPlainText("This product is chemically stable and non-reactive.")
+        self.conditions_to_avoid_input.setText("None")
+        self.materials_to_avoid_input.setText("None")
+        self.hazardous_decomposition_input.setText("None")
         self.toxicological_input.setPlainText("This product is non-toxic and physiologically harmless.")
         self.ecological_input.setPlainText("No known harmful effects to human lives or to the environment.")
         self.disposal_input.setPlainText(
@@ -791,7 +789,6 @@ def clear_msds_form(self):
     except Exception as e:
         window_alert.show_message(self, "Unexpected Error", f"An error occurred: {str(e)}", icon_type="critical")
 
-
 def validate_field(widget):
     """Checks if a QLineEdit or QTextEdit is empty and applies/removes red border."""
     is_empty = False
@@ -809,11 +806,8 @@ def validate_field(widget):
             widget.setProperty("class", "")
             widget.style().polish(widget)  # Reapply stylesheet to update appearance
 
-
 def check_empty_fields(self):
     """Applies validation to all relevant input fields in the form."""
-    # List all QLineEdit and QTextEdit instances you want to validate
-    # You'll need to make sure these are attributes of `self` in your actual class
     input_fields = [
         self.customer_name_input, self.trade_label_input, self.manufactured_label_input,
         self.tel_label_input, self.facsimile_label_input, self.email_label_input,
@@ -824,6 +818,7 @@ def check_empty_fields(self):
         self.accidental_release_input, self.handling_input, self.msds_storage_input,
         self.exposure_control_input, self.respiratory_protection_input, self.hand_protection_input,
         self.eye_protection_input, self.skin_protection_input, self.stability_reactivity_input,
+        self.conditions_to_avoid_input, self.materials_to_avoid_input, self.hazardous_decomposition_input,
         self.toxicological_input, self.ecological_input, self.disposal_input,
         self.transport_input, self.regulatory_input, self.msds_shelf_life_input,
         self.other_input
