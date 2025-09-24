@@ -1105,7 +1105,7 @@ class MainWindow(QMainWindow):
 
             #Data Entry
             self.coa_header_label.setText("Certificate of Analysis - RRF")
-            self.completer.model().setStringList(self.rrf_no_list)
+            self.dr_completer.model().setStringList(self.rrf_no_list)
             self.delivery_receipt_label.setText("RRF No:")
             coa_data_entry.clear_coa_form(self)
             #  change the connected function
@@ -1145,7 +1145,7 @@ class MainWindow(QMainWindow):
 
             # Data Entry
             self.coa_header_label.setText("Certificate of Analysis")
-            self.completer.model().setStringList(self.dr_no_list)
+            self.dr_completer.model().setStringList(self.dr_no_list)
             self.delivery_receipt_label.setText("Delivery Receipt No:")
             coa_data_entry.clear_coa_form(self)
 
