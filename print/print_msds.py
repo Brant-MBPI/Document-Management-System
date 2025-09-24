@@ -114,7 +114,7 @@ class FileMSDS(QWidget):
         doc = SimpleDocTemplate(
             buffer,
             pagesize=letter,
-            rightMargin=50, leftMargin=50, topMargin=96, bottomMargin=30
+            rightMargin=50, leftMargin=50, topMargin=94, bottomMargin=40
         )
         styles = getSampleStyleSheet()
         styles.add(
@@ -130,7 +130,7 @@ class FileMSDS(QWidget):
             fontName="Helvetica-Bold",  # built-in font
             fontSize=16,
             leading=22,
-            spaceAfter=6
+            spaceAfter=2
         ))
         content = []
         page_width = letter[0] - 50 - 50
