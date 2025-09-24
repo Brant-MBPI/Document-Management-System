@@ -163,11 +163,9 @@ class MainWindow(QMainWindow):
         self.coa_header_label = QLabel("Certificate of Analysis")
         self.dr_no_list = db_con.get_all_dr_no()
         self.rrf_no_list = db_con.get_all_rrf_no()
+        self.certified_by_lists = db_con.get_all_certified_by()
         # Create QCompleter with the list
-        self.completer = QCompleter(self.dr_no_list)
-        self.completer.setFilterMode(Qt.MatchFlag.MatchStartsWith)  # Suggest if text is contained anywhere
-        self.delivery_receipt_input = QLineEdit()
-        self.completer.popup().setStyleSheet("""
+        style_completer = """
             QListView {
                 background-color: white;
                 border: 1px solid gray;
@@ -184,8 +182,12 @@ class MainWindow(QMainWindow):
                 background-color: #0078d7;  /* Windows blue */
                 color: white;
             }
-        """)
-        self.delivery_receipt_input.setCompleter(self.completer)
+        """
+        self.dr_completer = QCompleter(self.dr_no_list)
+        self.dr_completer.setFilterMode(Qt.MatchFlag.MatchStartsWith)  # Suggest if text is contained anywhere
+        self.delivery_receipt_input = QLineEdit()
+        self.dr_completer.popup().setStyleSheet(style_completer)
+        self.delivery_receipt_input.setCompleter(self.dr_completer)
         self.delivery_receipt_timer = self.setup_finished_typing(
             self.delivery_receipt_input,
             lambda: coa_data_entry.populate_coa_fields(self, self.delivery_receipt_input.text()),
@@ -195,7 +197,14 @@ class MainWindow(QMainWindow):
         self.sync_button.setFixedSize(60, 25)
         self.sync_button.clicked.connect(self.run_sync_script)
         self.po_number_input = QLineEdit()
+        self.certified_completer = QCompleter(self.certified_by_lists)
+        self.certified_completer.setCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
+        self.certified_completer.setFilterMode(Qt.MatchFlag.MatchContains)
+        self.certified_completer.setCompletionMode(QCompleter.CompletionMode.PopupCompletion)
+        self.certified_completer.setCurrentRow(0)
         self.certified_by_input = QLineEdit()
+        self.certified_completer.popup().setStyleSheet(style_completer)
+        self.certified_by_input.setCompleter(self.certified_completer)
         self.creation_date_input = QDateEdit()
         self.creation_date_input.setCalendarPopup(True)
         self.creation_date_input.setDate(QDate.currentDate())
@@ -668,6 +677,12 @@ class MainWindow(QMainWindow):
         # Check summary of analysis if no empty row
         if not any(any(cell for cell in row) for row in summary_of_analysis.values()):
             window_alert.show_message(self, "Missing Input", "Please fill in the Summary of Analysis table.",
+                                      icon_type="warning")
+            return
+
+            # Validate certified_by against the list from the database
+        if certified_by not in self.certified_by_lists:
+            window_alert.show_message(self, "Invalid Input", f"Certified By: '{certified_by}' is not in the list.",
                                       icon_type="warning")
             return
 

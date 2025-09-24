@@ -166,9 +166,9 @@ def create_tables():
         INSERT INTO tbl_coa_certified_by (name)
         SELECT t.name
         FROM (VALUES
-            ('John Doe'),
-            ('Jane Doe'),
-            ('Michael Smith')
+            ('Marissa Naz'),
+            ('Linzy Jam Bautista'),
+            ('Geelyn Raeanne Rellin')
         ) AS t(name)
         WHERE NOT EXISTS (
             SELECT 1 FROM tbl_coa_certified_by
@@ -874,6 +874,18 @@ def get_all_rrf_no():
     cur = conn.cursor()
 
     cur.execute("SELECT rrf_no FROM rrf_items ORDER BY CAST(rrf_no AS INTEGER);")
+    records = cur.fetchall()  # only one row expected
+
+    cur.close()
+    conn.close()
+    return [row[0] for row in records]
+
+
+def get_all_certified_by():
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("SELECT name FROM tbl_coa_certified_by;")
     records = cur.fetchall()  # only one row expected
 
     cur.close()
