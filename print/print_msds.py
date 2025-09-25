@@ -294,7 +294,6 @@ class FileMSDS(QWidget):
         # Section 10
         content.append(Paragraph("10) Stability & Reactivity", styles['SectionHeader']))
         content.append(Paragraph(str(field_result[30]), IndentedText))
-        content.append(Spacer(1, 8))
         section10_additional_content = [
             ['', Paragraph('Conditions to avoid', styles['NormalText']), ':', Paragraph(str(field_result[31]), styles['NormalText'])],
             ['', Paragraph('Materials to avoid', styles['NormalText']), ':', Paragraph(str(field_result[32]), styles['NormalText'])],

@@ -562,7 +562,7 @@ def _create_property_row(self, name, value):
     down_btn.setObjectName("actionButton")
 
     # Layout: Property: [name] : [value (stretch)] [↑] [↓] [Delete]
-    label = QLabel("Property:")
+    label = QLabel("")
     label.setObjectName("propertyLabel")
     row_layout.addWidget(label)
     row_layout.addWidget(name_edit, stretch=1)
