@@ -90,12 +90,12 @@ def coa_data_entry_form(self, is_rrf=False):
                 text-align: center; 
             }}
             QLineEdit, QDateEdit {{
-                font-size: 14px;
-                padding: 10px 12px;
+                font-size: 12px;
+                padding: 6px 8px;
                 border: 1px solid #ced4da; /* Lighter, more neutral border */
                 border-radius: 6px; /* Slightly less rounded for a crisp look */
                 background-color: #ffffff;
-                min-height: 38px; /* Consistent height */
+                min-height: 28px; /* Consistent height */
                 selection-background-color: #aed6f1;
             }}
             QLineEdit:focus, QDateEdit:focus {{
@@ -124,14 +124,14 @@ def coa_data_entry_form(self, is_rrf=False):
                 left: 1px;
             }}
             QGroupBox {{
-                font-size: 16px;
+                font-size: 14px;
                 font-weight: 600;
                 color: #212529;
                 border: 1px solid #e0e0e0; /* Lighter border for group box */
                 border-radius: 8px;
                 margin-top: 2.0ex; /* Space for title */
                 background-color: #ffffff;
-                padding: 15px; /* Inner padding for group box content */
+                padding: 10px; /* Inner padding for group box content */
             }}
             QGroupBox::title {{
                 subcontrol-origin: margin;
@@ -192,12 +192,12 @@ def coa_data_entry_form(self, is_rrf=False):
                 color: white;
                 font-size: 13px; /* Slightly smaller font */
                 font-weight: 500;
-                padding: 7px 10px; /* Adjusted padding */
+                padding: 6px 8px; /* Adjusted padding */
                 border: none;
                 border-radius: 6px;
-                min-width: 60px; /* Adjusted min-width */
-                max-width: 75px; /* Adjusted max-width */
-                min-height: 36px; /* Slightly smaller height */
+                min-width: 50px; /* Adjusted min-width */
+                max-width: 65px; /* Adjusted max-width */
+                min-height: 28px; /* Slightly smaller height */
             }
             QPushButton:hover { background-color: #218838; }
             QPushButton:pressed { background-color: #1e7e34; }
