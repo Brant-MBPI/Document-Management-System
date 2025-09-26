@@ -656,13 +656,13 @@ def form_btn(self):
         QPushButton {
             background-color: #007bff; /* Primary blue for submit (consistent with COA) */
             color: #ffffff;
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 600;
-            padding: 10px 20px;
+            padding: 6px 12px;
             border: none;
             border-radius: 6px;
-            min-width: 120px;
-            min-height: 40px;
+            min-width: 80px;
+            min-height: 30px;
             margin-top: 20px;
             letter-spacing: 0.5px;
         }

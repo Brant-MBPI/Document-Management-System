@@ -318,11 +318,11 @@ def coa_data_entry_form(self, is_rrf=False):
                 color: #ffffff;
                 font-size: 14px; /* Slightly smaller font */
                 font-weight: 600;
-                padding: 6px 16px; /* Adjusted padding */
+                padding: 6px 12px; /* Adjusted padding */
                 border: none;
                 border-radius: 6px;
-                min-width: 100px; /* Adjusted min-width */
-                min-height: 38px; /* Adjusted min-height */
+                min-width: 80px; /* Adjusted min-width */
+                min-height: 30px; /* Adjusted min-height */
                 transition: background-color 0.2s ease, box-shadow 0.2s ease;
             }
             QPushButton:hover {
@@ -365,7 +365,7 @@ def coa_data_entry_form(self, is_rrf=False):
         btn_add_table_row = QHBoxLayout()
         btn_add_table_row.addStretch()
         btn_add_table_row.addWidget(btn_add_row)
-        btn_add_table_row.addSpacing(15)
+        btn_add_table_row.addSpacing(10)
         btn_add_table_row.addWidget(btn_delete_row)
         btn_add_table_row.addStretch()
         summary_analysis_layout.addLayout(btn_add_table_row)
