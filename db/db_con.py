@@ -107,6 +107,34 @@ def create_tables():
             creation_date TIMESTAMP WITH TIME ZONE DEFAULT NOW()
         );
     """)
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS tbl_terumo (
+            id SERIAL PRIMARY KEY,
+            coa_id INTEGER NOT NULL REFERENCES certificates_of_analysis(id) ON DELETE CASCADE,
+            item_description TEXT,
+            color_std TEXT,
+            color_actual TEXT,
+            color_judgement VARCHAR(36),
+            diameter_std TEXT,
+            area_std TEXT,
+            count_std TEXT,
+            fmc_actual TEXT,
+            fmc_judgement VARCHAR(36),
+            appearance_std TEXT,
+            appearance_start TEXT,
+            appearance_mid TEXT,
+            appearance_end TEXT,
+            appearance_judgement VARCHAR(36),
+            dimension_std TEXT,
+            dimension_start TEXT,
+            dimension_mid TEXT,
+            dimension_end TEXT,
+            dimension_judgment VARCHAR(36),
+            remarks TEXT,
+            approved_by TEXT,
+            approver_position TEXT
+        );
+    """)
 
     cur.execute("""
         CREATE TABLE IF NOT EXISTS coa_analysis_results (
