@@ -139,3 +139,33 @@ def lot_for_filename(lot_no: str) -> str:
         result_parts.append(part)
 
     return ", ".join(result_parts)
+
+
+def expand_lots(normalized_lots: str) -> str:
+    if not normalized_lots:
+        return ""
+
+    parts = [p.strip() for p in normalized_lots.split(",") if p.strip()]
+    expanded_parts = []
+
+    for part in parts:
+        # Check if part is a range: "MB-13-3756N to MB-13-3760N"
+        range_match = re.match(r"^(.*?)(\d+)([A-Za-z]*)\s+to\s+(.*?)(\d+)([A-Za-z]*)$", part)
+        if range_match:
+            prefix1, start_num, suffix1, prefix2, end_num, suffix2 = range_match.groups()
+
+            if prefix1 != prefix2 or suffix1 != suffix2:
+                # Mismatched range, keep as-is
+                expanded_parts.append(part)
+                continue
+
+            start_num = int(start_num)
+            end_num = int(end_num)
+
+            for i in range(start_num, end_num + 1):
+                expanded_parts.append(f"{prefix1}{i}{suffix1}")
+        else:
+            # Not a range, just append
+            expanded_parts.append(part)
+
+    return ", ".join(expanded_parts)

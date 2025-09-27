@@ -234,6 +234,11 @@ class MainWindow(QMainWindow):
         self.terumo_item_code = QLineEdit()
         self.terumo_item_description = QLineEdit()
         self.terumo_lot_number = QLineEdit()
+        self.terumo_lot_timer = self.setup_finished_typing(
+            self.terumo_lot_number,
+            lambda: terumo.seperate_lots(self, self.terumo_lot_number.text()),
+            delay=1200
+        )
         self.terumo_quantity = QLineEdit()
         self.terumo_delivery_date = QDateEdit()
         self.terumo_delivery_date.setCalendarPopup(True)
@@ -263,6 +268,7 @@ class MainWindow(QMainWindow):
         self.terumo_dimension_middle = QLineEdit("2.6x3.5")
         self.terumo_dimension_end = QLineEdit("2.5x3.5")
         self.terumo_dimension_judgement = QLineEdit("Passed")
+        self.terumo_lots = QTextEdit()
         self.terumo_approved_by = QLineEdit()
         self.terumo_approved_by.setCompleter(self.certified_completer)
         self.terumo_submit_btn = QPushButton("Submit")
