@@ -50,6 +50,9 @@ def coa_entry_form(self):
                 background-color: #e9f5ff;
                 box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
             }}
+            QTextEdit {{
+                min-height: 100px;
+            }}
             QDateEdit::drop-down {{
                 border: 0px;
                 width: 40px;
@@ -362,5 +365,6 @@ def clear_coa_form(self):
         print(str(e))
 
 
-def seperate_lots(lot):
-    pass
+def seperate_lots(self, lot):
+    expanded_lot = lot_format.expand_lots(lot)
+    self.terumo_lots.setPlainText(expanded_lot)

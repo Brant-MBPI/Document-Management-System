@@ -130,7 +130,7 @@ def create_tables():
             dimension_start TEXT,
             dimension_mid TEXT,
             dimension_end TEXT,
-            dimension_judgment VARCHAR(36),
+            dimension_judgement VARCHAR(36),
             approver_position TEXT
         );
     """)
@@ -392,7 +392,7 @@ def save_terumo_coa(data, terumo):
                 area_std, 
                 count_std, 
                 fmc_actual, 
-                foreign_judgement, 
+                fmc_judgement, 
                 appearance_std, 
                 appearance_start, 
                 appearance_mid,
@@ -405,12 +405,12 @@ def save_terumo_coa(data, terumo):
                 dimension_judgement,
                 approver_position
             )
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
         """, (
             coa_id, terumo["item_code"], terumo["item_description"], terumo["color_std"],
             terumo["color_actual"], terumo["color_judgement"], terumo["diameter_std"],
             terumo["area_std"], terumo["count_std"], terumo["fmc_actual"],
-            terumo["foreign_judgement"], terumo["appearance_std"], terumo["appearance_start"],
+            terumo["fmc_judgement"], terumo["appearance_std"], terumo["appearance_start"],
             terumo["appearance_mid"], terumo["appearance_end"], terumo["appearance_judgement"],
             terumo["dimension_std"], terumo["dimension_start"], terumo["dimension_mid"],
             terumo["dimension_end"], terumo["dimension_judgement"], terumo["approver_position"]
@@ -424,7 +424,11 @@ def save_terumo_coa(data, terumo):
         if conn:
             conn.rollback()
         raise e
-
+    finally:
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()
 
 
 def save_certificate_of_analysis_rrf(data, summary_of_analysis):
