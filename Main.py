@@ -8,6 +8,7 @@ from alert import window_alert
 from table import msds_data_entry, coa_data_entry, table, terumo
 from print.print_msds import FileMSDS
 from print.print_coa import FileCOA
+from print.print_terumo import FileTerumo
 import Login
 from utils import abs_path, scroll_date, calendar_design
 
@@ -280,6 +281,7 @@ class MainWindow(QMainWindow):
         self.all_terumo_id = db_con.get_all_terumo_id()
         self.coa_widget = None
         self.msds_widget = None
+        self.terumo_widget = None
 
         self.msds_tab = QWidget()  #MSDS Main Tab
         self.msds_layout = QVBoxLayout(self.msds_tab)
@@ -906,7 +908,7 @@ class MainWindow(QMainWindow):
             # Save (use existing DB function or create new)
             try:
                 if terumo.current_coa_id is not None:
-                    db_con.update_terumo_coa(coa_data_entry.current_coa_id, coa_data, terumo_data)
+                    db_con.update_terumo_coa(terumo.current_coa_id, coa_data, terumo_data)
                     window_alert.show_message(self, "Success", "Terumo COA updated successfully!", icon_type="info")
                     terumo.current_coa_id = None
                 else:
@@ -1095,14 +1097,16 @@ class MainWindow(QMainWindow):
 
         if column == 1:  # view column
             display_text = self.coa_records_table.item(row, 0).text()
-            self.open_coa_preview(coa_id, display_text)
+            if coa_id in self.all_terumo_id:
+                self.open_terumo_preview(coa_id, display_text)
+            else:
+                self.open_coa_preview(coa_id, display_text)
         if column == 2:  # edit column
             if coa_id in self.all_terumo_id:
                 terumo.current_coa_id = coa_id  # Store the selected COA ID
                 terumo.load_coa_details(self, coa_id)
                 self.coa_sub_tabs.setCurrentWidget(self.coa_data_entry_tab)
                 self.coa_data_entry_sub_tabs.setCurrentIndex(1)
-                print("terumo")
             else:
                 coa_data_entry.current_coa_id = coa_id
                 coa_data_entry.load_coa_details(self, coa_id, self.is_rrf)
@@ -1219,6 +1223,18 @@ class MainWindow(QMainWindow):
         self.coa_widget.show()
         self.coa_widget.activateWindow()
         self.coa_widget.raise_()
+
+    def open_terumo_preview(self, coa_id, filename):
+        # If the widget already exists, close it first to avoid multiple instances
+        if self.terumo_widget is not None:
+            self.terumo_widget.close()
+            self.terumo_widget.deleteLater()  # Good practice
+        self.terumo_widget = FileTerumo()
+        self.terumo_widget.show_pdf_preview(coa_id, filename, self.is_rrf)
+        self.terumo_widget.resize(900, 800)
+        self.terumo_widget.show()
+        self.terumo_widget.activateWindow()
+        self.terumo_widget.raise_()
 
     def run_sync_script(self):
         # Show loading dialog

@@ -12,7 +12,7 @@ current_coa_id = None
 
 
 def load_coa_details(self, coa_id):
-    self.delivery_receipt_input.blockSignals(True)
+    self.terumo_delivery_receipt.blockSignals(True)
     self.terumo_lot_number.blockSignals(True)
 
     field_result = db_con.get_single_coa_data(coa_id)
@@ -31,7 +31,7 @@ def load_coa_details(self, coa_id):
     self.terumo_approved_by.setText(str(field_result[10]))
     self.terumo_submit_btn.setText("Update")
 
-    self.delivery_receipt_input.blockSignals(False)
+    self.terumo_delivery_receipt.blockSignals(False)
     self.terumo_lot_number.blockSignals(False)
 
 #     for table
@@ -368,6 +368,8 @@ def coa_entry_form(self):
 
 def populate_terumo_coa_fields(self, dr_no):
     try:
+        self.terumo_delivery_receipt.blockSignals(True)
+        self.terumo_lot_number.blockSignals(True)
         fields = db_con.get_dr_details(dr_no)
 
         if not fields:  # None or empty tuple
@@ -397,6 +399,8 @@ def populate_terumo_coa_fields(self, dr_no):
 
         if fields[3]:
             self.terumo_delivery_date.setDate(QDate(fields[3].year, fields[3].month, fields[3].day))
+        self.terumo_delivery_receipt.blockSignals(False)
+        self.terumo_lot_number.blockSignals(False)
     except Exception as e:
         print("terumo", e)
 
@@ -406,7 +410,7 @@ def clear_coa_form(self):
         """Clear all input fields and the summary table."""
         global current_coa_id
         current_coa_id = None
-
+        self.terumo_delivery_receipt.blockSignals(True)
         self.terumo_delivery_receipt.blockSignals(True)
 
         self.terumo_customer_input.clear()
@@ -418,6 +422,7 @@ def clear_coa_form(self):
         self.terumo_delivery_receipt.clear()
 
         self.terumo_submit_btn.setText("Submit")
+        self.terumo_delivery_receipt.blockSignals(False)
         self.terumo_delivery_receipt.blockSignals(False)
     except Exception as e:
         print(str(e))
