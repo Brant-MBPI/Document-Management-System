@@ -93,7 +93,7 @@ def create_tables():
             customer_name VARCHAR(255),
             color_code VARCHAR(100),
             
-            lot_number VARCHAR(100) UNIQUE,
+            lot_number TEXT,
             po_number VARCHAR(100),
             delivery_receipt_number VARCHAR(100),
             quantity_delivered TEXT,
@@ -131,7 +131,8 @@ def create_tables():
             dimension_mid TEXT,
             dimension_end TEXT,
             dimension_judgement VARCHAR(36),
-            approver_position TEXT
+            approver_position TEXT,
+            lot_numbers TEXT
         );
     """)
 
@@ -403,9 +404,10 @@ def save_terumo_coa(data, terumo):
                 dimension_mid,
                 dimension_end,
                 dimension_judgement,
-                approver_position
+                approver_position,
+                lot_numbers
             )
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
         """, (
             coa_id, terumo["item_code"], terumo["item_description"], terumo["color_std"],
             terumo["color_actual"], terumo["color_judgement"], terumo["diameter_std"],
@@ -413,7 +415,8 @@ def save_terumo_coa(data, terumo):
             terumo["fmc_judgement"], terumo["appearance_std"], terumo["appearance_start"],
             terumo["appearance_mid"], terumo["appearance_end"], terumo["appearance_judgement"],
             terumo["dimension_std"], terumo["dimension_start"], terumo["dimension_mid"],
-            terumo["dimension_end"], terumo["dimension_judgement"], terumo["approver_position"]
+            terumo["dimension_end"], terumo["dimension_judgement"], terumo["approver_position"],
+            terumo["lot_numbers"]
         ))
 
         conn.commit()
@@ -685,6 +688,88 @@ def update_certificate_of_analysis_rrf(coa_id, data, summary_of_analysis):
         raise e
 
 
+def update_terumo_coa(coa_id, data, terumo):
+    conn = get_connection()
+    cur = None
+    try:
+        cur = conn.cursor()
+
+        # Update certificates_of_analysis
+        cur.execute("""
+            UPDATE certificates_of_analysis
+            SET
+                customer_name = %s, 
+                color_code = %s, 
+                lot_number = %s, 
+                po_number = %s, 
+                delivery_receipt_number = %s, 
+                quantity_delivered = %s, 
+                delivery_date = %s, 
+                production_date = %s, 
+                certification_date = %s, 
+                certified_by = %s, 
+                storage_instructions = %s, 
+                shelf_life_coa = %s, 
+                suitability = %s
+            WHERE id = %s;
+        """, (
+            data["customer_name"], data["color_code"], data["lot_number"], data["po_number"],
+            data["delivery_receipt"], data["quantity_delivered"], data["delivery_date"],
+            data["production_date"], data["creation_date"], data["certified_by"],
+            data["storage"], data["shelf_life"], data["suitability"], coa_id
+        ))
+
+        # Update tbl_terumo
+        cur.execute("""
+            UPDATE tbl_terumo
+            SET
+                item_code = %s, 
+                item_description = %s, 
+                color_std = %s, 
+                color_actual = %s, 
+                color_judgement = %s, 
+                diameter_std = %s, 
+                area_std = %s, 
+                count_std = %s, 
+                fmc_actual = %s, 
+                fmc_judgement = %s, 
+                appearance_std = %s, 
+                appearance_start = %s, 
+                appearance_mid = %s,
+                appearance_end = %s,
+                appearance_judgement = %s,
+                dimension_std = %s,
+                dimension_start = %s,
+                dimension_mid = %s,
+                dimension_end = %s,
+                dimension_judgement = %s,
+                approver_position = %s,
+                lot_numbers = %s
+            WHERE coa_id = %s;
+        """, (
+            terumo["item_code"], terumo["item_description"], terumo["color_std"],
+            terumo["color_actual"], terumo["color_judgement"], terumo["diameter_std"],
+            terumo["area_std"], terumo["count_std"], terumo["fmc_actual"],
+            terumo["fmc_judgement"], terumo["appearance_std"], terumo["appearance_start"],
+            terumo["appearance_mid"], terumo["appearance_end"], terumo["appearance_judgement"],
+            terumo["dimension_std"], terumo["dimension_start"], terumo["dimension_mid"],
+            terumo["dimension_end"], terumo["dimension_judgement"], terumo["approver_position"],
+            terumo["lot_numbers"], coa_id
+        ))
+
+        conn.commit()
+
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        raise e
+    finally:
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()
+
+
 #     Read
 def get_all_msds_data():
     conn = get_connection()
@@ -813,6 +898,22 @@ def get_single_coa_data_rrf(coa_id):
     cur.close()
     conn.close()
     return record
+
+
+def get_single_terumo_data(coa_id):
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute(
+        "SELECT * FROM tbl_terumo WHERE coa_id = %s;",
+        (coa_id,)
+    )
+    record = cur.fetchone()  # only one row expected
+
+    cur.close()
+    conn.close()
+    return record
+
 
 
 def get_coa_analysis_results_rrf(coa_id):
@@ -1007,6 +1108,19 @@ def get_all_rrf_no():
     cur.close()
     conn.close()
     return [row[0] for row in records]
+
+
+def get_all_terumo_id():
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("SELECT coa_id FROM tbl_terumo;")
+    records = cur.fetchall()  # only one row expected
+
+    cur.close()
+    conn.close()
+    return [row[0] for row in records]
+
 
 
 def get_all_certified_by():

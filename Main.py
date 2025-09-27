@@ -277,7 +277,7 @@ class MainWindow(QMainWindow):
         self.terumo_approved_by.setCompleter(self.certified_completer)
         self.terumo_submit_btn = QPushButton("Submit")
         self.terumo_submit_btn.clicked.connect(self.terumo_submit_clicked)
-
+        self.all_terumo_id = db_con.get_all_terumo_id()
         self.coa_widget = None
         self.msds_widget = None
 
@@ -846,7 +846,7 @@ class MainWindow(QMainWindow):
             dimension_middle = self.terumo_dimension_middle.text()
             dimension_end = self.terumo_dimension_end.text()
             dimension_judgement = self.terumo_dimension_judgement.text()
-
+            lots = self.terumo_lots.toPlainText()
             # Required fields check
             required_fields = {
                 "Customer Name": customer_name,
@@ -899,25 +899,27 @@ class MainWindow(QMainWindow):
                 "dimension_mid": dimension_middle,
                 "dimension_end": dimension_end,
                 "dimension_judgement": dimension_judgement,
-                "approver_position": ""
+                "approver_position": "",
+                "lot_numbers": lots
             }
 
             # Save (use existing DB function or create new)
             try:
-                if coa_data_entry.current_coa_id is not None:
-                    db_con.update_certificate_of_analysis(coa_data_entry.current_coa_id, coa_data, summary_of_analysis)
+                if terumo.current_coa_id is not None:
+                    db_con.update_terumo_coa(coa_data_entry.current_coa_id, coa_data, terumo_data)
                     window_alert.show_message(self, "Success", "Terumo COA updated successfully!", icon_type="info")
-                    coa_data_entry.current_coa_id = None
+                    terumo.current_coa_id = None
                 else:
                     db_con.save_terumo_coa(coa_data, terumo_data)
                     window_alert.show_message(self, "Success", "Terumo COA saved successfully!", icon_type="info")
             except Exception as e:
                 window_alert.show_message(self, "Database Error", str(e), icon_type="critical")
             finally:
-                # coa_data_entry.clear_terumo_form(self)
+                terumo.clear_coa_form(self)
                 table.load_coa_table(self)
                 self.terumo_scroll_area.verticalScrollBar().setValue(0)
                 self.coa_sub_tabs.setCurrentIndex(0)
+                self.all_terumo_id = db_con.get_all_terumo_id()
         except Exception as e:
             print(e)
 
@@ -1090,14 +1092,23 @@ class MainWindow(QMainWindow):
 
     def coa_cell_clicked(self, row, column):
         coa_id = self.coa_records_table.item(row, 0).data(Qt.ItemDataRole.UserRole)
+
         if column == 1:  # view column
             display_text = self.coa_records_table.item(row, 0).text()
             self.open_coa_preview(coa_id, display_text)
         if column == 2:  # edit column
-            coa_data_entry.current_coa_id = coa_id  # Store the selected COA ID
-            coa_data_entry.load_coa_details(self, coa_id, self.is_rrf)
-            # Switch to the COA tab
-            self.coa_sub_tabs.setCurrentWidget(self.coa_data_entry_tab)
+            if coa_id in self.all_terumo_id:
+                terumo.current_coa_id = coa_id  # Store the selected COA ID
+                terumo.load_coa_details(self, coa_id)
+                self.coa_sub_tabs.setCurrentWidget(self.coa_data_entry_tab)
+                self.coa_data_entry_sub_tabs.setCurrentIndex(1)
+                print("terumo")
+            else:
+                coa_data_entry.current_coa_id = coa_id
+                coa_data_entry.load_coa_details(self, coa_id, self.is_rrf)
+                # Switch to the COA tab
+                self.coa_sub_tabs.setCurrentWidget(self.coa_data_entry_tab)
+                self.coa_data_entry_sub_tabs.setCurrentIndex(0)
         if column == 3:  # delete column
             msg = " - RRF" if self.is_rrf else ""
             confirm = window_alert.show_message(self, "Confirm Deletion",

@@ -9,6 +9,64 @@ from db import db_con
 from utils import abs_path, lot_format
 
 current_coa_id = None
+
+
+def load_coa_details(self, coa_id):
+    self.delivery_receipt_input.blockSignals(True)
+    self.terumo_lot_number.blockSignals(True)
+
+    field_result = db_con.get_single_coa_data(coa_id)
+    terumo_res = db_con.get_single_terumo_data(coa_id)
+
+    # === Populate inputs ===
+    self.terumo_customer_input.setText(str(field_result[1]))
+    self.terumo_lot_number.setText(str(field_result[3]))
+    self.terumo_delivery_receipt.setText(str(field_result[5]))
+    self.terumo_quantity.setText(str(field_result[6]))
+
+    # Handle potential None for dates
+    if field_result[7]:
+        self.terumo_delivery_date.setDate(QDate(field_result[7].year, field_result[7].month, field_result[7].day))
+
+    self.terumo_approved_by.setText(str(field_result[10]))
+    self.terumo_submit_btn.setText("Update")
+
+    self.delivery_receipt_input.blockSignals(False)
+    self.terumo_lot_number.blockSignals(False)
+
+#     for table
+    diameter1, diameter2 = split_by_comma(str(terumo_res[7]))
+    area1, area2 = split_by_comma(str(terumo_res[8]))
+    count1, count2 = split_by_comma(str(terumo_res[9]))
+    actual1, actual2 = split_by_comma(str(terumo_res[10]))
+
+    self.terumo_item_code.setText(str(terumo_res[2]))
+    self.terumo_item_description.setText(str(terumo_res[3]))
+    self.terumo_color_std.setText(str(terumo_res[4]))
+    self.terumo_color_actual.setText(str(terumo_res[5]))
+    self.terumo_color_judgement.setText(str(terumo_res[6]))
+    self.terumo_foreign_diameter1.setText(diameter1)
+    self.terumo_foreign_diameter2.setText(diameter2)
+    self.terumo_foreign_area1.setText(area1)
+    self.terumo_foreign_area2.setText(area2)
+    self.terumo_foreign_count1.setText(count1)
+    self.terumo_foreign_count2.setText(count2)
+    self.terumo_foreign_actual1.setText(actual1)
+    self.terumo_foreign_actual2.setText(actual2)
+    self.terumo_foreign_judgement.setText(str(terumo_res[11]))
+    self.terumo_appearance_std.setText(str(terumo_res[12]))
+    self.terumo_appearance_start.setText(str(terumo_res[13]))
+    self.terumo_appearance_mid.setText(str(terumo_res[14]))
+    self.terumo_appearance_end.setText(str(terumo_res[15]))
+    self.terumo_appearance_judgement.setText(str(terumo_res[16]))
+    self.terumo_dimension_std.setPlainText(str(terumo_res[17]))
+    self.terumo_dimension_start.setText(str(terumo_res[18]))
+    self.terumo_dimension_middle.setText(str(terumo_res[19]))
+    self.terumo_dimension_end.setText(str(terumo_res[20]))
+    self.terumo_dimension_judgement.setText(str(terumo_res[21]))
+    self.terumo_lots.setPlainText(str(terumo_res[23]))
+
+
 def coa_entry_form(self):
     try:
         form_widget = QWidget()
@@ -368,3 +426,8 @@ def clear_coa_form(self):
 def seperate_lots(self, lot):
     expanded_lot = lot_format.expand_lots(lot)
     self.terumo_lots.setPlainText(expanded_lot)
+
+
+def split_by_comma(text: str):
+    # Split by comma and strip spaces
+    return [part.strip() for part in text.split(",") if part.strip()]
