@@ -111,6 +111,7 @@ def create_tables():
         CREATE TABLE IF NOT EXISTS tbl_terumo (
             id SERIAL PRIMARY KEY,
             coa_id INTEGER NOT NULL REFERENCES certificates_of_analysis(id) ON DELETE CASCADE,
+            item_code TEXT,
             item_description TEXT,
             color_std TEXT,
             color_actual TEXT,
@@ -130,8 +131,6 @@ def create_tables():
             dimension_mid TEXT,
             dimension_end TEXT,
             dimension_judgment VARCHAR(36),
-            remarks TEXT,
-            approved_by TEXT,
             approver_position TEXT
         );
     """)
@@ -346,6 +345,86 @@ def save_certificate_of_analysis(data, summary_of_analysis):
         if conn:
             conn.rollback()
         raise e
+
+
+def save_terumo_coa(data, terumo):
+    conn = get_connection()
+    try:
+        cur = conn.cursor()
+
+        # Insert into certificates_of_analysis
+        cur.execute("""
+            INSERT INTO certificates_of_analysis (
+                customer_name, 
+                color_code, 
+                lot_number, 
+                po_number, 
+                delivery_receipt_number, 
+                quantity_delivered, 
+                delivery_date, 
+                production_date, 
+                certification_date, 
+                certified_by, 
+                storage_instructions, 
+                shelf_life_coa, 
+                suitability
+            )
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            RETURNING id;
+        """, (
+            data["customer_name"], data["color_code"], data["lot_number"], data["po_number"],
+            data["delivery_receipt"], data["quantity_delivered"], data["delivery_date"],
+            data["production_date"], data["creation_date"], data["certified_by"],
+            data["storage"], data["shelf_life"], data["suitability"]
+        ))
+
+        coa_id = cur.fetchone()[0]
+
+        cur.execute("""
+            INSERT INTO tbl_terumo (
+                coa_id,
+                item_code, 
+                item_description, 
+                color_std, 
+                color_actual, 
+                color_judgement, 
+                diameter_std, 
+                area_std, 
+                count_std, 
+                fmc_actual, 
+                foreign_judgement, 
+                appearance_std, 
+                appearance_start, 
+                appearance_mid,
+                appearance_end,
+                appearance_judgement,
+                dimension_std,
+                dimension_start,
+                dimension_mid,
+                dimension_end,
+                dimension_judgement,
+                approver_position
+            )
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+        """, (
+            coa_id, terumo["item_code"], terumo["item_description"], terumo["color_std"],
+            terumo["color_actual"], terumo["color_judgement"], terumo["diameter_std"],
+            terumo["area_std"], terumo["count_std"], terumo["fmc_actual"],
+            terumo["foreign_judgement"], terumo["appearance_std"], terumo["appearance_start"],
+            terumo["appearance_mid"], terumo["appearance_end"], terumo["appearance_judgement"],
+            terumo["dimension_std"], terumo["dimension_start"], terumo["dimension_mid"],
+            terumo["dimension_end"], terumo["dimension_judgement"], terumo["approver_position"]
+        ))
+
+        conn.commit()
+        cur.close()
+        conn.close()
+
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        raise e
+
 
 
 def save_certificate_of_analysis_rrf(data, summary_of_analysis):
@@ -651,6 +730,23 @@ def get_single_msds_data(msds_id):
 
     cur.close()
     conn.close()
+    return record
+
+
+def get_trade_name_msds(code):
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute(
+        "SELECT trade_name FROM msds_sheets WHERE product_code = %s;",
+        (code,)
+    )
+    record = cur.fetchone()  # only one row expected
+
+    cur.close()
+    conn.close()
+    if record is None:
+        return ()  # or return None, depending on how you want to handle it
     return record
 
 

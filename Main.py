@@ -198,6 +198,9 @@ class MainWindow(QMainWindow):
         self.sync_button = QPushButton("Sync")
         self.sync_button.setFixedSize(60, 25)
         self.sync_button.clicked.connect(self.run_sync_script)
+        self.terumo_sync_button = QPushButton("Sync")
+        self.terumo_sync_button.setFixedSize(60, 25)
+        self.terumo_sync_button.clicked.connect(self.run_sync_script)
         self.po_number_input = QLineEdit()
         self.certified_completer = QCompleter(self.certified_by_lists)
         self.certified_completer.setCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
@@ -220,6 +223,13 @@ class MainWindow(QMainWindow):
         self.btn_coa_submit.clicked.connect(self.coa_btn_submit_clicked)
 
         # TERUMO COA inputs
+        self.terumo_delivery_receipt = QLineEdit()
+        self.terumo_delivery_receipt.setCompleter(self.dr_completer)
+        self.terumo_delivery_receipt_timer = self.setup_finished_typing(
+            self.terumo_delivery_receipt,
+            lambda: terumo.populate_terumo_coa_fields(self, self.terumo_delivery_receipt.text()),
+            delay=1200
+        )
         self.terumo_customer_input = QLineEdit()
         self.terumo_item_code = QLineEdit()
         self.terumo_item_description = QLineEdit()
@@ -243,7 +253,7 @@ class MainWindow(QMainWindow):
         self.terumo_foreign_actual1 = QLineEdit("0")
         self.terumo_foreign_actual2 = QLineEdit("0")
         self.terumo_foreign_judgement = QLineEdit("Passed")
-        self.terumo_appearance_std = QLineEdit("Free from foreign material. No stickiness of oellets")
+        self.terumo_appearance_std = QLineEdit("Free from foreign material. No stickiness of pellets")
         self.terumo_appearance_start = QLineEdit("0")
         self.terumo_appearance_mid = QLineEdit("0")
         self.terumo_appearance_end = QLineEdit("0")
@@ -253,9 +263,8 @@ class MainWindow(QMainWindow):
         self.terumo_dimension_middle = QLineEdit("2.6x3.5")
         self.terumo_dimension_end = QLineEdit("2.5x3.5")
         self.terumo_dimension_judgement = QLineEdit("Passed")
-        self.terumo_remarks = QTextEdit("Attached are the same sample chips for the following number:")
-        self.terumo_remarks.setTabChangesFocus(True)
-        self.terumo_approved_by = QLineEdit("")
+        self.terumo_approved_by = QLineEdit()
+        self.terumo_approved_by.setCompleter(self.certified_completer)
         self.terumo_submit_btn = QPushButton("Submit")
         self.terumo_submit_btn.clicked.connect(self.terumo_submit_clicked)
 
@@ -795,28 +804,37 @@ class MainWindow(QMainWindow):
 
     def terumo_submit_clicked(self):
         # Collect data (adapt as needed for DB)
+        terumo_dr = self.terumo_delivery_receipt.text()
         customer_name = self.terumo_customer_input.text()
-        item_code = self.terumo_item_code.text()
-        item_desc = self.terumo_item_desc.text()
         quantity = self.terumo_quantity.text()
         delivery_date = self.terumo_delivery_date.date().toString("yyyy-MM-dd")
         lot_number = self.terumo_lot_number.text()
+        approved_by = self.terumo_approved_by.text()
+
+        item_code = self.terumo_item_code.text()
+        item_desc = self.terumo_item_desc.text()
+        color_std = self.terumo_color_std.text()
         color_actual = self.terumo_color_actual.text()
         color_judgement = self.terumo_color_judgement.text()
+        foreign_diameter1 = self.terumo_foreign_diameter1.text()
+        foreign_diameter2 = self.terumo_foreign_diameter2.text()
+        foreign_area1 = self.terumo_foreign_area1.text()
+        foreign_area2 = self.terumo_foreign_area2.text()
+        foreign_count1 = self.terumo_foreign_count1.text()
+        foreign_count2 = self.terumo_foreign_count2.text()
         foreign_actual1 = self.terumo_foreign_actual1.text()
         foreign_actual2 = self.terumo_foreign_actual2.text()
-        foreign_actual3 = self.terumo_foreign_actual3.text()
         foreign_judgement = self.terumo_foreign_judgement.text()
+        appearance_std = self.terumo_appearance_std.text()
         appearance_start = self.terumo_appearance_start.text()
-        appearance_middle = self.terumo_appearance_middle.text()
+        appearance_mid = self.terumo_appearance_mid.text()
         appearance_end = self.terumo_appearance_end.text()
         appearance_judgement = self.terumo_appearance_judgement.text()
+        dimension_std = self.terumo_dimension_std.toPlainText()
         dimension_start = self.terumo_dimension_start.text()
         dimension_middle = self.terumo_dimension_middle.text()
         dimension_end = self.terumo_dimension_end.text()
         dimension_judgement = self.terumo_dimension_judgement.text()
-        remarks = self.terumo_remarks.toPlainText()
-        approved_by = self.terumo_approved_by.text()
 
         # Required fields check
         required_fields = {
@@ -835,10 +853,10 @@ class MainWindow(QMainWindow):
         # Build coa_data and summary
         coa_data = {
             "customer_name": customer_name,
-            "color_code": item_code,
+            "color_code": "",
             "lot_number": lot_number,
             "po_number": "",
-            "delivery_receipt": "",
+            "delivery_receipt": terumo_dr,
             "quantity_delivered": quantity,
             "delivery_date": delivery_date,
             "production_date": "",
@@ -849,15 +867,28 @@ class MainWindow(QMainWindow):
             "suitability": ""
         }
 
-        summary_of_analysis = {
-            "Molded Chip - Color": ["TPC approved standard", color_actual, color_judgement],
-            "Foreign Material Contamination - >0.10": ["> 0.10", "> 0.01", "2 pcs", foreign_actual1],
-            "Foreign Material Contamination - 0.01-0.10": ["0.01 - 0.10", "0.01 - 0.10", "6 pcs", foreign_actual2],
-            "Foreign Material Contamination - <0.10": ["< 0.10", "< 0.10", "6 pcs", foreign_actual3],
-            "Foreign Judgement": foreign_judgement,
-            "Pellet Appearance - Start": [appearance_start, appearance_middle, appearance_end, appearance_judgement],
-            "Pellet Dimension - Start": [dimension_start, dimension_middle, dimension_end, dimension_judgement],
-            "Remarks": remarks
+        terumo_data = {
+            "item_code": item_code,
+            "item_description": item_desc,
+            "color_std": color_std,
+            "color_actual": color_actual,
+            "color_judgement": color_judgement,
+            "diameter_std": foreign_diameter1 + ", " + foreign_diameter2,
+            "area_std": foreign_area1 + ", " + foreign_area2,
+            "count_std": foreign_count1 + ", " + foreign_count2,
+            "fmc_actual": foreign_actual1 + ", " + foreign_actual2,
+            "foreign_judgement": foreign_judgement,
+            "appearance_std": appearance_std,
+            "appearance_start": appearance_start,
+            "appearance_mid": appearance_mid,
+            "appearance_end": appearance_end,
+            "appearance_judgement": appearance_judgement,
+            "dimension_std": dimension_std,
+            "dimension_start": dimension_start,
+            "dimension_mid": dimension_middle,
+            "dimension_end": dimension_end,
+            "dimension_judgement": dimension_judgement,
+            "approver_position": ""
         }
 
         # Save (use existing DB function or create new)
@@ -867,12 +898,12 @@ class MainWindow(QMainWindow):
                 window_alert.show_message(self, "Success", "Terumo COA updated successfully!", icon_type="info")
                 coa_data_entry.current_coa_id = None
             else:
-                db_con.save_certificate_of_analysis(coa_data, summary_of_analysis)
+                db_con.save_terumo_coa(coa_data, terumo_data)
                 window_alert.show_message(self, "Success", "Terumo COA saved successfully!", icon_type="info")
         except Exception as e:
             window_alert.show_message(self, "Database Error", str(e), icon_type="critical")
         finally:
-            coa_data_entry.clear_terumo_form(self)
+            # coa_data_entry.clear_terumo_form(self)
             table.load_coa_table(self)
             self.terumo_scroll_area.verticalScrollBar().setValue(0)
             self.coa_sub_tabs.setCurrentIndex(0)

@@ -4,8 +4,11 @@ from PyQt6.QtCore import QDate, Qt
 from PyQt6.QtWidgets import (
     QLabel, QHBoxLayout, QPushButton, QWidget, QVBoxLayout, QGroupBox, QGridLayout
 )
-from utils import abs_path
 
+from db import db_con
+from utils import abs_path, lot_format
+
+current_coa_id = None
 def coa_entry_form(self):
     try:
         form_widget = QWidget()
@@ -114,20 +117,23 @@ def coa_entry_form(self):
         general_info_layout.setContentsMargins(20, 25, 20, 20)
 
         # Rearranged to closer match PDF order
-        general_info_layout.addWidget(QLabel("Customer:"), 0, 0, Qt.AlignmentFlag.AlignRight)
-        general_info_layout.addWidget(self.terumo_customer_input, 0, 1)
-        general_info_layout.addWidget(QLabel("Delivery Date:"), 0, 2, Qt.AlignmentFlag.AlignRight)
-        general_info_layout.addWidget(self.terumo_delivery_date, 0, 3)
+        general_info_layout.addWidget(QLabel("Delivery Receipt number:"), 0, 0, Qt.AlignmentFlag.AlignRight)
+        general_info_layout.addWidget(self.terumo_delivery_receipt, 0, 1)
+        general_info_layout.addWidget(self.terumo_sync_button, 0, 1, Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTop)
+        general_info_layout.addWidget(QLabel("Customer:"), 1, 0, Qt.AlignmentFlag.AlignRight)
+        general_info_layout.addWidget(self.terumo_customer_input, 1, 1)
+        general_info_layout.addWidget(QLabel("Delivery Date:"), 1, 2, Qt.AlignmentFlag.AlignRight)
+        general_info_layout.addWidget(self.terumo_delivery_date, 1, 3)
 
-        general_info_layout.addWidget(QLabel("Item Code:"), 1, 0, Qt.AlignmentFlag.AlignRight)
-        general_info_layout.addWidget(self.terumo_item_code, 1, 1)
-        general_info_layout.addWidget(QLabel("Item Description:"), 1, 2, Qt.AlignmentFlag.AlignRight)
-        general_info_layout.addWidget(self.terumo_item_description, 1, 3)
+        general_info_layout.addWidget(QLabel("Item Code:"), 2, 0, Qt.AlignmentFlag.AlignRight)
+        general_info_layout.addWidget(self.terumo_item_code, 2, 1)
+        general_info_layout.addWidget(QLabel("Item Description:"), 2, 2, Qt.AlignmentFlag.AlignRight)
+        general_info_layout.addWidget(self.terumo_item_description, 2, 3)
 
-        general_info_layout.addWidget(QLabel("Lot No.:"), 2, 0, Qt.AlignmentFlag.AlignRight)
-        general_info_layout.addWidget(self.terumo_lot_number, 2, 1)
-        general_info_layout.addWidget(QLabel("Quantity:"), 2, 2, Qt.AlignmentFlag.AlignRight)
-        general_info_layout.addWidget(self.terumo_quantity, 2, 3)
+        general_info_layout.addWidget(QLabel("Lot No.:"), 3, 0, Qt.AlignmentFlag.AlignRight)
+        general_info_layout.addWidget(self.terumo_lot_number, 3, 1)
+        general_info_layout.addWidget(QLabel("Quantity:"), 3, 2, Qt.AlignmentFlag.AlignRight)
+        general_info_layout.addWidget(self.terumo_quantity, 3, 3)
 
         main_v_layout.addWidget(general_info_group)
 
@@ -248,12 +254,9 @@ def coa_entry_form(self):
         remarks_layout.setVerticalSpacing(15)
         remarks_layout.setContentsMargins(20, 25, 20, 20)
 
-        remarks_layout.addWidget(QLabel("Remarks:"), 0, 0, Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTop)
-        remarks_layout.addWidget(self.terumo_remarks, 0, 1, 1, 2)
-        remarks_layout.addWidget(QLabel(""), 1, 1, 1, 3)
-        self.terumo_remarks.setMinimumHeight(100)
-        remarks_layout.addWidget(QLabel("Approved By:"), 1, 0, Qt.AlignmentFlag.AlignRight)
-        remarks_layout.addWidget(self.terumo_approved_by, 1, 1, 1, 2)
+
+        remarks_layout.addWidget(QLabel("Approved By: "), 0, 0, Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTop)
+        remarks_layout.addWidget(self.terumo_approved_by, 0, 1, 1, 2)
         remarks_layout.addWidget(QLabel(""), 1, 1, 1, 3)
 
         main_v_layout.addWidget(remarks_group)
@@ -297,3 +300,60 @@ def coa_entry_form(self):
         self.terumo_form_layout.addWidget(form_widget)
     except Exception as e:
         print(f"Error loading Terumo COA form: {e}")
+
+
+def populate_terumo_coa_fields(self, dr_no):
+    try:
+        fields = db_con.get_dr_details(dr_no)
+
+        if not fields:  # None or empty tuple
+            # Clear fields or just exit
+            self.terumo_customer_input.clear()
+
+            self.terumo_lot_number.clear()
+            self.terumo_quantity.clear()
+            self.terumo_delivery_date.setDate(QDate.currentDate())
+
+            self.terumo_item_code.clear()
+            self.terumo_item_description.clear()
+            return
+
+        # === Populate inputs ===
+        lot_no = lot_format.normalize(fields[5])
+        item_desc = db_con.get_trade_name_msds(fields[1])
+        if item_desc:
+            desc = item_desc[0]
+        else:
+            desc = ""
+        self.terumo_item_description.setText(str(desc))
+
+        self.terumo_customer_input.setText(str(fields[2]))
+        self.terumo_quantity.setText(str(fields[6]))
+        self.terumo_lot_number.setText(lot_no)
+
+        if fields[3]:
+            self.terumo_delivery_date.setDate(QDate(fields[3].year, fields[3].month, fields[3].day))
+    except Exception as e:
+        print("terumo", e)
+
+
+def clear_coa_form(self):
+    try:
+        """Clear all input fields and the summary table."""
+        global current_coa_id
+        current_coa_id = None
+
+        self.terumo_delivery_receipt.blockSignals(True)
+
+        self.terumo_customer_input.clear()
+        self.terumo_lot_number.clear()
+        self.terumo_quantity.clear()
+        self.terumo_delivery_date.setDate(QDate.currentDate())
+        self.terumo_item_code.clear()
+        self.terumo_item_description.clear()
+        self.terumo_delivery_receipt.clear()
+
+        self.terumo_submit_btn.setText("Submit")
+        self.terumo_delivery_receipt.blockSignals(False)
+    except Exception as e:
+        print(str(e))

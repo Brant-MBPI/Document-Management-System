@@ -186,7 +186,7 @@ def coa_data_entry_form(self, is_rrf=False):
         general_info_layout.addWidget(self.delivery_receipt_label, 2, 0, Qt.AlignmentFlag.AlignRight)
         receipt_input_layout = QHBoxLayout()
         receipt_input_layout.addWidget(self.delivery_receipt_input, alignment=Qt.AlignmentFlag.AlignVCenter)
-        self.sync_button.setStyleSheet("""
+        sync_style = """
             QPushButton {
                 background-color: #28a745; /* Green sync button */
                 color: white;
@@ -201,7 +201,9 @@ def coa_data_entry_form(self, is_rrf=False):
             }
             QPushButton:hover { background-color: #218838; }
             QPushButton:pressed { background-color: #1e7e34; }
-        """)
+        """
+        self.sync_button.setStyleSheet(sync_style)
+        self.terumo_sync_button.setStyleSheet(sync_style)
         receipt_input_layout.addWidget(self.sync_button, alignment=Qt.AlignmentFlag.AlignVCenter)
         general_info_layout.addLayout(receipt_input_layout, 2, 1)
 
