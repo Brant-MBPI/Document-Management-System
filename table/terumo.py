@@ -444,6 +444,8 @@ def clear_coa_form(self):
         self.terumo_item_code.clear()
         self.terumo_item_description.clear()
         self.terumo_delivery_receipt.clear()
+        self.terumo_approved_by.clear()
+        self.terumo_approver_position.clear()
 
         self.terumo_submit_btn.setText("Submit")
         self.terumo_delivery_receipt.blockSignals(False)
@@ -453,7 +455,13 @@ def clear_coa_form(self):
 
 
 def seperate_lots(self, lot):
-    expanded_lot = lot_format.expand_lots(lot)
+    inner_text = lot
+    match = re.search(r"\((.*?)\)", lot)
+    if match:
+        inner_text = match.group(1)
+    if re.search(r"\d+[A-Z]*-\d+[A-Z]*", inner_text):
+        inner_text = lot_format.normalize(inner_text)
+    expanded_lot = lot_format.expand_lots(inner_text)
     self.terumo_lots.setPlainText(expanded_lot)
 
 
