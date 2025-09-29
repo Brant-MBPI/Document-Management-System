@@ -287,6 +287,9 @@ class MainWindow(QMainWindow):
         self.terumo_submit_btn = QPushButton("Submit")
         self.terumo_submit_btn.clicked.connect(self.terumo_submit_clicked)
         self.all_terumo_id = db_con.get_all_terumo_id()
+
+
+
         self.coa_widget = None
         self.msds_widget = None
         self.terumo_widget = None
