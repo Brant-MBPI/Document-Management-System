@@ -127,8 +127,12 @@ def expand_lots(normalized_lots: str) -> str:
     expanded_parts = []
 
     for part in parts:
-        # Check if part is a range: "MB-13-3756N to MB-13-3760N"
-        range_match = re.match(r"^(.*?)(\d+)([A-Za-z]*)\s+to\s+(.*?)(\d+)([A-Za-z]*)$", part)
+        # Check if part is a range: "MB-13-3756N to MB-13-3760N" (case-insensitive 'to')
+        range_match = re.match(
+            r"^(.*?)(\d+)([A-Za-z]*)\s+to\s+(.*?)(\d+)([A-Za-z]*)$",
+            part,
+            flags=re.IGNORECASE
+        )
         if range_match:
             prefix1, start_num, suffix1, prefix2, end_num, suffix2 = range_match.groups()
 
