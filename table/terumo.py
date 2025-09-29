@@ -31,6 +31,7 @@ def load_coa_details(self, coa_id):
             self.terumo_delivery_date.setDate(QDate(field_result[7].year, field_result[7].month, field_result[7].day))
 
         self.terumo_approved_by.setText(str(field_result[10]))
+        self.terumo_approver_position.setText(str(terumo_res[22]))
         self.terumo_submit_btn.setText("Update")
 
         self.terumo_delivery_receipt.blockSignals(False)

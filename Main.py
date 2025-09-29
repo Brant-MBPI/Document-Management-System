@@ -872,6 +872,11 @@ class MainWindow(QMainWindow):
                     window_alert.show_message(self, "Missing Input", f"Please fill in: {field}", icon_type="warning")
                     return
 
+            if approved_by not in self.certified_by_lists:
+                window_alert.show_message(self, "Invalid Input", f"Certified By: '{approved_by}' is not in the list.",
+                                          icon_type="warning")
+                return
+
             # Build coa_data and summary
             coa_data = {
                 "customer_name": customer_name,
