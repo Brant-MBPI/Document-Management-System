@@ -1,8 +1,8 @@
-from PyQt6.QtCore import Qt, QDate, QRegularExpression, QTimer, QEvent, QObject, pyqtSignal, QThread
-from PyQt6.QtGui import QIcon, QIntValidator, QRegularExpressionValidator, QFont, QAction
-from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QTabWidget, \
+from PyQt6.QtCore import Qt, QDate, QRegularExpression, QTimer, pyqtSignal, QThread
+from PyQt6.QtGui import QIcon, QRegularExpressionValidator, QFont, QAction
+from PyQt6.QtWidgets import QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QTabWidget, \
     QTableWidget, QLineEdit, QHeaderView, QTableWidgetItem, QScrollArea, QTextEdit, QPushButton, QDateEdit, \
-    QMessageBox, QAbstractItemView, QGroupBox, QCompleter, QDialog, QLabel, QProgressBar, QStackedLayout, QGridLayout
+    QMessageBox, QAbstractItemView, QGroupBox, QCompleter, QDialog, QLabel, QProgressBar, QStackedLayout
 from db import db_con, db_dr, db_rrf
 from alert import window_alert
 from table import msds_data_entry, coa_data_entry, table, terumo

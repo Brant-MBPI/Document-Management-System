@@ -14,7 +14,7 @@ from reportlab.lib import colors
 
 from alert import window_alert
 from db import db_con
-from print.pdf_header import add_first_page_header, add_coa_header
+from print.pdf_header import add_first_page_header
 from utils import abs_path
 
 
@@ -153,24 +153,28 @@ class FileTerumo(QWidget):
             # Customer + Lot No.
             lot_no = f"{field_result[3]}"
             upper_data = [
-                ['', ''],
                 [Paragraph(f"<b>Customer Name:</b> {field_result[1]}", normal_style),
                  Paragraph(f"<b>Lot No.:</b> {lot_no}", normal_style)],
-                ['', ''],
                 [Paragraph(f"<b>Item Code:</b> {terumo_res[2]}", normal_style),
                  Paragraph(f"<b>Quantity:</b> {field_result[6]}", normal_style)],
-                ['', ''],
                 [Paragraph(f"<b>Item Description:</b> {str(terumo_res[3])}", normal_style), ''],
-                ['', '']
             ]
-            col_widths_upper = [290, 250]  # Adjusted to sum to 540 to match main table width
+            col_widths_upper = [325, 215]  # Adjusted to sum to 540 to match main table width
             upper_table = Table(upper_data, colWidths=col_widths_upper, hAlign='CENTER')
             upper_table.setStyle(TableStyle([
-                ('VALIGN', (0, 0), (-1, 0), 'MIDDLE'),  # First row middle
-                ('VALIGN', (0, 1), (-1, -1), 'TOP'),  # Other rows top
+                ('VALIGN', (0, 0), (-1, 0), 'MIDDLE'),
+                ('VALIGN', (0, 1), (-1, -1), 'TOP'),
                 ('LEFTPADDING', (0, 0), (-1, -1), 6),
                 ('RIGHTPADDING', (0, 0), (-1, -1), 6),
-                ('SPAN', (0, 6), (1, 6)),  # Span item description
+
+                # Control margins per row
+                ('TOPPADDING', (0, 0), (-1, 0), 10),  # More space above row 1
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),  # More space below row 1
+
+                ('BOTTOMPADDING', (0, 1), (-1, 1), 12),  # Extra margin above Item Code row
+                ('BOTTOMPADDING', (0, 2), (-1, 2), 10),  # Extra margin below Item Description row
+
+                ('SPAN', (0, 5), (1, 5)),  # Span item description
                 ('BOX', (0, 0), (-1, -1), 0.5, colors.black)
             ]))
             content.append(upper_table)
