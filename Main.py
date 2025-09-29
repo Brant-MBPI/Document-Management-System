@@ -276,6 +276,7 @@ class MainWindow(QMainWindow):
         self.terumo_lots = QTextEdit()
         self.terumo_approved_by = QLineEdit()
         self.terumo_approved_by.setCompleter(self.certified_completer)
+        self.terumo_approver_position = QLineEdit()
         self.terumo_submit_btn = QPushButton("Submit")
         self.terumo_submit_btn.clicked.connect(self.terumo_submit_clicked)
         self.all_terumo_id = db_con.get_all_terumo_id()
@@ -848,6 +849,7 @@ class MainWindow(QMainWindow):
             dimension_middle = self.terumo_dimension_middle.text()
             dimension_end = self.terumo_dimension_end.text()
             dimension_judgement = self.terumo_dimension_judgement.text()
+            position = self.terumo_approver_position.text()
             lots = self.terumo_lots.toPlainText()
             # Required fields check
             required_fields = {
@@ -901,7 +903,7 @@ class MainWindow(QMainWindow):
                 "dimension_mid": dimension_middle,
                 "dimension_end": dimension_end,
                 "dimension_judgement": dimension_judgement,
-                "approver_position": "",
+                "approver_position": position,
                 "lot_numbers": lots
             }
 
@@ -1153,6 +1155,7 @@ class MainWindow(QMainWindow):
                 self.coa_search_bar.show()
                 self.coa_search_bar.setFocus()
                 coa_data_entry.clear_coa_form(self)
+                terumo.clear_coa_form(self)
             else:
                 self.coa_search_bar.hide()
                 self.coa_scroll_area.verticalScrollBar().setValue(0)
@@ -1317,6 +1320,7 @@ class MainWindow(QMainWindow):
             self.dr_completer.model().setStringList(self.rrf_no_list)
             self.delivery_receipt_label.setText("RRF No:")
             coa_data_entry.clear_coa_form(self)
+            terumo.clear_coa_form(self)
             #  change the connected function
             self.coa_data_entry_sub_tabs.setTabEnabled(1, False)
             try:
@@ -1358,6 +1362,7 @@ class MainWindow(QMainWindow):
             self.dr_completer.model().setStringList(self.dr_no_list)
             self.delivery_receipt_label.setText("Delivery Receipt No:")
             coa_data_entry.clear_coa_form(self)
+            terumo.clear_coa_form(self)
             self.coa_data_entry_sub_tabs.setTabEnabled(1, True)
             #  change the connected function
             try:

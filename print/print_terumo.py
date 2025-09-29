@@ -7,7 +7,7 @@ from PyQt6.QtPdfWidgets import QPdfView
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QPushButton, QHBoxLayout, QFileDialog
 from reportlab.lib.enums import TA_CENTER, TA_RIGHT, TA_LEFT
 from PyQt6.QtPrintSupport import QPrinter, QPrintDialog
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Indenter
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
@@ -300,8 +300,10 @@ class FileTerumo(QWidget):
             content.append(Paragraph(approved_by_html, left_style))
 
             # Add position/title under the name with indentation
-            position_html = f"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{str(terumo_res[22])}"
-            content.append(Paragraph(position_html, left_style))
+            content.append(Indenter(left=72))
+            # position_html = f"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{str(terumo_res[22])}"
+            content.append(Paragraph(str(terumo_res[22]), left_style))
+            content.append(Indenter(left=-72))
 
             # --- Document Content End ---
 

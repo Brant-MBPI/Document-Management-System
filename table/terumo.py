@@ -312,7 +312,7 @@ def coa_entry_form(self):
         remarks_layout = QGridLayout()
         remarks_group.setLayout(remarks_layout)
         remarks_layout.setHorizontalSpacing(30)
-        remarks_layout.setVerticalSpacing(15)
+        remarks_layout.setVerticalSpacing(25)
         remarks_layout.setContentsMargins(20, 25, 20, 20)
         remarks_layout.addWidget(QLabel("Remarks: Attached are the same sample chips for the following number: "), 0, 0,
                                  1, 6, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
@@ -320,8 +320,17 @@ def coa_entry_form(self):
         self.terumo_lots.setStyleSheet("""
         min-height: 80px;
         """)
-        remarks_layout.addWidget(QLabel("Approved By: "), 2, 1, Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTop)
-        remarks_layout.addWidget(self.terumo_approved_by, 2, 2, 2, 2)
+        label_approved = QLabel("Approved By: ")
+        label_approved.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+
+        label_position = QLabel("Position: ")
+        label_position.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+
+        remarks_layout.addWidget(label_approved, 2, 1)
+        remarks_layout.addWidget(self.terumo_approved_by, 2, 2, 1, 2)
+
+        remarks_layout.addWidget(label_position, 3, 1)
+        remarks_layout.addWidget(self.terumo_approver_position, 3, 2, 1, 2)
 
         main_v_layout.addWidget(remarks_group)
 
@@ -360,7 +369,7 @@ def coa_entry_form(self):
         main_v_layout.addLayout(submit_button_row)
 
         main_v_layout.addStretch(1)
-
+        clear_coa_form(self)
         self.terumo_form_layout.addWidget(form_widget)
     except Exception as e:
         print(f"Error loading Terumo COA form: {e}")

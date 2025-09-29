@@ -13,6 +13,18 @@ def get_connection():
         port="5432"
     )
 
+# uncomment this if you are running this in your local computer
+
+# def get_connection():
+#     return psycopg2.connect(
+#         host="localhost",
+#         dbname="db_msds",
+#         user="postgres",
+#         password="newpassword",
+#         port="5432"
+#     )
+
+
 
 def create_tables():
     conn = get_connection()
