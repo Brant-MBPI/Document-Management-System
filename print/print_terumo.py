@@ -142,7 +142,7 @@ class FileTerumo(QWidget):
 
             # Certificate of Analysis Title
             content.append(Paragraph("<b>Certificate of Analysis</b>", title_style))
-            content.append(Spacer(1, 24))
+            content.append(Spacer(1, 14))
 
             # Delivery Date
             date_format = "%-d" if platform.system() != "Windows" else "%#d"
@@ -152,30 +152,28 @@ class FileTerumo(QWidget):
 
             # Customer + Lot No.
             lot_no = f"{field_result[3]}"
-            customer_data = [
+            upper_data = [
+                ['', ''],
                 [Paragraph(f"<b>Customer Name:</b> {field_result[1]}", normal_style),
-                 Paragraph(f"<b>Lot No.:</b> {lot_no}", normal_style)]
-            ]
-            customer_table = Table(customer_data, colWidths=[300, 212], hAlign='LEFT')
-            customer_table.setStyle(TableStyle([('VALIGN', (0, 0), (-1, -1), 'MIDDLE')]))
-            content.append(customer_table)
-            content.append(Spacer(1, 2))
-
-            # Item Code + Quantity
-            quantity = f"{field_result[6]}"
-            item_data = [
+                 Paragraph(f"<b>Lot No.:</b> {lot_no}", normal_style)],
+                ['', ''],
                 [Paragraph(f"<b>Item Code:</b> {terumo_res[2]}", normal_style),
-                 Paragraph(f"<b>Quantity:</b> {quantity}", normal_style)],
-                [Paragraph(f"<b>Item Description:</b> {str(terumo_res[3])}", normal_style),
-                 Paragraph("", normal_style)]
+                 Paragraph(f"<b>Quantity:</b> {field_result[6]}", normal_style)],
+                ['', ''],
+                [Paragraph(f"<b>Item Description:</b> {str(terumo_res[3])}", normal_style), ''],
+                ['', '']
             ]
-            item_table = Table(item_data, colWidths=[300, 212], hAlign='LEFT')
-            item_table.setStyle(TableStyle([
-                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            col_widths_upper = [290, 250]  # Adjusted to sum to 540 to match main table width
+            upper_table = Table(upper_data, colWidths=col_widths_upper, hAlign='CENTER')
+            upper_table.setStyle(TableStyle([
+                ('VALIGN', (0, 0), (-1, 0), 'MIDDLE'),  # First row middle
+                ('VALIGN', (0, 1), (-1, -1), 'TOP'),  # Other rows top
                 ('LEFTPADDING', (0, 0), (-1, -1), 6),
                 ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+                ('SPAN', (0, 6), (1, 6)),  # Span item description
+                ('BOX', (0, 0), (-1, -1), 0.5, colors.black)
             ]))
-            content.append(item_table)
+            content.append(upper_table)
             content.append(Spacer(1, 8))
 
             # --- Main Check Items Table ---
@@ -192,64 +190,74 @@ class FileTerumo(QWidget):
             count_parts = get_padded_list(count_parts, 2)
             actual_parts = get_padded_list(actual_parts, 2)
 
-            appearance_std = "Free from foreign material. No stickiness of pellets"
-            dimension_std = "3 x 3 ± 0.5 mm pellet diameter and length<br/>Single cut, partially cut or double pellet shall be treated as single pellet and must be within the set acceptance criteria"
+            appearance_std = str(terumo_res[12])
+            dimension_std = str(terumo_res[17]).replace("\n", "<br/>")
 
             table_data = [
+                # Header
                 [Paragraph('<b>Check items</b>', left_style),
-                 Paragraph('<b>Standard</b>', center_style), '', '',
-                 Paragraph('<b>Actual</b>', center_style),
+                 Paragraph('<b>Standard</b>', center_style), '', '',  # span across 3 cols
+                 Paragraph('<b>Actual</b>', center_style), '', '',  # span across 3 cols
                  Paragraph('<b>Judgement</b>', center_style)],
 
-                [Paragraph('<b>Molded Chip Inspection</b>', left_style), '', '', '', '', ''],
+                # Molded Chip Inspection section
+                [Paragraph('<b>Molded Chip Inspection</b>', left_style), '', '', '', '', '', '', ''],
 
                 [Paragraph('Color', left_style),
-                 Paragraph(str(terumo_res[4]), left_style), '', '',
-                 Paragraph(str(terumo_res[5]), center_style),
+                 Paragraph(str(terumo_res[4]), left_style), '', '',  # Standard
+                 Paragraph(str(terumo_res[5]), center_style), '', '',  # Actual (Start, Middle, End not used here)
                  Paragraph(str(terumo_res[6]), center_style)],
 
                 [Paragraph('Foreign Material Contamination', left_style),
                  Paragraph('Diameter (mm)', center_style),
                  Paragraph('Area (mm²)', center_style),
-                 Paragraph('Count', center_style), '',
+                 Paragraph('Count', center_style),
+                 '', '', '',
                  Paragraph(str(terumo_res[11]), center_style)],
 
                 ['', Paragraph(diameter_parts[0], center_style),
                  Paragraph(area_parts[0], center_style),
                  Paragraph(count_parts[0], center_style),
-                 Paragraph(actual_parts[0], center_style), ''],
+                 Paragraph(actual_parts[0], center_style), '', '', ''],
 
                 ['', Paragraph(diameter_parts[1], center_style),
                  Paragraph(area_parts[1], center_style),
                  Paragraph(count_parts[1], center_style),
-                 Paragraph(actual_parts[1], center_style), ''],
+                 Paragraph(actual_parts[1], center_style), '', '', ''],
 
-                [Paragraph('<b>Pellet Inspection</b>', left_style), '', '', '', '', ''],
+                # Pellet Inspection section
+                [Paragraph('<b>Pellet Inspection</b>', left_style), '', '', '', '', '', '', ''],
 
                 [Paragraph('Appearance', left_style),
-                 Paragraph(appearance_std, left_style),
+                 Paragraph(appearance_std, left_style), '', '',  # span like Standard
                  Paragraph('Start', center_style),
                  Paragraph('Middle', center_style),
                  Paragraph('End', center_style),
                  Paragraph(str(terumo_res[16]), center_style)],
 
-                ['', '', Paragraph(str(terumo_res[13]), center_style),
+                ['', '', '', '',
+                 Paragraph(str(terumo_res[13]), center_style),
                  Paragraph(str(terumo_res[14]), center_style),
-                 Paragraph(str(terumo_res[15]), center_style), ''],
+                 Paragraph(str(terumo_res[15]), center_style),
+                 ''],
 
+                # Dimension
                 [Paragraph('Dimension', left_style),
-                 Paragraph(dimension_std, left_style),
+                 Paragraph(dimension_std, left_style), '', '',  # span like Standard
                  Paragraph('Start', center_style),
                  Paragraph('Middle', center_style),
                  Paragraph('End', center_style),
                  Paragraph(str(terumo_res[21]), center_style)],
 
-                ['', '', Paragraph(str(terumo_res[18]), center_style),
+                ['', '', '', '',
+                 Paragraph(str(terumo_res[18]), center_style),
                  Paragraph(str(terumo_res[19]), center_style),
-                 Paragraph(str(terumo_res[20]), center_style), ''],
+                 Paragraph(str(terumo_res[20]), center_style),
+                 ''],
             ]
 
-            col_widths = [130, 90, 80, 80, 80, 80]
+            # Update column widths to match new structure (9 columns now)
+            col_widths = [77, 67, 67, 67, 65, 65, 65, 67, ]
 
             main_table = Table(table_data, colWidths=col_widths, hAlign='CENTER')
             main_table.setStyle(TableStyle([
@@ -258,41 +266,64 @@ class FileTerumo(QWidget):
                 ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
                 ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
 
+                # Header spans
+                ('SPAN', (1, 0), (3, 0)),  # Standard header
+                ('SPAN', (4, 0), (6, 0)),  # Actual header
+
+                # Section spans
                 ('SPAN', (0, 1), (-1, 1)),  # Molded Chip Inspection
                 ('SPAN', (0, 6), (-1, 6)),  # Pellet Inspection
 
+                # Standard spans
                 ('SPAN', (1, 2), (3, 2)),  # Color Standard
-                ('SPAN', (0, 3), (0, 5)),  # Foreign Material Contamination
-                ('SPAN', (5, 3), (5, 5)),  # Judgement FMC
-                ('SPAN', (0, 7), (0, 8)),  # Appearance
-                ('SPAN', (1, 7), (1, 8)),  # Appearance Standard
-                ('SPAN', (5, 7), (5, 8)),  # Judgement Appearance
-                ('SPAN', (0, 9), (0, 10)),  # Dimension
-                ('SPAN', (1, 9), (1, 10)),  # Dimension Standard
-                ('SPAN', (5, 9), (5, 10)),  # Judgement Dimension
+                ('SPAN', (1, 7), (3, 8)),  # Appearance Standard
+                ('SPAN', (1, 9), (3, 10)),  # Dimension Standard
+
+                # Actual
+                ('SPAN', (4, 2), (6, 2)),  # Actual color
+                ('SPAN', (4, 3), (6, 3)),  # Actual fmc title
+                ('SPAN', (4, 4), (6, 4)),  # Actual value
+                ('SPAN', (4, 5), (6, 5)),  # Actual value
+
+                # Row label spans
+                ('SPAN', (0, 3), (0, 5)),  # FMC label
+                ('SPAN', (8, 7), (8, 7)),  # Appearance values row (no span, but keep consistent)
+                ('SPAN', (0, 7), (0, 8)),  # Dimension label (if needed across rows)
+                ('SPAN', (0, 9), (0, 10)),  # Dimension label (if needed across rows)
+
+                # Judgement spans
+                ('SPAN', (7, 3), (7, 5)),  # Judgement FMC
+                ('SPAN', (7, 7), (7, 8)),  # Judgement Appearance
+                ('SPAN', (7, 9), (7, 10)),  # Judgement Dimension
             ]))
+
             content.append(main_table)
             content.append(Spacer(1, 18))
 
             # Remarks
-            remarks_text = "Remarks: Attached are the same sample chips for the following number:"
-            content.append(Paragraph(remarks_text, normal_style))
+            remarks_data = [
+                [Paragraph("Remarks: Attached are the same sample chips for the following number:", normal_style)],
+                [Paragraph(str(terumo_res[23]).replace("\n", "<br/>"), normal_style)]
+            ]
 
-            # Put terumo_res[23] inside a table with a max width for wrapping
+            # Give the last row an initial height (e.g. 142pt), but let it expand
             remarks_table = Table(
-                [[Paragraph(str(terumo_res[23]), normal_style)]],
-                colWidths=[460]  # adjust width to fit your margins (letter is 612pt wide, margins 50 each → 512 usable)
+                remarks_data,
+                colWidths=[540],
+                rowHeights=[20, 72]  # row 1 = 20pt, row 2 = 72pt minimum
             )
+
             remarks_table.setStyle(TableStyle([
                 ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-                ('LEFTPADDING', (0, 0), (-1, -1), 0),
-                ('RIGHTPADDING', (0, 0), (-1, -1), 0),
-                ('TOPPADDING', (0, 0), (-1, -1), 0),
-                ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
+                ('LEFTPADDING', (0, 0), (-1, -1), 6),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+                ('TOPPADDING', (0, 0), (-1, -1), 6),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+                ('BOX', (0, 0), (-1, -1), 0.5, colors.black)
             ]))
-            content.append(remarks_table)
 
-            content.append(Spacer(1, 36))
+            content.append(remarks_table)
+            content.append(Spacer(1, 26))
 
             # Approved by section
             # Approved by section (name inline and underlined, title below with indent)
@@ -300,10 +331,10 @@ class FileTerumo(QWidget):
             content.append(Paragraph(approved_by_html, left_style))
 
             # Add position/title under the name with indentation
-            content.append(Indenter(left=72))
+            content.append(Indenter(left=70))
             # position_html = f"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{str(terumo_res[22])}"
             content.append(Paragraph(str(terumo_res[22]), left_style))
-            content.append(Indenter(left=-72))
+            content.append(Indenter(left=-70))
 
             # --- Document Content End ---
 

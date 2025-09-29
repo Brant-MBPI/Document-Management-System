@@ -12,59 +12,64 @@ current_coa_id = None
 
 
 def load_coa_details(self, coa_id):
-    self.terumo_delivery_receipt.blockSignals(True)
-    self.terumo_lot_number.blockSignals(True)
+    try:
+        self.terumo_delivery_receipt.blockSignals(True)
+        self.terumo_lot_number.blockSignals(True)
+        self.terumo_item_description.blockSignals(True)
 
-    field_result = db_con.get_single_coa_data(coa_id)
-    terumo_res = db_con.get_single_terumo_data(coa_id)
+        field_result = db_con.get_single_coa_data(coa_id)
+        terumo_res = db_con.get_single_terumo_data(coa_id)
 
-    # === Populate inputs ===
-    self.terumo_customer_input.setText(str(field_result[1]))
-    self.terumo_lot_number.setText(str(field_result[3]))
-    self.terumo_delivery_receipt.setText(str(field_result[5]))
-    self.terumo_quantity.setText(str(field_result[6]))
+        # === Populate inputs ===
+        self.terumo_customer_input.setText(str(field_result[1]))
+        self.terumo_lot_number.setText(str(field_result[3]))
+        self.terumo_delivery_receipt.setText(str(field_result[5]))
+        self.terumo_quantity.setText(str(field_result[6]))
 
-    # Handle potential None for dates
-    if field_result[7]:
-        self.terumo_delivery_date.setDate(QDate(field_result[7].year, field_result[7].month, field_result[7].day))
+        # Handle potential None for dates
+        if field_result[7]:
+            self.terumo_delivery_date.setDate(QDate(field_result[7].year, field_result[7].month, field_result[7].day))
 
-    self.terumo_approved_by.setText(str(field_result[10]))
-    self.terumo_submit_btn.setText("Update")
+        self.terumo_approved_by.setText(str(field_result[10]))
+        self.terumo_submit_btn.setText("Update")
 
-    self.terumo_delivery_receipt.blockSignals(False)
-    self.terumo_lot_number.blockSignals(False)
+        self.terumo_delivery_receipt.blockSignals(False)
+        self.terumo_lot_number.blockSignals(False)
 
-#     for table
-    diameter1, diameter2 = split_by_comma(str(terumo_res[7]))
-    area1, area2 = split_by_comma(str(terumo_res[8]))
-    count1, count2 = split_by_comma(str(terumo_res[9]))
-    actual1, actual2 = split_by_comma(str(terumo_res[10]))
+    #     for table
+        diameter1, diameter2 = split_by_comma(str(terumo_res[7]))
+        area1, area2 = split_by_comma(str(terumo_res[8]))
+        count1, count2 = split_by_comma(str(terumo_res[9]))
+        actual1, actual2 = split_by_comma(str(terumo_res[10]))
 
-    self.terumo_item_code.setText(str(terumo_res[2]))
-    self.terumo_item_description.setText(str(terumo_res[3]))
-    self.terumo_color_std.setText(str(terumo_res[4]))
-    self.terumo_color_actual.setText(str(terumo_res[5]))
-    self.terumo_color_judgement.setText(str(terumo_res[6]))
-    self.terumo_foreign_diameter1.setText(diameter1)
-    self.terumo_foreign_diameter2.setText(diameter2)
-    self.terumo_foreign_area1.setText(area1)
-    self.terumo_foreign_area2.setText(area2)
-    self.terumo_foreign_count1.setText(count1)
-    self.terumo_foreign_count2.setText(count2)
-    self.terumo_foreign_actual1.setText(actual1)
-    self.terumo_foreign_actual2.setText(actual2)
-    self.terumo_foreign_judgement.setText(str(terumo_res[11]))
-    self.terumo_appearance_std.setText(str(terumo_res[12]))
-    self.terumo_appearance_start.setText(str(terumo_res[13]))
-    self.terumo_appearance_mid.setText(str(terumo_res[14]))
-    self.terumo_appearance_end.setText(str(terumo_res[15]))
-    self.terumo_appearance_judgement.setText(str(terumo_res[16]))
-    self.terumo_dimension_std.setPlainText(str(terumo_res[17]))
-    self.terumo_dimension_start.setText(str(terumo_res[18]))
-    self.terumo_dimension_middle.setText(str(terumo_res[19]))
-    self.terumo_dimension_end.setText(str(terumo_res[20]))
-    self.terumo_dimension_judgement.setText(str(terumo_res[21]))
-    self.terumo_lots.setPlainText(str(terumo_res[23]))
+        self.terumo_item_code.setText(str(terumo_res[2]))
+        self.terumo_item_description.setText(str(terumo_res[3]))
+        self.terumo_color_std.setText(str(terumo_res[4]))
+        self.terumo_color_actual.setText(str(terumo_res[5]))
+        self.terumo_color_judgement.setText(str(terumo_res[6]))
+        self.terumo_foreign_diameter1.setText(diameter1)
+        self.terumo_foreign_diameter2.setText(diameter2)
+        self.terumo_foreign_area1.setText(area1)
+        self.terumo_foreign_area2.setText(area2)
+        self.terumo_foreign_count1.setText(count1)
+        self.terumo_foreign_count2.setText(count2)
+        self.terumo_foreign_actual1.setText(actual1)
+        self.terumo_foreign_actual2.setText(actual2)
+        self.terumo_foreign_judgement.setText(str(terumo_res[11]))
+        self.terumo_appearance_std.setText(str(terumo_res[12]))
+        self.terumo_appearance_start.setText(str(terumo_res[13]))
+        self.terumo_appearance_mid.setText(str(terumo_res[14]))
+        self.terumo_appearance_end.setText(str(terumo_res[15]))
+        self.terumo_appearance_judgement.setText(str(terumo_res[16]))
+        self.terumo_dimension_std.setPlainText(str(terumo_res[17]))
+        self.terumo_dimension_start.setText(str(terumo_res[18]))
+        self.terumo_dimension_middle.setText(str(terumo_res[19]))
+        self.terumo_dimension_end.setText(str(terumo_res[20]))
+        self.terumo_dimension_judgement.setText(str(terumo_res[21]))
+        self.terumo_lots.setPlainText(str(terumo_res[23]))
+        self.terumo_item_description.blockSignals(False)
+    except Exception as e:
+        print(e)
 
 
 def coa_entry_form(self):
@@ -377,8 +382,6 @@ def coa_entry_form(self):
 
 def populate_terumo_coa_fields(self, dr_no):
     try:
-        self.terumo_delivery_receipt.blockSignals(True)
-        self.terumo_lot_number.blockSignals(True)
         fields = db_con.get_dr_details(dr_no)
 
         if not fields:  # None or empty tuple
@@ -408,10 +411,21 @@ def populate_terumo_coa_fields(self, dr_no):
 
         if fields[3]:
             self.terumo_delivery_date.setDate(QDate(fields[3].year, fields[3].month, fields[3].day))
-        self.terumo_delivery_receipt.blockSignals(False)
-        self.terumo_lot_number.blockSignals(False)
+
     except Exception as e:
         print("terumo", e)
+
+
+def populate_item_code(self, item_desc):
+    terumo_desc = item_desc.strip()
+    mbpi_code = terumo_desc.split()[-1] if terumo_desc else ""
+
+    terumo_item_code = db_con.get_terumo_item_code(mbpi_code)
+
+    if terumo_item_code and len(terumo_item_code) > 0:
+        self.terumo_item_code.setText(str(terumo_item_code[0]))
+    else:
+        self.terumo_item_code.setText("")
 
 
 def clear_coa_form(self):
@@ -420,7 +434,7 @@ def clear_coa_form(self):
         global current_coa_id
         current_coa_id = None
         self.terumo_delivery_receipt.blockSignals(True)
-        self.terumo_delivery_receipt.blockSignals(True)
+        self.terumo_lot_number.blockSignals(True)
 
         self.terumo_customer_input.clear()
         self.terumo_lot_number.clear()
@@ -432,7 +446,7 @@ def clear_coa_form(self):
 
         self.terumo_submit_btn.setText("Submit")
         self.terumo_delivery_receipt.blockSignals(False)
-        self.terumo_delivery_receipt.blockSignals(False)
+        self.terumo_lot_number.blockSignals(False)
     except Exception as e:
         print(str(e))
 

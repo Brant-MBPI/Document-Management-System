@@ -149,6 +149,14 @@ def create_tables():
     """)
 
     cur.execute("""
+        CREATE TABLE IF NOT EXISTS tbl_terumo_codes (
+            id SERIAL PRIMARY KEY,
+            product_code VARCHAR(100),
+            terumo_code VARCHAR(100)
+        );
+    """)
+
+    cur.execute("""
         CREATE TABLE IF NOT EXISTS coa_analysis_results (
             id SERIAL PRIMARY KEY,
             coa_id INTEGER NOT NULL REFERENCES certificates_of_analysis(id) ON DELETE CASCADE,
@@ -926,6 +934,22 @@ def get_single_terumo_data(coa_id):
     conn.close()
     return record
 
+
+def get_terumo_item_code(mbpi_code):
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute(
+        "SELECT terumo_code FROM tbl_terumo_codes WHERE product_code = %s;",
+        (mbpi_code,)
+    )
+    record = cur.fetchone()
+
+    cur.close()
+    conn.close()
+    if record is None:
+        return ""  # or return None, depending on how you want to handle it
+    return record
 
 
 def get_coa_analysis_results_rrf(coa_id):

@@ -234,6 +234,11 @@ class MainWindow(QMainWindow):
         self.terumo_customer_input = QLineEdit()
         self.terumo_item_code = QLineEdit()
         self.terumo_item_description = QLineEdit()
+        self.terumo_item_decription_timer = self.setup_finished_typing(
+            self.terumo_item_description,
+            lambda: terumo.populate_item_code(self, self.terumo_item_description.text()),
+            delay=1200
+        )
         self.terumo_lot_number = QLineEdit()
         self.terumo_lot_timer = self.setup_finished_typing(
             self.terumo_lot_number,
